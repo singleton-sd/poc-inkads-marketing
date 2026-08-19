@@ -41,18 +41,16 @@ The production build includes a static Decap application at `/admin/`. Its
 configuration targets `singleton-sd/poc-inkads-marketing` and maps the same
 landing and legal fields enforced by the Astro schemas.
 
-**CMS login is intentionally unavailable until a separate GitHub OAuth
-integration is deployed.** GitHub Pages can serve the static admin files, but
-it cannot execute the server-side OAuth callback or safely hold the OAuth
-client secret. Deploying that external authentication service, configuring a
-GitHub OAuth application, and granting editor repository access are separate
-operational decisions and are not part of this repository change.
+**CMS login is intentionally unavailable** without an external OAuth
+integration. GitHub Pages can serve the static admin files, but it cannot execute the OAuth callback
+or safely hold the OAuth client secret.
 
-When an OAuth service is approved and deployed, add its `base_url` and, when
-the service does not use Decap's default path, `auth_endpoint` beneath the
-`backend` block in `public/admin/config.yml`. Do not commit OAuth client
-secrets or access tokens. Validate the provider's callback URL and access
-controls before enabling editor login.
+The shared OAuth service is deployed as an Azure Function
+(`ssd-pocpk-decap-oauth-dev-ae`, `poc-plattform-kit` infra). Its `base_url`
+and `auth_endpoint` are already configured in `public/admin/config.yml`.
+Editors need **write** access to this repository so that the GitHub OAuth grant
+covers Decap's required `repo` scope. Do not commit OAuth client secrets or
+access tokens to this repository.
 
 The public landing page is generated entirely by Astro at build time. It does
 not load Decap, call the OAuth service, or depend on `/admin/` being available.
