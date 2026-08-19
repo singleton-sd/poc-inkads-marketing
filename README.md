@@ -33,6 +33,8 @@ pnpm build
 
 Deployment and Route 53 setup are documented in
 [`docs/deployment.md`](docs/deployment.md).
+Git-backed content schemas, the static Decap admin, and its external OAuth
+requirement are documented in [`docs/editorial.md`](docs/editorial.md).
 
 The shared `@singleton-sd/tokens` package is currently hosted in a private
 registry. This public repository therefore keeps its small semantic token

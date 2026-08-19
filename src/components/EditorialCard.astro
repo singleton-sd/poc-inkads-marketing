@@ -1,14 +1,15 @@
 ---
 interface Props {
+  id?: string;
   eyebrow: string;
   title: string;
   description: string;
 }
 
-const { eyebrow, title, description } = Astro.props;
+const { id, eyebrow, title, description } = Astro.props;
 ---
 
-<article class="editorial-card">
+<article {id} class="editorial-card">
   <p class="eyebrow">{eyebrow}</p>
   <h3>{title}</h3>
   <p>{description}</p>

@@ -3,6 +3,8 @@ import { getEntry } from "astro:content";
 import ButtonLink from "../components/ButtonLink.astro";
 import DeviceFrame from "../components/DeviceFrame.astro";
 import EditorialCard from "../components/EditorialCard.astro";
+import PlaceCard from "../components/PlaceCard.astro";
+import SystemStep from "../components/SystemStep.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 
 const home = await getEntry("pages", "home");
@@ -13,19 +15,34 @@ if (!home) throw new Error("The home page content entry is missing.");
   <main id="main-content">
     <section class="shell hero" aria-labelledby="page-title">
       <div class="hero__copy">
-        <p class="eyebrow">Low-power / high-attention</p>
+        <p class="eyebrow">E-paper / shared spaces</p>
         <h1 id="page-title">{home.data.headline}</h1>
         <p class="hero__summary">{home.data.summary}</p>
         <div class="hero__actions">
-          <ButtonLink href="#audiences" label="For venues" />
+          <ButtonLink href="#venues" label="For venues — manage a space" />
           <ButtonLink
-            href="#audiences"
-            label="For advertisers"
+            href="#advertisers"
+            label="For advertisers — place a message"
             variant="secondary"
           />
         </div>
+        <p class="hero__note">Two distinct paths. One considered network.</p>
       </div>
       <DeviceFrame />
+    </section>
+
+    <section class="statement" aria-labelledby="statement-title">
+      <div class="shell statement__inner">
+        <p class="eyebrow">The idea</p>
+        <h2 id="statement-title">
+          A calmer format for useful messages in physical places.
+        </h2>
+        <p>
+          InkAds is a proof of concept for connecting venue space with
+          advertiser messages through low-power e-paper displays. It is being
+          explored as an alternative to adding another bright, animated screen.
+        </p>
+      </div>
     </section>
 
     <section
@@ -39,14 +56,112 @@ if (!home) throw new Error("The home page content entry is missing.");
       </div>
       <div class="card-grid">
         <EditorialCard
+          id="venues"
           eyebrow="01 / Venues"
-          title="Make shared spaces work harder"
-          description="A considered display format designed to sit comfortably within the places people already spend time."
-        />
+          title="Give overlooked space a useful role"
+          description="Explore a considered display format designed to fit the character and practical needs of your venue."
+        >
+          <ButtonLink href="#how-it-works" label="See the venue model" />
+        </EditorialCard>
         <EditorialCard
+          id="advertisers"
           eyebrow="02 / Advertisers"
-          title="Show up in useful moments"
-          description="A contextual canvas for messages intended to be noticed without turning the space into another screen."
+          title="Place messages in relevant contexts"
+          description="Explore a tactile canvas intended for context-aware creative in places where people spend time."
+        >
+          <ButtonLink
+            href="#places"
+            label="Explore placement contexts"
+            variant="secondary"
+          />
+        </EditorialCard>
+      </div>
+    </section>
+
+    <section
+      id="how-it-works"
+      class="shell system-section"
+      aria-labelledby="system-title"
+    >
+      <div class="section-heading section-heading--split">
+        <div>
+          <p class="eyebrow">A simple system / concept stage</p>
+          <h2 id="system-title">From message to place.</h2>
+        </div>
+        <p>
+          The proof of concept is focused on the relationship between content, a
+          low-power display device, and the shared space around it.
+        </p>
+      </div>
+      <ol class="system-list">
+        <SystemStep
+          number="01"
+          title="Match"
+          description="A venue and message are considered together, with context guiding the placement."
+        />
+        <SystemStep
+          number="02"
+          title="Prepare"
+          description="Creative is composed for a static e-paper canvas rather than a conventional digital screen."
+        />
+        <SystemStep
+          number="03"
+          title="Display"
+          description="The device presents the selected message within the venue’s shared space."
+        />
+      </ol>
+    </section>
+
+    <section id="places" class="places-section" aria-labelledby="places-title">
+      <div class="shell">
+        <div class="section-heading">
+          <p class="eyebrow">Use cases / built to adapt</p>
+          <h2 id="places-title">Start specific. Think beyond one setting.</h2>
+          <p class="section-heading__summary">
+            Bathrooms are the initial proof-of-concept context, not the limit of
+            the product idea. The same format could be explored wherever a calm,
+            considered display belongs.
+          </p>
+        </div>
+        <div class="places-grid">
+          <PlaceCard
+            index="01"
+            title="Bathrooms"
+            description="An initial context for testing how a compact display fits into a private, high-dwell shared space."
+            featured
+          />
+          <PlaceCard
+            index="02"
+            title="Pubs & hospitality"
+            description="Potential placements across venues where people gather, pause, and make local decisions."
+          />
+          <PlaceCard
+            index="03"
+            title="Shopping centres"
+            description="A format to explore across varied retail environments and shared amenities."
+          />
+          <PlaceCard
+            index="04"
+            title="High-traffic spaces"
+            description="Other suitable physical settings where a static message can complement the environment."
+          />
+        </div>
+      </div>
+    </section>
+
+    <section class="shell closing-section" aria-labelledby="closing-title">
+      <p class="eyebrow">Choose a perspective</p>
+      <h2 id="closing-title">A shared canvas needs both sides.</h2>
+      <p>
+        Explore how InkAds could work for the space you manage or the messages
+        you want to place.
+      </p>
+      <div class="hero__actions">
+        <ButtonLink href="#venues" label="Venue perspective" />
+        <ButtonLink
+          href="#advertisers"
+          label="Advertiser perspective"
+          variant="secondary"
         />
       </div>
     </section>
