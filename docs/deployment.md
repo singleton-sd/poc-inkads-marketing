@@ -1,19 +1,30 @@
 # GitHub Pages deployment
 
-The production site is published from `main` by
-`.github/workflows/pages.yml` to:
+The production site is built from `main` by `.github/workflows/pages.yml` and
+published from the root of the `gh-pages` branch to:
 
 <https://inkads.poc.singletonsd.com>
 
-Pull requests run the complete build gate but do not deploy. Merges to `main`
-build `dist`, upload the GitHub Pages artifact, and deploy it to the protected
-`github-pages` environment.
+In-repository pull requests run the complete build gate and publish beneath
+`https://inkads.poc.singletonsd.com/pr-preview/pr-<number>/`. The preview
+workflow adds a managed **Preview** section to the PR body, updates the same
+path when commits are pushed, and removes the preview and body section when the
+PR closes. Pull requests from forks are not given write access to publish.
+
+Production and preview workflows serialize writes to `gh-pages`. Production
+deployment cleans stale production files while preserving the `pr-preview`
+directory; each preview deployment changes only its own numbered directory.
 
 ## One-time GitHub Pages configuration
 
-Configure the repository to use GitHub Actions as its Pages source and set the
-custom domain to `inkads.poc.singletonsd.com`. GitHub Actions custom workflows
-ignore `CNAME` files, so the Pages repository setting is authoritative.
+Configure the repository to deploy GitHub Pages from the `gh-pages` branch and
+the repository root. Set the custom domain to `inkads.poc.singletonsd.com`.
+The production build includes a matching `CNAME` file so branch deployments
+retain the custom domain.
+
+Under **Settings > Actions > General > Workflow permissions**, select **Read
+and write permissions**. The workflows also declare their narrower permissions
+explicitly.
 
 GitHub provisions the TLS certificate after DNS resolves. Enable **Enforce
 HTTPS** only after the certificate is available.
@@ -31,7 +42,8 @@ private distribution. The record contains no secret.
 
 ## Verification
 
-After merging the deployment PR and creating the DNS record:
+After merging the deployment PR, changing the Pages source, and creating the
+DNS record:
 
 ```sh
 dig +short inkads.poc.singletonsd.com CNAME
