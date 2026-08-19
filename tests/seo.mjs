@@ -44,7 +44,13 @@ const [indexHtml, robotsTxt, sitemapXml] = await Promise.all([
 
 testMetadata("basic <title> + description", () => {
   assert.match(indexHtml, /<title>[^<]*InkAds[^<]*<\/title>/i);
-  assert.match(indexHtml, new RegExp(homeFrontmatterDescription.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i"));
+  assert.match(
+    indexHtml,
+    new RegExp(
+      homeFrontmatterDescription.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
+      "i",
+    ),
+  );
 });
 
 testMetadata("canonical + robots meta", () => {
@@ -60,17 +66,24 @@ testMetadata("canonical + robots meta", () => {
 
 testMetadata("Open Graph and Twitter cards reference production domain", () => {
   assert.match(indexHtml, /property="og:title" content="[^"]*InkAds/i);
-  assert.match(indexHtml, new RegExp(`property="og:url" content="${SITE_DOMAIN}[^"]*"`, "i"));
-  assert.match(indexHtml, new RegExp(`property="og:image" content="${SITE_DOMAIN}[^"]*"`, "i"));
+  assert.match(
+    indexHtml,
+    new RegExp(`property="og:url" content="${SITE_DOMAIN}[^"]*"`, "i"),
+  );
+  assert.match(
+    indexHtml,
+    new RegExp(`property="og:image" content="${SITE_DOMAIN}[^"]*"`, "i"),
+  );
 
   assert.match(indexHtml, /name="twitter:card" content="summary_large_image"/i);
-  assert.match(indexHtml, new RegExp(`name="twitter:image" content="${SITE_DOMAIN}[^"]*"`, "i"));
+  assert.match(
+    indexHtml,
+    new RegExp(`name="twitter:image" content="${SITE_DOMAIN}[^"]*"`, "i"),
+  );
 });
 
 testMetadata("structured data present", () => {
-  const ldTypeIdx = indexHtml.indexOf(
-    'type="application/ld+json"',
-  );
+  const ldTypeIdx = indexHtml.indexOf('type="application/ld+json"');
   assert.ok(ldTypeIdx >= 0, "Missing application/ld+json script tag");
 
   const jsonStart = indexHtml.indexOf("{", ldTypeIdx);
@@ -91,13 +104,22 @@ testMetadata("favicons included", () => {
 });
 
 testMetadata("sitemap and robots reference production domain", () => {
-  assert.match(sitemapXml, new RegExp(`${SITE_DOMAIN.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&")}/`, "i"));
-  assert.match(sitemapXml, /<loc>https:\/\/inkads\.poc\.singletonsd\.com\/<\/loc>/i);
+  assert.match(
+    sitemapXml,
+    new RegExp(`${SITE_DOMAIN.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&")}/`, "i"),
+  );
+  assert.match(
+    sitemapXml,
+    /<loc>https:\/\/inkads\.poc\.singletonsd\.com\/<\/loc>/i,
+  );
 
   assert.match(robotsTxt, /User-agent:\s*\*/i);
   assert.match(
     robotsTxt,
-    new RegExp(`Sitemap:\\s*${SITE_DOMAIN.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&")}/sitemap\\.xml`, "i"),
+    new RegExp(
+      `Sitemap:\\s*${SITE_DOMAIN.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&")}/sitemap\\.xml`,
+      "i",
+    ),
   );
   assert.doesNotMatch(robotsTxt, /noindex|nofollow/i);
 });
@@ -112,4 +134,3 @@ function testMetadata(label, fn) {
 }
 
 console.log("SEO + metadata checks passed");
-

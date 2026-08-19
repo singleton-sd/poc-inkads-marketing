@@ -11,7 +11,9 @@ const distDir = fileURLToPath(new URL("../dist", import.meta.url));
 const port = Number(process.env.A11Y_PORT ?? 0);
 
 if (!existsSync(distDir)) {
-  throw new Error(`Missing dist directory at ${distDir}. Run pnpm build first.`);
+  throw new Error(
+    `Missing dist directory at ${distDir}. Run pnpm build first.`,
+  );
 }
 
 function contentTypeForPath(pathname) {
@@ -74,7 +76,10 @@ const server = http.createServer(async (req, res) => {
 
 await new Promise((resolve) => server.listen(port, "127.0.0.1", resolve));
 const actualPort = server.address()?.port;
-assert.ok(typeof actualPort === "number" && actualPort > 0, "Failed to pick an available port");
+assert.ok(
+  typeof actualPort === "number" && actualPort > 0,
+  "Failed to pick an available port",
+);
 const baseUrl = `http://127.0.0.1:${actualPort}`;
 
 const browser = await chromium.launch();
@@ -159,11 +164,9 @@ try {
     await page.keyboard.press("Enter");
 
     if (href.startsWith("#")) {
-      await page.waitForFunction(
-        (h) => window.location.hash === h,
-        href,
-        { timeout: 3000 },
-      );
+      await page.waitForFunction((h) => window.location.hash === h, href, {
+        timeout: 3000,
+      });
     } else if (href === "/") {
       // Brand/home may re-navigate; just ensure the main landmark is present.
       await page.waitForSelector("#main-content", { timeout: 5000 });
@@ -176,4 +179,3 @@ try {
   await browser.close();
   server.close();
 }
-
