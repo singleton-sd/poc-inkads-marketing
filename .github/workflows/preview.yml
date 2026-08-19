@@ -56,7 +56,6 @@ jobs:
           pages-base-url: https://inkads.poc.singletonsd.com
           umbrella-dir: pr-preview
           comment: false
-          wait-for-pages-deployment: true
       - name: Update preview link in pull request body
         uses: actions/github-script@v8
         env:
