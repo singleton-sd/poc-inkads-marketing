@@ -1,0 +1,90 @@
+name: Deploy pull request preview
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, closed]
+
+concurrency:
+  group: pages-publish
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  preview:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+      - name: Set up pnpm
+        if: github.event.action != 'closed'
+        uses: pnpm/action-setup@v6
+        with:
+          run_install: false
+      - name: Set up Node.js
+        if: github.event.action != 'closed'
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - name: Install dependencies
+        if: github.event.action != 'closed'
+        run: pnpm install --frozen-lockfile
+      - name: Check formatting
+        if: github.event.action != 'closed'
+        run: pnpm format:check
+      - name: Lint and type-check
+        if: github.event.action != 'closed'
+        run: pnpm lint
+      - name: Run tests
+        if: github.event.action != 'closed'
+        run: pnpm test
+      - name: Build preview site
+        if: github.event.action != 'closed'
+        run: pnpm build
+        env:
+          PREVIEW_BASE_PATH: /pr-preview/pr-${{ github.event.number }}/
+      - name: Deploy or remove preview
+        id: preview
+        uses: rossjrw/pr-preview-action@v1.8.1
+        with:
+          source-dir: dist
+          preview-branch: gh-pages
+          pages-base-url: https://inkads.poc.singletonsd.com
+          umbrella-dir: pr-preview
+          comment: false
+      - name: Update preview link in pull request body
+        uses: actions/github-script@v8
+        env:
+          PREVIEW_URL: https://inkads.poc.singletonsd.com/pr-preview/pr-${{ github.event.number }}/
+          PREVIEW_REMOVED: ${{ github.event.action == 'closed' }}
+        with:
+          script: |
+            const markerStart = "<!-- inkads-preview:start -->";
+            const markerEnd = "<!-- inkads-preview:end -->";
+            const managedBlock = new RegExp(
+              `${markerStart}[\\s\\S]*?${markerEnd}\\n*`,
+              "m",
+            );
+            const currentBody = context.payload.pull_request.body ?? "";
+            const bodyWithoutPreview = currentBody.replace(managedBlock, "").trimEnd();
+            const previewBlock = [
+              markerStart,
+              "## Preview",
+              "",
+              `[View this pull request's preview](${process.env.PREVIEW_URL})`,
+              markerEnd,
+            ].join("\n");
+            const body = process.env.PREVIEW_REMOVED === "true"
+              ? bodyWithoutPreview
+              : `${bodyWithoutPreview}${bodyWithoutPreview ? "\n\n" : ""}${previewBlock}`;
+
+            await github.rest.pulls.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              body,
+            });
