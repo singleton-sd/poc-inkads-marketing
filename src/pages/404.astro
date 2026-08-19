@@ -1,0 +1,28 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout
+  title="Page not found | InkAds"
+  description="The requested InkAds page could not be found."
+>
+  <main class="mx-auto flex min-h-[70vh] max-w-4xl items-center px-6 py-24">
+    <section aria-labelledby="page-title">
+      <p
+        class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--ink-accent)]"
+      >
+        404
+      </p>
+      <h1 id="page-title" class="mt-4 text-5xl font-semibold tracking-tight">
+        Page not found
+      </h1>
+      <p class="mt-6 text-lg text-[var(--ink-text-muted)]">
+        The page may have moved, or the address may be incorrect.
+      </p>
+      <a
+        class="mt-8 inline-block font-semibold underline underline-offset-4"
+        href="/">Return home</a
+      >
+    </section>
+  </main>
+</BaseLayout>
