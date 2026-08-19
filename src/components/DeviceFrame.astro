@@ -1,0 +1,23 @@
+---
+interface Props {
+  label?: string;
+}
+
+const { label = "InkAds e-paper display concept" } = Astro.props;
+---
+
+<figure class="device-frame" aria-label={label}>
+  <div class="device-frame__screen">
+    <div class="device-frame__signal" aria-hidden="true">
+      <span></span><span></span><span></span>
+    </div>
+    <p class="device-frame__label">InkAds / display 01</p>
+    <div class="device-frame__content">
+      <slot>
+        <p>Useful messages.<br />Placed thoughtfully.</p>
+      </slot>
+    </div>
+    <p class="device-frame__meta">E-paper concept / replaceable artwork</p>
+  </div>
+  <figcaption>Product visual placeholder</figcaption>
+</figure>
