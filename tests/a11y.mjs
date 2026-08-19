@@ -8,7 +8,7 @@ import { chromium } from "playwright";
 import AxeBuilder from "@axe-core/playwright";
 
 const distDir = fileURLToPath(new URL("../dist", import.meta.url));
-const port = Number(process.env.A11Y_PORT ?? 4173);
+const port = Number(process.env.A11Y_PORT ?? 0);
 
 if (!existsSync(distDir)) {
   throw new Error(`Missing dist directory at ${distDir}. Run pnpm build first.`);
@@ -73,7 +73,9 @@ const server = http.createServer(async (req, res) => {
 });
 
 await new Promise((resolve) => server.listen(port, "127.0.0.1", resolve));
-const baseUrl = `http://127.0.0.1:${port}`;
+const actualPort = server.address()?.port;
+assert.ok(typeof actualPort === "number" && actualPort > 0, "Failed to pick an available port");
+const baseUrl = `http://127.0.0.1:${actualPort}`;
 
 const browser = await chromium.launch();
 const context = await browser.newContext({
