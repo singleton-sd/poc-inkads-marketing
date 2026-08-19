@@ -1,5 +1,8 @@
 ---
 import { getEntry } from "astro:content";
+import ButtonLink from "../components/ButtonLink.astro";
+import DeviceFrame from "../components/DeviceFrame.astro";
+import EditorialCard from "../components/EditorialCard.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 
 const home = await getEntry("pages", "home");
@@ -7,22 +10,45 @@ if (!home) throw new Error("The home page content entry is missing.");
 ---
 
 <BaseLayout title={home.data.title} description={home.data.description}>
-  <main class="mx-auto flex min-h-[70vh] max-w-6xl items-center px-6 py-24">
-    <section class="max-w-3xl" aria-labelledby="page-title">
-      <p
-        class="mb-4 text-sm font-semibold uppercase tracking-[0.18em] text-[var(--ink-accent)]"
-      >
-        InkAds
-      </p>
-      <h1
-        id="page-title"
-        class="text-5xl font-semibold tracking-tight sm:text-7xl"
-      >
-        {home.data.headline}
-      </h1>
-      <p class="mt-6 max-w-2xl text-lg leading-8 text-[var(--ink-text-muted)]">
-        {home.data.summary}
-      </p>
+  <main id="main-content">
+    <section class="shell hero" aria-labelledby="page-title">
+      <div class="hero__copy">
+        <p class="eyebrow">Low-power / high-attention</p>
+        <h1 id="page-title">{home.data.headline}</h1>
+        <p class="hero__summary">{home.data.summary}</p>
+        <div class="hero__actions">
+          <ButtonLink href="#audiences" label="For venues" />
+          <ButtonLink
+            href="#audiences"
+            label="For advertisers"
+            variant="secondary"
+          />
+        </div>
+      </div>
+      <DeviceFrame />
+    </section>
+
+    <section
+      id="audiences"
+      class="shell audience-section"
+      aria-labelledby="audiences-title"
+    >
+      <div class="section-heading">
+        <p class="eyebrow">Two paths / one network</p>
+        <h2 id="audiences-title">Designed around the space and the message.</h2>
+      </div>
+      <div class="card-grid">
+        <EditorialCard
+          eyebrow="01 / Venues"
+          title="Make shared spaces work harder"
+          description="A considered display format designed to sit comfortably within the places people already spend time."
+        />
+        <EditorialCard
+          eyebrow="02 / Advertisers"
+          title="Show up in useful moments"
+          description="A contextual canvas for messages intended to be noticed without turning the space into another screen."
+        />
+      </div>
     </section>
   </main>
 </BaseLayout>
