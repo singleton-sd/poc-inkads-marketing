@@ -1,0 +1,17 @@
+---
+interface Props {
+  number: string;
+  title: string;
+  description: string;
+}
+
+const { number, title, description } = Astro.props;
+---
+
+<li class="system-step">
+  <span class="system-step__number" aria-hidden="true">{number}</span>
+  <div>
+    <h3>{title}</h3>
+    <p>{description}</p>
+  </div>
+</li>

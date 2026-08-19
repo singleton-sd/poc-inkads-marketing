@@ -1,0 +1,19 @@
+---
+interface Props {
+  index: string;
+  title: string;
+  description: string;
+  featured?: boolean;
+}
+
+const { index, title, description, featured = false } = Astro.props;
+---
+
+<article class:list={["place-card", { "place-card--featured": featured }]}>
+  <div class="place-card__heading">
+    <p class="eyebrow">{index}</p>
+    {featured && <p class="place-card__tag">Initial focus</p>}
+  </div>
+  <h3>{title}</h3>
+  <p>{description}</p>
+</article>
