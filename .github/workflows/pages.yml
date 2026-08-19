@@ -37,6 +37,16 @@ jobs:
         run: pnpm test
       - name: Build production site
         run: pnpm build
+
+      - name: Install Playwright browsers
+        run: pnpm playwright:install
+
+      - name: SEO metadata checks
+        run: pnpm test:seo
+
+      - name: Accessibility checks
+        run: pnpm test:a11y
+
       - name: Deploy production site
         uses: JamesIves/github-pages-deploy-action@v4.8.0
         with:
