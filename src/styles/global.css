@@ -1,0 +1,37 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: light;
+  --ink-canvas: oklch(0.97 0.015 90);
+  --ink-surface: oklch(1 0 0);
+  --ink-text: oklch(0.22 0.025 85);
+  --ink-text-muted: oklch(0.46 0.02 82);
+  --ink-accent: oklch(0.52 0.11 145);
+  --ink-focus: oklch(0.62 0.16 250);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--ink-canvas);
+  color: var(--ink-text);
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+}
+:focus-visible {
+  outline: 3px solid var(--ink-focus);
+  outline-offset: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
