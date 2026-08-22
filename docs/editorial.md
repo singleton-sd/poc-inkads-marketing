@@ -41,13 +41,18 @@ The production build includes a static Decap application at `/admin/`. Its
 configuration targets `singleton-sd/poc-inkads-marketing` and maps the same
 landing and legal fields enforced by the Astro schemas.
 
-**CMS login is intentionally unavailable** without an external OAuth
-integration. GitHub Pages can serve the static admin files, but it cannot execute the OAuth callback
-or safely hold the OAuth client secret.
+GitHub Pages can serve the static admin files, but it cannot execute the OAuth
+callback or safely hold the OAuth client secret. CMS login therefore uses the
+shared org service **cms-oauth-kit** at `https://auth.singletonsd.com`
+(`singleton-sd/cms-oauth-kit`). `public/admin/config.yml` sets
+`base_url: https://auth.singletonsd.com` and `auth_endpoint: auth`. This
+repository stays fully static and does not host Azure Functions.
 
-The shared OAuth service is deployed as an Azure Function
-(`ssd-pocpk-decap-oauth-dev-ae`, `poc-plattform-kit` infra). Its `base_url`
-and `auth_endpoint` are already configured in `public/admin/config.yml`.
+Open `/admin` on `https://inkads.poc.singletonsd.com` or `localhost:4321`.
+GitHub Pages / preview hosts that are not under `*.singletonsd.com` or
+`*.patoperpetua.com` will not complete the popup handshake. Do not implement a
+local OAuth proxy in this repository.
+
 Editors need **write** access to this repository so that the GitHub OAuth grant
 covers Decap's required `repo` scope. Do not commit OAuth client secrets or
 access tokens to this repository.

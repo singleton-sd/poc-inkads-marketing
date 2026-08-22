@@ -12,6 +12,12 @@ test("Decap admin targets this repository and models landing and legal content",
 
   assert.match(config, /name: github/);
   assert.match(config, /repo: singleton-sd\/poc-inkads-marketing/);
+  assert.match(config, /base_url: https:\/\/auth\.singletonsd\.com/);
+  assert.match(config, /auth_endpoint: auth/);
+  assert.doesNotMatch(
+    config,
+    /ssd-pocpk-decap-oauth-dev-ae|azurewebsites\.net|poc-plattform-kit/,
+  );
   assert.match(config, /folder: src\/content\/pages/);
   assert.match(config, /folder: src\/content\/legal/);
   assert.match(config, /name: effectiveDate/);
@@ -31,15 +37,23 @@ test("admin page loads Decap without adding it to the public application", async
   assert.doesNotMatch(landing, /decap|\/admin/i);
 });
 
-test("editorial documentation states the external OAuth requirement", async () => {
+test("editorial documentation states the cms-oauth-kit login path", async () => {
   const documentation = await readFile(
     new URL("docs/editorial.md", root),
     "utf8",
   );
 
-  assert.match(documentation, /CMS login is intentionally unavailable/i);
-  assert.match(documentation, /GitHub Pages.*cannot execute.*OAuth callback/is);
+  assert.match(documentation, /cms-oauth-kit/);
+  assert.match(documentation, /https:\/\/auth\.singletonsd\.com/);
+  assert.match(
+    documentation,
+    /GitHub Pages.*cannot execute the\s+OAuth\s+callback/is,
+  );
   assert.match(documentation, /Do not commit OAuth client\s+secrets/i);
+  assert.doesNotMatch(
+    documentation,
+    /ssd-pocpk-decap-oauth-dev-ae|poc-plattform-kit/,
+  );
 });
 
 test("Astro schemas validate landing and future legal frontmatter", async () => {
