@@ -2,8 +2,8 @@ backend:
   name: github
   repo: singleton-sd/poc-inkads-marketing
   branch: main
-  # Shared Decap OAuth proxy (poc-plattform-kit infra/decap-oauth.bicep)
-  base_url: https://ssd-pocpk-decap-oauth-dev-ae.azurewebsites.net
+  # Shared Decap OAuth proxy (cms-oauth-kit, https://auth.singletonsd.com)
+  base_url: https://auth.singletonsd.com
   auth_endpoint: auth
 
 publish_mode: editorial_workflow
