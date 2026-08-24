@@ -1,0 +1,21 @@
+---
+interface Props {
+  title: string;
+  tone?: "dark" | "brand" | "audience";
+  titleId?: string;
+}
+
+const { title, tone = "dark", titleId = "cta-title" } = Astro.props;
+---
+
+<section
+  class:list={["cta-band", `cta-band--${tone}`]}
+  aria-labelledby={titleId}
+>
+  <div class="shell">
+    <h2 id={titleId}>{title}</h2>
+    <div class="cta-band__actions">
+      <slot />
+    </div>
+  </div>
+</section>

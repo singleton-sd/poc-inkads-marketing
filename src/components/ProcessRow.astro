@@ -1,0 +1,13 @@
+---
+interface Props {
+  label: string;
+  detail: string;
+}
+
+const { label, detail } = Astro.props;
+---
+
+<li class="process-row">
+  <span class="process-row__label">{label}</span>
+  <p>{detail}</p>
+</li>

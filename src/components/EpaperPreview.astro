@@ -1,0 +1,212 @@
+---
+interface Props {
+  defaultTab?: "poster" | "advertiser" | "yours";
+}
+
+const { defaultTab = "poster" } = Astro.props;
+
+const captions = {
+  poster: "Venue poster artwork · as the 1-bit panel renders it",
+  advertiser: "Advertiser creative · matched by venue context",
+  yours: "Your artwork · drop an image to preview it",
+} as const;
+---
+
+<div class="epaper-preview" data-epaper-preview data-active={defaultTab}>
+  <figure class="epaper-preview__device">
+    <div class="epaper-preview__chrome">
+      <p>Preview on display</p>
+      <div
+        class="epaper-preview__tabs"
+        role="tablist"
+        aria-label="Preview mode"
+      >
+        <button
+          class="epaper-preview__tab"
+          type="button"
+          role="tab"
+          aria-selected={defaultTab === "poster" ? "true" : "false"}
+          data-epaper-tab="poster">Poster</button
+        >
+        <button
+          class="epaper-preview__tab"
+          type="button"
+          role="tab"
+          aria-selected={defaultTab === "advertiser" ? "true" : "false"}
+          data-epaper-tab="advertiser">Advertiser</button
+        >
+        <button
+          class="epaper-preview__tab"
+          type="button"
+          role="tab"
+          aria-selected={defaultTab === "yours" ? "true" : "false"}
+          data-epaper-tab="yours">Yours</button
+        >
+      </div>
+    </div>
+    <div class="epaper-preview__screen">
+      <div
+        class:list={[
+          "epaper-preview__panel",
+          defaultTab === "poster" && "is-active",
+        ]}
+        data-epaper-panel="poster"
+      >
+        <div class="epaper-preview__poster">
+          <p class="epaper-preview__poster-mark">College Lawn · Trivia night</p>
+          <div>
+            <h3>Tuesday trivia. Same booth. New questions.</h3>
+          </div>
+          <div class="epaper-preview__bar">
+            <span>InkAds</span>
+            <span>Updated 06:00</span>
+          </div>
+        </div>
+      </div>
+      <div
+        class:list={[
+          "epaper-preview__panel",
+          defaultTab === "advertiser" && "is-active",
+        ]}
+        data-epaper-panel="advertiser"
+      >
+        <div class="epaper-preview__advertiser">
+          <p class="epaper-preview__poster-mark">
+            Northbank Coffee Roasters · Campaign 04
+          </p>
+          <div>
+            <h3>Two streets away. Still warm.</h3>
+            <p>
+              Single-origin filter, roasted this week. Show this screen for 20%
+              off your first cup.
+            </p>
+          </div>
+          <div class="epaper-preview__bar">
+            <span>Claim the offer</span>
+            <span>Scan for voucher</span>
+          </div>
+        </div>
+      </div>
+      <div
+        class:list={[
+          "epaper-preview__panel",
+          defaultTab === "yours" && "is-active",
+        ]}
+        data-epaper-panel="yours"
+      >
+        <label class="epaper-preview__drop" data-epaper-drop>
+          <span data-epaper-drop-label>Drop your artwork (480 × 800)</span>
+          <img alt="" hidden data-epaper-preview-image />
+          <input type="file" accept="image/*" hidden data-epaper-file />
+        </label>
+      </div>
+    </div>
+  </figure>
+  <div class="epaper-preview__meta">
+    <p data-epaper-caption>{captions[defaultTab]}</p>
+    <p>480 × 800 e-paper</p>
+  </div>
+  <div class="epaper-preview__upload">
+    <p>
+      <strong>Try your own creative</strong>
+      Drop an image into the panel to see how it renders on real hardware.
+    </p>
+    <button
+      class="button-link button-link--secondary"
+      type="button"
+      data-epaper-upload
+    >
+      Upload artwork
+    </button>
+  </div>
+</div>
+
+<script>
+  const captions = {
+    poster: "Venue poster artwork · as the 1-bit panel renders it",
+    advertiser: "Advertiser creative · matched by venue context",
+    yours: "Your artwork · drop an image to preview it",
+  };
+
+  function activateTab(root: HTMLElement, tab: string) {
+    root.dataset.active = tab;
+    root
+      .querySelectorAll<HTMLButtonElement>("[data-epaper-tab]")
+      .forEach((button) => {
+        button.setAttribute(
+          "aria-selected",
+          button.dataset.epaperTab === tab ? "true" : "false",
+        );
+      });
+    root
+      .querySelectorAll<HTMLElement>("[data-epaper-panel]")
+      .forEach((panel) => {
+        panel.classList.toggle("is-active", panel.dataset.epaperPanel === tab);
+      });
+    const caption = root.querySelector<HTMLElement>("[data-epaper-caption]");
+    if (caption && tab in captions) {
+      caption.textContent = captions[tab as keyof typeof captions];
+    }
+  }
+
+  function setupEpaperPreview() {
+    const maybeRoot = document.querySelector<HTMLElement>(
+      "[data-epaper-preview]",
+    );
+    if (!maybeRoot) return;
+    const previewRoot: HTMLElement = maybeRoot;
+
+    const fileInput =
+      previewRoot.querySelector<HTMLInputElement>("[data-epaper-file]");
+    const drop = previewRoot.querySelector<HTMLElement>("[data-epaper-drop]");
+    const previewImage = previewRoot.querySelector<HTMLImageElement>(
+      "[data-epaper-preview-image]",
+    );
+    const dropLabel = previewRoot.querySelector<HTMLElement>(
+      "[data-epaper-drop-label]",
+    );
+    const uploadButton = previewRoot.querySelector<HTMLButtonElement>(
+      "[data-epaper-upload]",
+    );
+
+    previewRoot
+      .querySelectorAll<HTMLButtonElement>("[data-epaper-tab]")
+      .forEach((button) => {
+        button.addEventListener("click", () => {
+          const tab = button.dataset.epaperTab;
+          if (tab) activateTab(previewRoot, tab);
+        });
+      });
+
+    function loadFile(file: File | undefined) {
+      if (
+        !file ||
+        !file.type.startsWith("image/") ||
+        !previewImage ||
+        !dropLabel
+      ) {
+        return;
+      }
+      const url = URL.createObjectURL(file);
+      previewImage.src = url;
+      previewImage.hidden = false;
+      dropLabel.hidden = true;
+      activateTab(previewRoot, "yours");
+    }
+
+    uploadButton?.addEventListener("click", () => fileInput?.click());
+    drop?.addEventListener("click", () => fileInput?.click());
+    fileInput?.addEventListener("change", () => loadFile(fileInput.files?.[0]));
+
+    drop?.addEventListener("dragover", (event) => {
+      event.preventDefault();
+    });
+    drop?.addEventListener("drop", (event) => {
+      event.preventDefault();
+      loadFile(event.dataTransfer?.files?.[0]);
+    });
+  }
+
+  setupEpaperPreview();
+  document.addEventListener("astro:page-load", setupEpaperPreview);
+</script>

@@ -1,0 +1,27 @@
+---
+interface Props {
+  id: string;
+  name: string;
+  label: string;
+  options: string[];
+  required?: boolean;
+  placeholder?: string;
+}
+
+const {
+  id,
+  name,
+  label,
+  options,
+  required = false,
+  placeholder = "I am a…",
+} = Astro.props;
+---
+
+<div class="field">
+  <label class="field__label" for={id}>{label}</label>
+  <select class="field-control" id={id} name={name} required={required}>
+    <option value="" disabled selected>{placeholder}</option>
+    {options.map((option) => <option value={option}>{option}</option>)}
+  </select>
+</div>

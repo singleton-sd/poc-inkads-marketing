@@ -8,7 +8,11 @@ header_active: Venues
 accent: "#ffb300"
 primary_cta: { label: Request a demo, href: Contact }
 image_slots:
-  - { id: venue-visual, size: "100% × 340px", placeholder: "Venue installation photo" }
+  - {
+      id: venue-visual,
+      size: "100% × 340px",
+      placeholder: "Venue installation photo",
+    }
 ---
 
 # Venues (for venues)
@@ -40,11 +44,11 @@ image_slots:
 
 **H2:** A light footprint for your team.
 
-| Stage | Detail |
-| --- | --- |
-| Setup | A single battery-powered unit is mounted; no wiring or data drops. |
+| Stage   | Detail                                                                                        |
+| ------- | --------------------------------------------------------------------------------------------- |
+| Setup   | A single battery-powered unit is mounted; no wiring or data drops.                            |
 | Content | You approve what appears in your space; venue messaging can run alongside advertiser content. |
-| Ongoing | Updates happen remotely on schedule — nothing to print, post, or replace on site. |
+| Ongoing | Updates happen remotely on schedule — nothing to print, post, or replace on site.             |
 
 ---
 

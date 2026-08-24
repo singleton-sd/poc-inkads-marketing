@@ -1,12 +1,44 @@
+---
+import BrandLockup from "./BrandLockup.astro";
+import { footerNav, withBase } from "../lib/nav";
+
+const base = import.meta.env.BASE_URL;
+---
+
 <footer class="site-footer">
-  <div class="shell site-footer__inner">
-    <div>
-      <p class="eyebrow">InkAds</p>
-      <p>Thoughtful e-paper advertising for shared spaces.</p>
+  <div class="shell">
+    <div class="site-footer__top">
+      <div class="site-footer__brand">
+        <BrandLockup variant="footer" showByline={false} />
+        <p class="site-footer__tagline">
+          Low-power e-paper advertising for shared indoor spaces. A calmer
+          format for useful messages.
+        </p>
+      </div>
+      <div class="site-footer__columns">
+        {
+          Object.entries(footerNav).map(([heading, links]) => (
+            <div class="site-footer__column">
+              <h2>{heading}</h2>
+              <ul>
+                {links.map((link) => (
+                  <li>
+                    <a href={withBase(link.href, base)}>{link.label}</a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))
+        }
+      </div>
     </div>
-    <div class="site-footer__end">
-      <a href="#main-content">Back to top <span aria-hidden="true">↑</span></a>
-      <p class="site-footer__meta">A Singleton SD proof of concept.</p>
+    <div class="site-footer__legal">
+      <p>© 2026 InkAds. A proof of concept by Singleton SD.</p>
+      <a
+        class="site-footer__credit"
+        href="https://singletonsd.com"
+        rel="noreferrer">Singleton SD</a
+      >
     </div>
   </div>
 </footer>

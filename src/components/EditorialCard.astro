@@ -4,14 +4,25 @@ interface Props {
   eyebrow: string;
   title: string;
   description: string;
+  accent?: "brand" | "audience";
 }
 
-const { id, eyebrow, title, description } = Astro.props;
+const { id, eyebrow, title, description, accent = "brand" } = Astro.props;
 ---
 
-<article {id} class="editorial-card">
-  <p class="eyebrow">{eyebrow}</p>
+<article
+  {id}
+  class:list={[
+    "editorial-card",
+    accent === "audience" && "editorial-card--audience",
+  ]}
+>
+  <p class:list={["eyebrow", accent === "audience" && "eyebrow--audience"]}>
+    {eyebrow}
+  </p>
   <h3>{title}</h3>
-  <p>{description}</p>
-  <slot />
+  <p class="editorial-card__body">{description}</p>
+  <div class="editorial-card__action">
+    <slot />
+  </div>
 </article>
