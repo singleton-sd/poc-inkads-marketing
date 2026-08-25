@@ -9,6 +9,20 @@ const pages = defineCollection({
     description: z.string().min(1),
     headline: z.string().min(1),
     summary: z.string().min(1),
+    eyebrow: z.string().min(1).optional(),
+    note: z.string().min(1).optional(),
+    pilots: z
+      .array(
+        z.object({
+          eyebrow: z.string().min(1),
+          title: z.string().min(1),
+          description: z.string().min(1),
+          ctaLabel: z.string().min(1),
+          href: z.string().min(1),
+          accent: z.enum(["brand", "audience"]).default("brand"),
+        }),
+      )
+      .optional(),
     draft: z.boolean().default(false),
   }),
 });

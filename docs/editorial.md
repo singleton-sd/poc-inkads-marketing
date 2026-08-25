@@ -17,6 +17,7 @@ Landing-page frontmatter requires:
 - `description`
 - `headline`
 - `summary`
+- optional `eyebrow`, `note`, and `pilots` (used by pages such as Pricing)
 - optional `draft` (defaults to `false`)
 
 Legal-page frontmatter requires:

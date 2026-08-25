@@ -1143,6 +1143,14 @@ textarea.field-control {
   padding-block: clamp(4rem, 8vw, 7rem);
 }
 
+.pricing-pilots {
+  padding-bottom: clamp(4rem, 8vw, 7rem);
+}
+
+.pricing-pilots .card-grid {
+  margin-top: 0;
+}
+
 .statement {
   background: var(--ink-inverse);
   color: var(--ink-on-inverse);
