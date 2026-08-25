@@ -33,6 +33,10 @@ collections:
         widget: text
         required: false
         hint: Short meta description for SEO.
+      - label: Eyebrow
+        name: eyebrow
+        widget: string
+        required: false
       - label: Brand
         name: brand
         widget: string
@@ -41,6 +45,51 @@ collections:
         name: headline
         widget: string
         required: false
+      - label: Summary
+        name: summary
+        widget: text
+        required: false
+      - label: Columns
+        name: columns
+        widget: list
+        required: false
+        fields:
+          - label: Title
+            name: title
+            widget: string
+          - label: Body
+            name: body
+            widget: text
+      - label: Parent brand copy
+        name: parentBrand
+        widget: text
+        required: false
+      - label: CTA title
+        name: ctaTitle
+        widget: string
+        required: false
+      - label: Primary CTA label
+        name: primaryCta
+        widget: object
+        required: false
+        fields:
+          - label: Label
+            name: label
+            widget: string
+          - label: URL
+            name: href
+            widget: string
+      - label: Secondary CTA
+        name: secondaryCta
+        widget: object
+        required: false
+        fields:
+          - label: Label
+            name: label
+            widget: string
+          - label: URL
+            name: href
+            widget: string
       - label: CTA label
         name: ctaLabel
         widget: string

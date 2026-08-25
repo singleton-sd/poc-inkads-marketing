@@ -2,13 +2,32 @@ import { defineCollection } from "astro:content";
 import { glob } from "astro/loaders";
 import { z } from "astro/zod";
 
+const ctaLink = z.object({
+  label: z.string().min(1),
+  href: z.string().min(1),
+});
+
 const pages = defineCollection({
   loader: glob({ base: "./src/content/pages", pattern: "**/*.{md,mdx}" }),
   schema: z.object({
     title: z.string().min(1),
     description: z.string().min(1),
+    eyebrow: z.string().min(1).optional(),
     headline: z.string().min(1),
     summary: z.string().min(1),
+    columns: z
+      .array(
+        z.object({
+          title: z.string().min(1),
+          body: z.string().min(1),
+        }),
+      )
+      .min(1)
+      .optional(),
+    parentBrand: z.string().min(1).optional(),
+    ctaTitle: z.string().min(1).optional(),
+    primaryCta: ctaLink.optional(),
+    secondaryCta: ctaLink.optional(),
     draft: z.boolean().default(false),
   }),
 });
