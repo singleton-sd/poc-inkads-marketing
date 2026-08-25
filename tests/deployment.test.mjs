@@ -53,8 +53,21 @@ test("PR workflow publishes subpath previews and updates the PR body", async () 
   assert.match(workflow, /pull-requests:\s*write/);
   assert.match(workflow, /github\.rest\.pulls\.update/);
   assert.match(workflow, /inkads-preview:start/);
+  assert.match(workflow, /sticky-pull-request-comment@v2/);
+  assert.match(workflow, /header:\s*inkads-preview/);
+  assert.match(workflow, /pnpm test:visual/);
+  assert.match(workflow, /visual-pr-\$\{\{\s*github\.event\.number\s*\}\}/);
   assert.doesNotMatch(workflow, /pull_request_target/);
   assert.doesNotMatch(workflow, /secrets\./);
+});
+
+test("visual screenshot helper is wired for post-build review artifacts", async () => {
+  const pkg = await readFile(new URL("package.json", root), "utf8");
+  const visual = await readFile(new URL("tests/visual.mjs", root), "utf8");
+  assert.match(pkg, /"test:visual":\s*"node tests\/visual\.mjs"/);
+  assert.match(visual, /test-results\/visual/);
+  assert.match(visual, /1440/);
+  assert.match(visual, /390/);
 });
 
 test("Pages branch includes the production custom domain", async () => {

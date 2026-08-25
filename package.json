@@ -17,7 +17,8 @@
     "playwright:install": "playwright install chromium",
     "test": "node --test tests/*.test.mjs",
     "test:seo": "node tests/seo.mjs",
-    "test:a11y": "node tests/a11y.mjs"
+    "test:a11y": "node tests/a11y.mjs",
+    "test:visual": "node tests/visual.mjs"
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.3.0",

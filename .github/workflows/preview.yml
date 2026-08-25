@@ -47,6 +47,22 @@ jobs:
         run: pnpm build
         env:
           PREVIEW_BASE_PATH: /pr-preview/pr-${{ github.event.number }}/
+      - name: Install Playwright browsers
+        if: github.event.action != 'closed'
+        run: pnpm playwright:install
+      - name: Capture visual screenshots
+        if: github.event.action != 'closed'
+        run: pnpm test:visual
+        env:
+          VISUAL_BASE_PATH: /pr-preview/pr-${{ github.event.number }}/
+      - name: Upload visual screenshots
+        if: github.event.action != 'closed'
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-pr-${{ github.event.number }}
+          path: test-results/visual
+          if-no-files-found: error
+          retention-days: 14
       - name: Deploy or remove preview
         id: preview
         uses: rossjrw/pr-preview-action@v1.8.1
@@ -56,6 +72,25 @@ jobs:
           pages-base-url: https://inkads.poc.singletonsd.com
           umbrella-dir: pr-preview
           comment: false
+      - name: Post sticky preview comment
+        if: github.event.action != 'closed'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: inkads-preview
+          recreate: true
+          message: |
+            ## Preview
+
+            🔗 **[Open live preview](https://inkads.poc.singletonsd.com/pr-preview/pr-${{ github.event.number }}/)**
+
+            - URL: `https://inkads.poc.singletonsd.com/pr-preview/pr-${{ github.event.number }}/`
+            - Visual screenshots: download the `visual-pr-${{ github.event.number }}` artifact from this workflow run
+      - name: Hide sticky preview comment
+        if: github.event.action == 'closed'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: inkads-preview
+          hide: true
       - name: Update preview link in pull request body
         uses: actions/github-script@v8
         env:
@@ -69,18 +104,25 @@ jobs:
               `${markerStart}[\\s\\S]*?${markerEnd}\\n*`,
               "m",
             );
-            const currentBody = context.payload.pull_request.body ?? "";
-            const bodyWithoutPreview = currentBody.replace(managedBlock, "").trimEnd();
+            const pull = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+            });
+            const currentBody = pull.data.body ?? "";
+            const bodyWithoutPreview = currentBody.replace(managedBlock, "").trim();
             const previewBlock = [
               markerStart,
               "## Preview",
               "",
-              `[View this pull request's preview](${process.env.PREVIEW_URL})`,
+              `🔗 **[Open live preview](${process.env.PREVIEW_URL})**`,
+              "",
+              `Screenshots: workflow artifact \`visual-pr-${context.issue.number}\``,
               markerEnd,
             ].join("\n");
             const body = process.env.PREVIEW_REMOVED === "true"
               ? bodyWithoutPreview
-              : `${bodyWithoutPreview}${bodyWithoutPreview ? "\n\n" : ""}${previewBlock}`;
+              : `${previewBlock}${bodyWithoutPreview ? `\n\n${bodyWithoutPreview}` : ""}`;
 
             await github.rest.pulls.update({
               owner: context.repo.owner,
