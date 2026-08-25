@@ -8,9 +8,12 @@ const pagePath = new URL("src/pages/index.astro", root);
 test("landing page presents distinct venue and advertiser paths", async () => {
   const page = await readFile(pagePath, "utf8");
   assert.match(page, /id="venues"/);
-  assert.match(page, /For venues — manage a space/);
   assert.match(page, /id="advertisers"/);
-  assert.match(page, /For advertisers — place a message/);
+  assert.match(page, /Request a demo/);
+  assert.match(page, /See how it works/);
+  assert.match(page, /Venue perspective/);
+  assert.match(page, /Advertiser perspective/);
+  assert.match(page, /accent="audience"/);
 });
 
 test("landing page explains the system and intended place contexts", async () => {
@@ -49,15 +52,22 @@ test("public landing copy avoids unvalidated outcome claims", async () => {
   );
 });
 
-test("landing page includes semantic section labels and replaceable visuals", async () => {
+test("landing page composes Claude Design kit sections and e-paper preview", async () => {
   const page = await readFile(pagePath, "utf8");
-  const device = await readFile(
-    new URL("src/components/DeviceFrame.astro", root),
+  const preview = await readFile(
+    new URL("src/components/EpaperPreview.astro", root),
     "utf8",
   );
-  assert.match(page, /aria-labelledby="statement-title"/);
+  assert.match(page, /PageHero/);
+  assert.match(page, /EpaperPreview/);
+  assert.match(page, /InverseSection/);
+  assert.match(page, /CtaBand/);
+  assert.match(page, /labelledBy="statement-title"/);
   assert.match(page, /aria-labelledby="system-title"/);
   assert.match(page, /aria-labelledby="places-title"/);
-  assert.match(device, /replaceable artwork/i);
-  assert.match(device, /Product visual placeholder/);
+  assert.match(preview, /Preview on display/);
+  assert.match(preview, /Drop your artwork \(480 × 800\)/);
+  assert.match(preview, /data-epaper-tab="poster"/);
+  assert.match(preview, /data-epaper-tab="advertiser"/);
+  assert.match(preview, /data-epaper-tab="yours"/);
 });

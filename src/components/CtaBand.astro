@@ -1,15 +1,24 @@
 ---
 interface Props {
   title: string;
+  eyebrow?: string;
   tone?: "dark" | "brand" | "audience";
   titleId?: string;
 }
 
 const {
   title,
+  eyebrow,
   tone = "dark",
   titleId = `cta-title-${crypto.randomUUID().slice(0, 8)}`,
 } = Astro.props;
+
+const eyebrowClass =
+  tone === "brand"
+    ? "eyebrow cta-band__eyebrow"
+    : tone === "audience"
+      ? "eyebrow eyebrow--audience cta-band__eyebrow"
+      : "eyebrow cta-band__eyebrow";
 ---
 
 <section
@@ -17,6 +26,7 @@ const {
   aria-labelledby={titleId}
 >
   <div class="shell">
+    {eyebrow && <p class={eyebrowClass}>{eyebrow}</p>}
     <h2 id={titleId}>{title}</h2>
     <div class="cta-band__actions">
       <slot />

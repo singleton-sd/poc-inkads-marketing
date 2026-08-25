@@ -1,9 +1,13 @@
 ---
 import { getEntry } from "astro:content";
 import ButtonLink from "../components/ButtonLink.astro";
-import DeviceFrame from "../components/DeviceFrame.astro";
+import CtaBand from "../components/CtaBand.astro";
 import EditorialCard from "../components/EditorialCard.astro";
+import EpaperPreview from "../components/EpaperPreview.astro";
+import InverseSection from "../components/InverseSection.astro";
+import PageHero from "../components/PageHero.astro";
 import PlaceCard from "../components/PlaceCard.astro";
+import SectionHeading from "../components/SectionHeading.astro";
 import SystemList from "../components/SystemList.astro";
 import SystemStep from "../components/SystemStep.astro";
 import TextLink from "../components/TextLink.astro";
@@ -17,56 +21,53 @@ const base = import.meta.env.BASE_URL;
 
 <BaseLayout title={home.data.title} description={home.data.description}>
   <main id="main-content">
-    <section class="shell hero" aria-labelledby="page-title">
-      <div class="hero__copy">
-        <p class="eyebrow">E-paper · shared spaces</p>
-        <h1 id="page-title">{home.data.headline}</h1>
-        <p class="hero__summary">{home.data.summary}</p>
-        <div class="hero__actions">
-          <ButtonLink
-            href={withBase("/contact", base)}
-            label="For venues — manage a space"
-          />
-          <ButtonLink
-            href={withBase("/contact", base)}
-            label="For advertisers — place a message"
-            variant="secondary"
-          />
-        </div>
-        <p class="hero__note">Two distinct paths. One considered network.</p>
-      </div>
-      <DeviceFrame />
-    </section>
+    <PageHero
+      eyebrow="E-paper · shared spaces"
+      title={home.data.headline}
+      lead={home.data.summary}
+      split
+    >
+      <ButtonLink
+        slot="actions"
+        href={withBase("/contact", base)}
+        label="Request a demo"
+      />
+      <ButtonLink
+        slot="actions"
+        href={withBase("/how-it-works", base)}
+        label="See how it works"
+        variant="secondary"
+      />
+      <EpaperPreview />
+    </PageHero>
 
-    <section class="statement" aria-labelledby="statement-title">
-      <div class="shell statement__inner">
-        <p class="eyebrow">The idea</p>
-        <h2 id="statement-title">
-          A calmer format for useful messages in physical places.
-        </h2>
-        <p>
-          InkAds is a proof of concept for connecting venue space with
-          advertiser messages through low-power e-paper displays. It is being
-          explored as an alternative to adding another bright, animated screen.
-        </p>
-      </div>
-    </section>
+    <InverseSection centered labelledBy="statement-title">
+      <SectionHeading
+        eyebrow="The idea"
+        title="A calmer format for useful messages in physical places."
+        lead="InkAds connects venue space with advertiser messages through low-power e-paper displays — a considered alternative to adding another bright, animated screen. No mains power required at each unit, and content changes remotely on a schedule."
+        tone="light"
+        align="center"
+        titleId="statement-title"
+      />
+    </InverseSection>
 
     <section
       id="audiences"
       class="shell audience-section"
       aria-labelledby="audiences-title"
     >
-      <div class="section-heading">
-        <p class="eyebrow">Two paths · one network</p>
-        <h2 id="audiences-title">Designed around the space and the message.</h2>
-      </div>
+      <SectionHeading
+        eyebrow="Two paths · one network"
+        title="Designed around the space and the message."
+        titleId="audiences-title"
+      />
       <div class="card-grid">
         <EditorialCard
           id="venues"
           eyebrow="01 / Venues"
           title="Give overlooked space a useful role"
-          description="Explore a considered display format designed to fit the character and practical needs of your venue."
+          description="A display format designed to fit the character and practical needs of your venue — no cabling, no bright video screen."
         >
           <TextLink
             href={withBase("/venues", base)}
@@ -77,7 +78,7 @@ const base = import.meta.env.BASE_URL;
           id="advertisers"
           eyebrow="02 / Advertisers"
           title="Place messages in relevant contexts"
-          description="Explore a tactile canvas intended for context-aware creative in places where people spend time."
+          description="A tactile canvas for context-aware creative, with scheduled changes and QR calls to action — no printing, no replacing posters."
           accent="audience"
         >
           <TextLink
@@ -91,70 +92,64 @@ const base = import.meta.env.BASE_URL;
 
     <section
       id="how-it-works"
-      class="shell system-section"
+      class="system-section"
       aria-labelledby="system-title"
     >
-      <div class="section-heading section-heading--split">
-        <div>
-          <p class="eyebrow">A simple system · concept stage</p>
-          <h2 id="system-title">From message to place.</h2>
-        </div>
-        <p>
-          The proof of concept is focused on the relationship between content, a
-          low-power display device, and the shared space around it.
-        </p>
+      <div class="shell">
+        <SectionHeading
+          eyebrow="A simple system"
+          title="From message to place."
+          titleId="system-title"
+        />
+        <SystemList layout="columns">
+          <SystemStep
+            number="01"
+            title="Match"
+            description="A venue and message are considered together, with context guiding placement."
+          />
+          <SystemStep
+            number="02"
+            title="Prepare"
+            description="Creative is composed for a static e-paper canvas rather than a conventional digital screen."
+          />
+          <SystemStep
+            number="03"
+            title="Display"
+            description="The device presents the selected message within the venue's shared space."
+          />
+        </SystemList>
       </div>
-      <SystemList layout="columns">
-        <SystemStep
-          number="01"
-          title="Match"
-          description="A venue and message are considered together, with context guiding the placement."
-        />
-        <SystemStep
-          number="02"
-          title="Prepare"
-          description="Creative is composed for a static e-paper canvas rather than a conventional digital screen."
-        />
-        <SystemStep
-          number="03"
-          title="Display"
-          description="The device presents the selected message within the venue’s shared space."
-        />
-      </SystemList>
     </section>
 
     <section id="places" class="places-section" aria-labelledby="places-title">
       <div class="shell">
-        <div class="section-heading">
-          <p class="eyebrow">Use cases · built to adapt</p>
-          <h2 id="places-title">Start specific. Think beyond one setting.</h2>
-          <p class="section-heading__summary">
-            Bathrooms are the initial proof-of-concept context, not the limit of
-            the product idea. The same format could be explored wherever a calm,
-            considered display belongs.
-          </p>
-        </div>
+        <SectionHeading
+          eyebrow="Use cases · built to adapt"
+          title="Start specific. Think beyond one setting."
+          lead="Bathrooms are the initial proof-of-concept context, not the limit of the idea. The same format could work anywhere a calm, considered display belongs."
+          titleId="places-title"
+        />
         <div class="places-grid">
           <PlaceCard
             index="01"
             title="Bathrooms"
-            description="An initial context for testing how a compact display fits into a private, high-dwell shared space."
+            description="Testing how a compact display fits a private, high-dwell shared space."
             featured
           />
           <PlaceCard
             index="02"
             title="Pubs & hospitality"
-            description="Potential placements across venues where people gather, pause, and make local decisions."
+            description="Placements where people gather, pause, and make local decisions."
           />
           <PlaceCard
             index="03"
             title="Shopping centres"
-            description="A format to explore across varied retail environments and shared amenities."
+            description="A format to explore across varied retail environments and amenities."
           />
           <PlaceCard
             index="04"
             title="High-traffic spaces"
-            description="Other suitable physical settings where a static message can complement the environment."
+            description="Other settings where a static message can complement the environment."
           />
         </div>
         <p class="section-follow-link">
@@ -166,24 +161,22 @@ const base = import.meta.env.BASE_URL;
       </div>
     </section>
 
-    <section class="shell closing-section" aria-labelledby="closing-title">
-      <p class="eyebrow">Choose a perspective</p>
-      <h2 id="closing-title">A shared canvas needs both sides.</h2>
-      <p>
-        Explore how InkAds could work for the space you manage or the messages
-        you want to place.
-      </p>
-      <div class="hero__actions">
-        <ButtonLink
-          href={withBase("/venues", base)}
-          label="Venue perspective"
-        />
-        <ButtonLink
-          href={withBase("/advertisers", base)}
-          label="Advertiser perspective"
-          variant="secondary"
-        />
-      </div>
-    </section>
+    <CtaBand
+      eyebrow="Choose a perspective"
+      title="A shared canvas needs both sides."
+      tone="brand"
+      titleId="closing-title"
+    >
+      <ButtonLink
+        href={withBase("/venues", base)}
+        label="Venue perspective"
+        variant="inverse"
+      />
+      <ButtonLink
+        href={withBase("/advertisers", base)}
+        label="Advertiser perspective"
+        variant="ghost-inverse"
+      />
+    </CtaBand>
   </main>
 </BaseLayout>

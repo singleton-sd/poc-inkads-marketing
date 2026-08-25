@@ -37,8 +37,8 @@ test("shell includes skip navigation and non-colour audience labels", async () =
   );
   const page = await readFile(new URL("src/pages/index.astro", root), "utf8");
   assert.match(layout, /Skip to content/);
-  assert.match(page, /For venues/);
-  assert.match(page, /For advertisers/);
+  assert.match(page, /Venue perspective/);
+  assert.match(page, /Advertiser perspective/);
   assert.match(page, /01 \/ Venues/);
   assert.match(page, /02 \/ Advertisers/);
 });
