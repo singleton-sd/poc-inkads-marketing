@@ -61,8 +61,8 @@ test("PR workflow publishes subpath previews and updates the PR body", async () 
   assert.match(workflow, /name:\s*visual/);
   assert.match(workflow, /visual-gate\.mjs/);
   assert.match(workflow, /visual-accepted/);
-  assert.match(workflow, /labeled/);
-  assert.match(workflow, /unlabeled/);
+  assert.match(workflow, /\blabeled\b/);
+  assert.match(workflow, /\bunlabeled\b/);
   assert.doesNotMatch(workflow, /pull_request_target/);
   assert.doesNotMatch(workflow, /secrets\./);
 });
