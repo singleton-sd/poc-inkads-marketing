@@ -27,9 +27,11 @@ Pull requests from forks are not given write access to publish.
 1. Open the sticky **Preview** comment → **Open visual report**
 2. If the **`visual`** check is red, review base / PR / diff for listed routes
 3. When the diffs are intentional, add the **`visual-accepted`** label
-4. **Re-run failed jobs** on the workflow run (re-runs only `visual`; preview
-   stays deployed)
+4. A thin workflow run clears **`visual`** automatically (no rebuild, no re-run)
 5. Merge when `visual` is green
+
+Removing **`visual-accepted`** re-runs the gate against the last capture and fails
+again if diffs remain.
 
 Merge updates production; the next PR compares against that new baseline.
 

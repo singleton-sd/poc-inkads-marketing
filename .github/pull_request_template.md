@@ -15,5 +15,5 @@ comment on this PR is the source of truth once CI finishes._
 
 - [ ] Open the sticky **Preview** comment / Preview section and check the live site
 - [ ] Open the hosted **visual report** (`…/visual/`) and review base vs PR vs diff
-- [ ] If the `visual` check fails for intentional changes: add `visual-accepted`, then Re-run failed jobs
+- [ ] If the `visual` check fails for intentional changes: add `visual-accepted` (check clears automatically; no re-run)
 - [ ] `pnpm format:check && pnpm lint && pnpm test && pnpm build`

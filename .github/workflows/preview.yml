@@ -2,10 +2,11 @@ name: Deploy pull request preview
 
 on:
   pull_request:
-    types: [opened, reopened, synchronize, closed]
+    types: [opened, reopened, synchronize, closed, labeled, unlabeled]
 
+# Label accept/reject must not serialize behind Pages publishes.
 concurrency:
-  group: pages-publish
+  group: ${{ contains(fromJSON('["labeled","unlabeled"]'), github.event.action) && format('visual-label-pr-{0}', github.event.number) || 'pages-publish' }}
   cancel-in-progress: false
 
 permissions:
@@ -17,7 +18,7 @@ jobs:
   preview:
     if: >
       github.event.pull_request.head.repo.full_name == github.repository &&
-      github.event.action != 'closed'
+      contains(fromJSON('["opened","reopened","synchronize"]'), github.event.action)
     runs-on: ubuntu-latest
     outputs:
       preview_url: ${{ steps.urls.outputs.preview_url }}
@@ -105,7 +106,7 @@ jobs:
                 ? summary.newRoutes.map((r) => `\`${r}\``).join(", ")
                 : "—";
             const statusLine = summary.hasDiffs
-              ? `⚠️ Visual diffs detected (${summary.changed} changed routes, ${summary.new} new). The **visual** check will fail until you review and add the \`visual-accepted\` label, then **Re-run failed jobs**.`
+              ? `⚠️ Visual diffs detected (${summary.changed} changed routes, ${summary.new} new). The **visual** check fails until you add the \`visual-accepted\` label (no rebuild — that label alone clears the check).`
               : "✅ No visual diffs vs production.";
             const body = [
               "## Preview",
@@ -169,19 +170,24 @@ jobs:
 
   visual:
     name: visual
-    if: >
-      github.event.pull_request.head.repo.full_name == github.repository &&
-      github.event.action != 'closed'
     needs: [preview]
+    if: >
+      always() &&
+      !cancelled() &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.action != 'closed' &&
+      (
+        needs.preview.result == 'success' ||
+        (
+          needs.preview.result == 'skipped' &&
+          contains(fromJSON('["labeled","unlabeled"]'), github.event.action) &&
+          github.event.label.name == 'visual-accepted'
+        )
+      )
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
-      - name: Download visual artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: visual-pr-${{ github.event.number }}
-          path: test-results/visual
       - name: Detect visual-accepted label
         id: accept
         uses: actions/github-script@v8
@@ -195,16 +201,42 @@ jobs:
             const accepted = labels.some((l) => l.name === "visual-accepted");
             core.setOutput("accepted", accepted ? "true" : "false");
             if (accepted) {
-              core.info("Label visual-accepted is present; gate will pass.");
+              core.info("Label visual-accepted is present; gate will pass without rebuild.");
             }
+      - name: Accept intentional visual diffs
+        if: steps.accept.outputs.accepted == 'true'
+        run: |
+          echo "visual-accepted label present — clearing the visual check (no rebuild or re-screenshot)."
+      - name: Download visual artifact from this run
+        if: steps.accept.outputs.accepted != 'true' && needs.preview.result == 'success'
+        uses: actions/download-artifact@v4
+        with:
+          name: visual-pr-${{ github.event.number }}
+          path: test-results/visual
+      - name: Download latest visual artifact for this PR
+        if: steps.accept.outputs.accepted != 'true' && needs.preview.result == 'skipped'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          ARTIFACT="visual-pr-${{ github.event.number }}"
+          ID="$(gh api "repos/${{ github.repository }}/actions/artifacts?name=${ARTIFACT}&per_page=5" \
+            --jq '[.artifacts[] | select(.expired==false)][0].id // empty')"
+          if [ -z "$ID" ]; then
+            echo "No ${ARTIFACT} artifact found. Push a commit so preview can capture visuals first."
+            exit 1
+          fi
+          mkdir -p test-results/visual
+          gh api "repos/${{ github.repository }}/actions/artifacts/${ID}/zip" > /tmp/visual.zip
+          unzip -o /tmp/visual.zip -d test-results/visual
       - name: Set up Node.js
+        if: steps.accept.outputs.accepted != 'true'
         uses: actions/setup-node@v7
         with:
           node-version: 24
       - name: Run visual gate
+        if: steps.accept.outputs.accepted != 'true'
         run: node tests/visual-gate.mjs
-        env:
-          VISUAL_ACCEPTED: ${{ steps.accept.outputs.accepted == 'true' && '1' || '0' }}
 
   cleanup:
     if: >

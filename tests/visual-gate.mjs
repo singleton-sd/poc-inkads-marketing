@@ -80,6 +80,6 @@ if (accepted) {
 }
 
 console.error(
-  "Visual gate failed: pixel diffs or new routes vs production. Review the hosted visual report, then add the visual-accepted label and re-run the failed visual job.",
+  "Visual gate failed: pixel diffs or new routes vs production. Review the hosted visual report, then add the visual-accepted label (that alone clears the check; no rebuild).",
 );
 process.exit(1);
