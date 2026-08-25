@@ -10,7 +10,10 @@
  * - `base/<route>-<viewport>.png` — production / base (when the route exists)
  * - `diff/<route>-<viewport>.png` — red pixel diff (when both exist and differ)
  * - `index.html` — side-by-side review page
- * - `manifest.json`
+ * - `manifest.json` — includes `summary` for CI gating
+ *
+ * Capture always exits 0 on successful screenshots. Use `pnpm test:visual:gate`
+ * (or CI job `visual`) to fail when routes are `changed` or `new`.
  *
  * Env:
  * - VISUAL_BASE_PATH — Astro base used for the PR build (e.g. `/pr-preview/pr-12/`)
@@ -102,7 +105,8 @@ function collectHtmlRoutes(dir = distDir, prefix = "") {
     const full = path.join(dir, entry.name);
     const rel = path.posix.join(prefix, entry.name);
     if (entry.isDirectory()) {
-      if (entry.name === "admin") continue;
+      // Skip Decap admin and the hosted visual report folder itself.
+      if (entry.name === "admin" || entry.name === "visual") continue;
       routes.push(...collectHtmlRoutes(full, rel));
       continue;
     }
@@ -382,12 +386,32 @@ try {
   server.close();
 }
 
+const changedRoutes = [
+  ...new Set(
+    manifest.filter((m) => m.status === "changed").map((m) => m.route),
+  ),
+].sort();
+const newRoutes = [
+  ...new Set(manifest.filter((m) => m.status === "new").map((m) => m.route)),
+].sort();
+const unchanged = manifest.filter((m) => m.status === "unchanged").length;
+const summary = {
+  total: manifest.length,
+  unchanged,
+  changed: changedRoutes.length,
+  new: newRoutes.length,
+  changedRoutes,
+  newRoutes,
+  hasDiffs: changedRoutes.length > 0 || newRoutes.length > 0,
+};
+
 await writeFile(
   path.join(outDir, "manifest.json"),
   `${JSON.stringify(
     {
       basePath,
       baseSiteUrl: skipBase ? null : baseSiteUrl,
+      summary,
       routes: manifest,
     },
     null,
@@ -397,8 +421,6 @@ await writeFile(
 );
 await writeFile(path.join(outDir, "index.html"), buildReportHtml(manifest));
 
-const changed = manifest.filter((m) => m.status === "changed").length;
-const created = manifest.filter((m) => m.status === "new").length;
 console.log(
-  `Visual screenshots: ${manifest.length} comparisons → ${outDir} (${changed} changed, ${created} new). Open index.html`,
+  `Visual screenshots: ${summary.total} comparisons → ${outDir} (${summary.changed} changed routes, ${summary.new} new routes). Open index.html`,
 );

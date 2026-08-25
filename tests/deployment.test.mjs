@@ -57,26 +57,44 @@ test("PR workflow publishes subpath previews and updates the PR body", async () 
   assert.match(workflow, /header:\s*inkads-preview/);
   assert.match(workflow, /pnpm test:visual/);
   assert.match(workflow, /visual-pr-\$\{\{\s*github\.event\.number\s*\}\}/);
+  assert.match(workflow, /dist\/visual/);
+  assert.match(workflow, /name:\s*visual/);
+  assert.match(workflow, /visual-gate\.mjs/);
+  assert.match(workflow, /visual-accepted/);
+  assert.match(workflow, /\blabeled\b/);
+  assert.match(workflow, /\bunlabeled\b/);
   assert.doesNotMatch(workflow, /pull_request_target/);
   assert.doesNotMatch(workflow, /secrets\./);
 });
 
-test("visual screenshot helper is wired for post-build review artifacts", async () => {
+test("visual screenshot helper is wired for hosted report and gate", async () => {
   const pkg = await readFile(new URL("package.json", root), "utf8");
   const visual = await readFile(new URL("tests/visual.mjs", root), "utf8");
+  const gate = await readFile(new URL("tests/visual-gate.mjs", root), "utf8");
   const template = await readFile(
     new URL(".github/pull_request_template.md", root),
     "utf8",
   );
+  const deployment = await readFile(
+    new URL("docs/deployment.md", root),
+    "utf8",
+  );
   assert.match(pkg, /"test:visual":\s*"node tests\/visual\.mjs"/);
+  assert.match(pkg, /"test:visual:gate":\s*"node tests\/visual-gate\.mjs"/);
   assert.match(pkg, /"pixelmatch"/);
   assert.match(visual, /test-results\/visual/);
   assert.match(visual, /VISUAL_BASE_URL/);
   assert.match(visual, /index\.html/);
+  assert.match(visual, /entry\.name === "visual"/);
   assert.match(visual, /1440/);
   assert.match(visual, /390/);
+  assert.match(gate, /VISUAL_ACCEPTED/);
+  assert.match(gate, /hasDiffs/);
   assert.match(template, /inkads-preview:start/);
   assert.match(template, /## Preview/);
+  assert.match(template, /visual-accepted/);
+  assert.match(deployment, /Open visual report/);
+  assert.match(deployment, /required.*visual/i);
 });
 
 test("Pages branch includes the production custom domain", async () => {
