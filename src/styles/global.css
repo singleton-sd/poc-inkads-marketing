@@ -532,6 +532,10 @@ main {
   margin-top: 2rem;
 }
 
+.band {
+  padding-block: clamp(4rem, 8vw, 6rem);
+}
+
 .inverse-section {
   background: var(--ink-inverse);
   color: var(--ink-on-inverse);
