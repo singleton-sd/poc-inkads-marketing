@@ -11,59 +11,64 @@ concurrency:
 permissions:
   contents: write
   pull-requests: write
+  actions: read
 
 jobs:
   preview:
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    if: >
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.action != 'closed'
     runs-on: ubuntu-latest
+    outputs:
+      preview_url: ${{ steps.urls.outputs.preview_url }}
+      visual_url: ${{ steps.urls.outputs.visual_url }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
+      - name: Set preview URLs
+        id: urls
+        run: |
+          echo "preview_url=https://inkads.poc.singletonsd.com/pr-preview/pr-${{ github.event.number }}/" >> "$GITHUB_OUTPUT"
+          echo "visual_url=https://inkads.poc.singletonsd.com/pr-preview/pr-${{ github.event.number }}/visual/" >> "$GITHUB_OUTPUT"
       - name: Set up pnpm
-        if: github.event.action != 'closed'
         uses: pnpm/action-setup@v6
         with:
           run_install: false
       - name: Set up Node.js
-        if: github.event.action != 'closed'
         uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: pnpm
       - name: Install dependencies
-        if: github.event.action != 'closed'
         run: pnpm install --frozen-lockfile
       - name: Check formatting
-        if: github.event.action != 'closed'
         run: pnpm format:check
       - name: Lint and type-check
-        if: github.event.action != 'closed'
         run: pnpm lint
       - name: Run tests
-        if: github.event.action != 'closed'
         run: pnpm test
       - name: Build preview site
-        if: github.event.action != 'closed'
         run: pnpm build
         env:
           PREVIEW_BASE_PATH: /pr-preview/pr-${{ github.event.number }}/
       - name: Install Playwright browsers
-        if: github.event.action != 'closed'
         run: pnpm playwright:install
       - name: Capture visual screenshots
-        if: github.event.action != 'closed'
         run: pnpm test:visual
         env:
           VISUAL_BASE_PATH: /pr-preview/pr-${{ github.event.number }}/
+      - name: Host visual report under preview
+        run: |
+          rm -rf dist/visual
+          cp -R test-results/visual dist/visual
       - name: Upload visual screenshots
-        if: github.event.action != 'closed'
         uses: actions/upload-artifact@v4
         with:
           name: visual-pr-${{ github.event.number }}
           path: test-results/visual
           if-no-files-found: error
           retention-days: 14
-      - name: Deploy or remove preview
+      - name: Deploy preview
         id: preview
         uses: rossjrw/pr-preview-action@v1.8.1
         with:
@@ -72,31 +77,63 @@ jobs:
           pages-base-url: https://inkads.poc.singletonsd.com
           umbrella-dir: pr-preview
           comment: false
+      - name: Build sticky preview comment
+        uses: actions/github-script@v8
+        env:
+          PREVIEW_URL: ${{ steps.urls.outputs.preview_url }}
+          VISUAL_URL: ${{ steps.urls.outputs.visual_url }}
+        with:
+          script: |
+            const fs = require("node:fs");
+            const manifest = JSON.parse(
+              fs.readFileSync("test-results/visual/manifest.json", "utf8"),
+            );
+            const summary = manifest.summary ?? {
+              changed: 0,
+              new: 0,
+              unchanged: 0,
+              changedRoutes: [],
+              newRoutes: [],
+              hasDiffs: false,
+            };
+            const changedList =
+              summary.changedRoutes?.length > 0
+                ? summary.changedRoutes.map((r) => `\`${r}\``).join(", ")
+                : "—";
+            const newList =
+              summary.newRoutes?.length > 0
+                ? summary.newRoutes.map((r) => `\`${r}\``).join(", ")
+                : "—";
+            const statusLine = summary.hasDiffs
+              ? `⚠️ Visual diffs detected (${summary.changed} changed routes, ${summary.new} new). The **visual** check will fail until you review and add the \`visual-accepted\` label, then **Re-run failed jobs**.`
+              : "✅ No visual diffs vs production.";
+            const body = [
+              "## Preview",
+              "",
+              `🔗 **[Open live preview](${process.env.PREVIEW_URL})**`,
+              "",
+              `🖼️ **[Open visual report](${process.env.VISUAL_URL})** (base vs PR vs diff)`,
+              "",
+              statusLine,
+              "",
+              `- Changed routes: ${changedList}`,
+              `- New routes: ${newList}`,
+              `- Unchanged viewports: ${summary.unchanged ?? 0}`,
+              `- Artifact backup: \`visual-pr-${context.issue.number}\``,
+              "",
+            ].join("\n");
+            fs.writeFileSync("preview-comment.md", body);
       - name: Post sticky preview comment
-        if: github.event.action != 'closed'
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           header: inkads-preview
           recreate: true
-          message: |
-            ## Preview
-
-            🔗 **[Open live preview](https://inkads.poc.singletonsd.com/pr-preview/pr-${{ github.event.number }}/)**
-
-            - URL: `https://inkads.poc.singletonsd.com/pr-preview/pr-${{ github.event.number }}/`
-            - Visual review: download the `visual-pr-${{ github.event.number }}` artifact from this workflow run, then open `index.html`
-            - Artifact layout: `base/` (production before) · `pr/` (this branch) · `diff/` (pixel changes)
-      - name: Hide sticky preview comment
-        if: github.event.action == 'closed'
-        uses: marocchino/sticky-pull-request-comment@v2
-        with:
-          header: inkads-preview
-          hide: true
+          path: preview-comment.md
       - name: Update preview link in pull request body
         uses: actions/github-script@v8
         env:
-          PREVIEW_URL: https://inkads.poc.singletonsd.com/pr-preview/pr-${{ github.event.number }}/
-          PREVIEW_REMOVED: ${{ github.event.action == 'closed' }}
+          PREVIEW_URL: ${{ steps.urls.outputs.preview_url }}
+          VISUAL_URL: ${{ steps.urls.outputs.visual_url }}
         with:
           script: |
             const markerStart = "<!-- inkads-preview:start -->";
@@ -118,13 +155,95 @@ jobs:
               "",
               `🔗 **[Open live preview](${process.env.PREVIEW_URL})**`,
               "",
-              `Visual review: download workflow artifact \`visual-pr-${context.issue.number}\` and open \`index.html\` (\`base/\` vs \`pr/\` vs \`diff/\`).`,
+              `🖼️ **[Open visual report](${process.env.VISUAL_URL})**`,
               markerEnd,
             ].join("\n");
-            const body = process.env.PREVIEW_REMOVED === "true"
-              ? bodyWithoutPreview
-              : `${previewBlock}${bodyWithoutPreview ? `\n\n${bodyWithoutPreview}` : ""}`;
+            const body = `${previewBlock}${bodyWithoutPreview ? `\n\n${bodyWithoutPreview}` : ""}`;
 
+            await github.rest.pulls.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              body,
+            });
+
+  visual:
+    name: visual
+    if: >
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.action != 'closed'
+    needs: [preview]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+      - name: Download visual artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: visual-pr-${{ github.event.number }}
+          path: test-results/visual
+      - name: Detect visual-accepted label
+        id: accept
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const { data: labels } = await github.rest.issues.listLabelsOnIssue({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const accepted = labels.some((l) => l.name === "visual-accepted");
+            core.setOutput("accepted", accepted ? "true" : "false");
+            if (accepted) {
+              core.info("Label visual-accepted is present; gate will pass.");
+            }
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - name: Run visual gate
+        run: node tests/visual-gate.mjs
+        env:
+          VISUAL_ACCEPTED: ${{ steps.accept.outputs.accepted == 'true' && '1' || '0' }}
+
+  cleanup:
+    if: >
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+      - name: Remove preview
+        uses: rossjrw/pr-preview-action@v1.8.1
+        with:
+          source-dir: dist
+          preview-branch: gh-pages
+          pages-base-url: https://inkads.poc.singletonsd.com
+          umbrella-dir: pr-preview
+          comment: false
+      - name: Hide sticky preview comment
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: inkads-preview
+          hide: true
+      - name: Remove preview block from pull request body
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const markerStart = "<!-- inkads-preview:start -->";
+            const markerEnd = "<!-- inkads-preview:end -->";
+            const managedBlock = new RegExp(
+              `${markerStart}[\\s\\S]*?${markerEnd}\\n*`,
+              "m",
+            );
+            const pull = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+            });
+            const currentBody = pull.data.body ?? "";
+            const body = currentBody.replace(managedBlock, "").trim();
             await github.rest.pulls.update({
               owner: context.repo.owner,
               repo: context.repo.repo,

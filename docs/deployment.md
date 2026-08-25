@@ -14,25 +14,31 @@ workflow:
    `.github/pull_request_template.md` for the starting placeholder)
 3. Captures Playwright full-page screenshots (desktop 1440 + mobile 390) for
    every built HTML route, compares each route to production
-   (`https://inkads.poc.singletonsd.com`), and uploads:
-   - `base/` — production (pre-PR), when the route already exists
-   - `pr/` — this branch (post-PR)
-   - `diff/` — red pixel diffs when both sides exist and differ
-   - `index.html` — side-by-side review page
-4. Removes the preview deploy and hides the sticky comment when the PR closes
+   (`https://inkads.poc.singletonsd.com`), and hosts a report at
+   `…/pr-<number>/visual/` (`base/` · `pr/` · `diff/` · `index.html`)
+4. Runs a required **`visual`** status check that **fails** when any route is
+   `changed` or `new` vs production
+5. Removes the preview deploy and hides the sticky comment when the PR closes
 
 Pull requests from forks are not given write access to publish.
 
-To review a PR visually before merge:
+## Visual review and accept
 
-1. Open the sticky **Preview** comment (or the Preview section at the top of the
-   PR body) for the live site
-2. In the **Deploy pull request preview** workflow run, download
-   `visual-pr-<number>` and open `index.html` for before/after/diff
+1. Open the sticky **Preview** comment → **Open visual report**
+2. If the **`visual`** check is red, review base / PR / diff for listed routes
+3. When the diffs are intentional, add the **`visual-accepted`** label
+4. **Re-run failed jobs** on the workflow run (re-runs only `visual`; preview
+   stays deployed)
+5. Merge when `visual` is green
 
-Production and preview workflows serialize writes to `gh-pages`. Production
-deployment cleans stale production files while preserving the `pr-preview`
-directory; each preview deployment changes only its own numbered directory.
+Merge updates production; the next PR compares against that new baseline.
+
+### Required status check (one-time)
+
+Under **Settings → Branches →** branch protection for `main`, require the status
+check named **`visual`** (job name from `.github/workflows/preview.yml`). Keep
+the existing preview/quality jobs as you prefer; `preview` still deploys even
+when `visual` fails so the report URL stays available.
 
 ## One-time GitHub Pages configuration
 
