@@ -63,7 +63,14 @@ const roleOptions = ["Venue owner / operator", "Advertiser / brand", "Other"];
       {submitLabel}
     </button>
   </form>
-  <div class="contact-form__success" hidden data-contact-form-success>
+  <div
+    class="contact-form__success"
+    hidden
+    role="status"
+    aria-live="polite"
+    tabindex="-1"
+    data-contact-form-success
+  >
     <h2>{successTitle}</h2>
     <p>{successBody}</p>
   </div>
@@ -89,6 +96,7 @@ const roleOptions = ["Venue owner / operator", "Advertiser / brand", "Other"];
       }
       form.hidden = true;
       success.hidden = false;
+      success.focus();
     });
   }
 

@@ -19,13 +19,23 @@
   --ink-audience: #8432ff;
   --ink-audience-hovered: #9b57ff;
   --ink-on-audience: #ffffff;
+  --ink-on-inverse-muted: #444444;
+  --ink-on-inverse-soft: #555555;
+  --ink-surface-deep: #0b0b0b;
+  --ink-surface-hover: #1a1a1a;
+  --ink-surface-soft: #f3f3f3;
+  --ink-epaper-surface: #d7d7d7;
+  --ink-epaper-ink: #111111;
+  --ink-epaper-muted: #333333;
+  --ink-epaper-border: #777777;
+  --ink-space-md: 1.5rem;
   --ink-border: #292c30;
   --ink-border-strong: #ffb300;
   --ink-focus: #ffd54f;
   --ink-inverse: #ffffff;
   --ink-on-inverse: #000000;
-  --ink-font-heading: "Manrope Variable", Manrope, sans-serif;
-  --ink-font-body: "Inter Variable", Inter, sans-serif;
+  --ink-font-heading: "Manrope Variable", "Manrope", sans-serif;
+  --ink-font-body: "Inter Variable", "Inter", sans-serif;
   --ink-font-label: "IBM Plex Mono", monospace;
   --ink-radius-control: 8px;
   --ink-radius-card: 16px;
@@ -266,10 +276,10 @@ textarea {
   display: block;
   width: 18px;
   height: 2px;
-  background: currentColor;
+  background: currentcolor;
   box-shadow:
-    0 -6px 0 currentColor,
-    0 6px 0 currentColor;
+    0 -6px 0 currentcolor,
+    0 6px 0 currentcolor;
 }
 
 main {
@@ -407,7 +417,7 @@ main {
 }
 
 .button-link--inverse:hover {
-  background: #1a1a1a;
+  background: var(--ink-surface-hover);
 }
 
 .button-link--ghost-inverse {
@@ -448,7 +458,7 @@ main {
 }
 
 .button-link--on-audience:hover {
-  background: #f3f3f3;
+  background: var(--ink-surface-soft);
 }
 
 .button-link--block {
@@ -537,7 +547,7 @@ main {
 }
 
 .inverse-section p {
-  color: #444;
+  color: var(--ink-on-inverse-muted);
 }
 
 .inverse-section--centered .shell {
@@ -712,7 +722,7 @@ main {
 }
 
 .inverse-section .feature-item p {
-  color: #555;
+  color: var(--ink-on-inverse-soft);
 }
 
 .system-list {
@@ -742,12 +752,12 @@ main {
   font-family: var(--ink-font-label);
   font-size: 0.875rem;
   letter-spacing: 0.12em;
-  color: var(--ink-border);
+  color: var(--ink-text-dim);
 }
 
 .system-list--rows .system-step__number {
   font-size: clamp(2rem, 4vw, 3rem);
-  color: var(--ink-border);
+  color: var(--ink-text-dim);
 }
 
 .system-step h3 {
@@ -855,11 +865,9 @@ main {
 }
 
 .field__label {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
+  color: var(--ink-text-soft);
+  font-size: 0.8125rem;
+  font-weight: 500;
 }
 
 .field-control {
@@ -878,6 +886,11 @@ main {
 .field-control:focus {
   border-color: var(--ink-brand);
   outline: none;
+}
+
+.field-control:focus-visible {
+  outline: 3px solid var(--ink-focus);
+  outline-offset: 2px;
 }
 
 textarea.field-control {
@@ -925,7 +938,7 @@ textarea.field-control {
   margin: 0;
   border: 1px solid var(--ink-border);
   border-radius: 14px;
-  background: #0b0b0b;
+  background: var(--ink-surface-deep);
   padding: 14px;
   box-shadow: var(--ink-shadow);
 }
@@ -970,8 +983,8 @@ textarea.field-control {
   aspect-ratio: 3 / 5;
   overflow: hidden;
   border-radius: 8px;
-  background: #d7d7d7;
-  color: #111;
+  background: var(--ink-epaper-surface);
+  color: var(--ink-epaper-ink);
 }
 
 .epaper-preview__panel {
@@ -1005,7 +1018,7 @@ textarea.field-control {
   font-weight: 700;
   letter-spacing: -0.03em;
   line-height: 1.05;
-  color: #111;
+  color: var(--ink-epaper-ink);
 }
 
 .epaper-preview__advertiser p {
@@ -1018,7 +1031,7 @@ textarea.field-control {
   display: flex;
   justify-content: space-between;
   gap: 1rem;
-  border-top: 1px solid #111;
+  border-top: 1px solid var(--ink-epaper-ink);
   padding-top: 0.75rem;
   font-size: 0.65rem;
   letter-spacing: 0.06em;
@@ -1031,8 +1044,8 @@ textarea.field-control {
   height: 100%;
   padding: 1.5rem;
   text-align: center;
-  border: 1px dashed #777;
-  color: #333;
+  border: 1px dashed var(--ink-epaper-border);
+  color: var(--ink-epaper-muted);
   font-size: 0.9rem;
 }
 
@@ -1157,7 +1170,7 @@ textarea.field-control {
 .statement__inner > p:last-child {
   max-width: 60ch;
   margin: 1.25rem auto 0;
-  color: #444;
+  color: var(--ink-on-inverse-muted);
   font-weight: 300;
   line-height: 1.7;
 }
@@ -1176,6 +1189,10 @@ textarea.field-control {
   color: var(--ink-text-muted);
   font-weight: 300;
   line-height: 1.7;
+}
+
+.section-follow-link {
+  margin-top: var(--ink-space-md);
 }
 
 .places-section {
@@ -1204,7 +1221,7 @@ textarea.field-control {
   margin: 0;
   border: 1px solid var(--ink-border);
   border-radius: 14px;
-  background: #0b0b0b;
+  background: var(--ink-surface-deep);
   padding: 14px;
   box-shadow: var(--ink-shadow);
 }
@@ -1212,9 +1229,9 @@ textarea.field-control {
 .device-frame__screen {
   min-height: 430px;
   border-radius: 8px;
-  background: #d7d7d7;
+  background: var(--ink-epaper-surface);
   padding: 1.5rem;
-  color: #111;
+  color: var(--ink-epaper-ink);
 }
 
 .device-frame__signal {
@@ -1227,7 +1244,7 @@ textarea.field-control {
   display: block;
   width: 5px;
   height: 5px;
-  background: currentColor;
+  background: currentcolor;
 }
 
 .device-frame__label,
@@ -1254,7 +1271,7 @@ textarea.field-control {
 }
 
 .device-frame__meta {
-  border-top: 1px solid currentColor;
+  border-top: 1px solid currentcolor;
   padding-top: 0.75rem;
 }
 

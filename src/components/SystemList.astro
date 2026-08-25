@@ -6,6 +6,6 @@ interface Props {
 const { layout = "rows" } = Astro.props;
 ---
 
-<ol class:list={["system-list", `system-list--${layout}`]}>
+<ol role="list" class:list={["system-list", `system-list--${layout}`]}>
   <slot />
 </ol>

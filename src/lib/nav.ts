@@ -24,6 +24,10 @@ export const footerNav = {
   ],
 } as const;
 
+/**
+ * Prefix an internal path with Astro's `BASE_URL` (e.g. `/` or `/preview/`).
+ * External, hash, and mailto links are returned unchanged.
+ */
 export function withBase(path: string, base: string): string {
   if (
     path.startsWith("http") ||
@@ -37,6 +41,10 @@ export function withBase(path: string, base: string): string {
   return `${normalizedBase}${path}`;
 }
 
+/**
+ * Whether `pathname` matches a nav `href` after base-path normalization.
+ * Home links compare equality only so a root `base` of `/` cannot match every route.
+ */
 export function isActivePath(
   pathname: string,
   href: string,
@@ -45,11 +53,7 @@ export function isActivePath(
   const current = pathname.replace(/\/$/, "") || "/";
   const target = withBase(href, base).replace(/\/$/, "") || "/";
   if (href === "/") {
-    return (
-      current === "" ||
-      current === "/" ||
-      current.endsWith(base.replace(/\/$/, ""))
-    );
+    return current === target;
   }
   return current === target || current.endsWith(href);
 }

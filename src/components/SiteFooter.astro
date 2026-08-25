@@ -15,7 +15,7 @@ const base = import.meta.env.BASE_URL;
           format for useful messages.
         </p>
       </div>
-      <div class="site-footer__columns">
+      <nav class="site-footer__columns" aria-label="Footer">
         {
           Object.entries(footerNav).map(([heading, links]) => (
             <div class="site-footer__column">
@@ -30,7 +30,7 @@ const base = import.meta.env.BASE_URL;
             </div>
           ))
         }
-      </div>
+      </nav>
     </div>
     <div class="site-footer__legal">
       <p>© 2026 InkAds. A proof of concept by Singleton SD.</p>

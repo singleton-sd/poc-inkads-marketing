@@ -5,7 +5,11 @@ interface Props {
   titleId?: string;
 }
 
-const { title, tone = "dark", titleId = "cta-title" } = Astro.props;
+const {
+  title,
+  tone = "dark",
+  titleId = `cta-title-${crypto.randomUUID().slice(0, 8)}`,
+} = Astro.props;
 ---
 
 <section

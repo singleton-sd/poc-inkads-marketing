@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile, readdir } from "node:fs/promises";
 import test from "node:test";
+import { pathToFileURL } from "node:url";
 
 const root = new URL("../", import.meta.url);
 
@@ -24,8 +25,8 @@ test("approved font roles are self-hosted", async () => {
   assert.match(layout, /@fontsource-variable\/manrope/);
   assert.match(layout, /@fontsource-variable\/inter/);
   assert.match(layout, /@fontsource\/ibm-plex-mono/);
-  assert.match(styles, /--ink-font-heading:.*Manrope/);
-  assert.match(styles, /--ink-font-body:.*Inter/);
+  assert.match(styles, /--ink-font-heading:.*"Manrope"/);
+  assert.match(styles, /--ink-font-body:.*"Inter"/);
   assert.match(styles, /--ink-font-label:.*IBM Plex Mono/);
 });
 
@@ -88,15 +89,44 @@ test("header and footer expose the Claude Design IA", async () => {
     new URL("src/components/SiteFooter.astro", root),
     "utf8",
   );
-  const nav = await readFile(new URL("src/lib/nav.ts", root), "utf8");
+  const layout = await readFile(
+    new URL("src/layouts/BaseLayout.astro", root),
+    "utf8",
+  );
+  const { isActivePath, primaryNav, footerNav } = await import(
+    pathToFileURL(new URL("src/lib/nav.ts", root).pathname).href
+  );
+
   assert.match(header, /Request a demo/);
-  assert.match(header, /currentPath/);
-  assert.match(nav, /how-it-works/);
-  assert.match(nav, /advertisers/);
-  assert.match(nav, /Product:/);
-  assert.match(nav, /Audiences:/);
-  assert.match(nav, /Company:/);
-  assert.match(nav, /FAQ/);
-  assert.match(footer, /footerNav/);
+  assert.match(header, /aria-current=\{/);
+  assert.match(header, /isActivePath\(currentPath, item\.href, base\)/);
+  assert.match(layout, /SiteHeader currentPath=\{currentPath\}/);
+  assert.match(footer, /aria-label="Footer"/);
   assert.match(footer, /© 2026 InkAds/);
+
+  assert.equal(primaryNav.length, 6);
+  assert.deepEqual(
+    primaryNav.map((item) => item.href),
+    [
+      "/how-it-works",
+      "/places",
+      "/venues",
+      "/advertisers",
+      "/pricing",
+      "/about",
+    ],
+  );
+  assert.deepEqual(Object.keys(footerNav), ["Product", "Audiences", "Company"]);
+  assert.ok(
+    Object.values(footerNav)
+      .flat()
+      .some((item) => item.href === "/faq"),
+  );
+
+  assert.equal(isActivePath("/about", "/about", "/"), true);
+  assert.equal(isActivePath("/venues", "/about", "/"), false);
+  assert.equal(isActivePath("/", "/", "/"), true);
+  assert.equal(isActivePath("/about", "/", "/"), false);
+  assert.equal(isActivePath("/preview/about", "/about", "/preview/"), true);
+  assert.equal(isActivePath("/preview/about", "/", "/preview/"), false);
 });
