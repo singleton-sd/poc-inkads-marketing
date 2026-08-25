@@ -7,9 +7,28 @@ published from the root of the `gh-pages` branch to:
 
 In-repository pull requests run the complete build gate and publish beneath
 `https://inkads.poc.singletonsd.com/pr-preview/pr-<number>/`. The preview
-workflow adds a managed **Preview** section to the PR body, updates the same
-path when commits are pushed, and removes the preview and body section when the
-PR closes. Pull requests from forks are not given write access to publish.
+workflow:
+
+1. Posts a **sticky PR comment** with the live preview link (survives body edits)
+2. Puts a managed **Preview** section at the **top** of the PR body (see
+   `.github/pull_request_template.md` for the starting placeholder)
+3. Captures Playwright full-page screenshots (desktop 1440 + mobile 390) for
+   every built HTML route, compares each route to production
+   (`https://inkads.poc.singletonsd.com`), and uploads:
+   - `base/` — production (pre-PR), when the route already exists
+   - `pr/` — this branch (post-PR)
+   - `diff/` — red pixel diffs when both sides exist and differ
+   - `index.html` — side-by-side review page
+4. Removes the preview deploy and hides the sticky comment when the PR closes
+
+Pull requests from forks are not given write access to publish.
+
+To review a PR visually before merge:
+
+1. Open the sticky **Preview** comment (or the Preview section at the top of the
+   PR body) for the live site
+2. In the **Deploy pull request preview** workflow run, download
+   `visual-pr-<number>` and open `index.html` for before/after/diff
 
 Production and preview workflows serialize writes to `gh-pages`. Production
 deployment cleans stale production files while preserving the `pr-preview`
