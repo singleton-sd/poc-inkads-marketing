@@ -1,17 +1,81 @@
 ---
+import BrandLockup from "./BrandLockup.astro";
+import ButtonLink from "./ButtonLink.astro";
+import { isActivePath, primaryNav, withBase } from "../lib/nav";
+
+interface Props {
+  currentPath?: string;
+}
+
+const { currentPath = "/" } = Astro.props;
 const base = import.meta.env.BASE_URL;
 ---
 
 <header class="site-header">
   <div class="shell site-header__inner">
-    <a class="brand" href={base} aria-label="InkAds home">
-      <span class="brand__mark" aria-hidden="true">I</span>
-      <span>InkAds</span>
-    </a>
-    <nav aria-label="Primary navigation">
-      <a href="#how-it-works">How it works</a>
-      <a href="#places">Places</a>
-      <a class="nav-cta" href="#audiences">Choose your path</a>
+    <BrandLockup />
+    <button
+      class="site-header__menu-toggle"
+      type="button"
+      aria-expanded="false"
+      aria-controls="site-primary-nav"
+      data-nav-toggle
+    >
+      <span class="sr-only">Menu</span>
+      <span aria-hidden="true"></span>
+    </button>
+    <nav
+      id="site-primary-nav"
+      class="site-header__nav"
+      aria-label="Primary navigation"
+      data-nav-panel
+    >
+      <div class="site-header__links">
+        {
+          primaryNav.map((item) => (
+            <a
+              href={withBase(item.href, base)}
+              aria-current={
+                isActivePath(currentPath, item.href, base) ? "page" : undefined
+              }
+            >
+              {item.label}
+            </a>
+          ))
+        }
+      </div>
+      <ButtonLink href={withBase("/contact", base)} label="Request a demo" />
     </nav>
   </div>
 </header>
+
+<script>
+  function setupNav() {
+    const toggle =
+      document.querySelector<HTMLButtonElement>("[data-nav-toggle]");
+    const panel = document.querySelector<HTMLElement>("[data-nav-panel]");
+    if (!toggle || !panel) return;
+
+    toggle.addEventListener("click", () => {
+      const open = panel.classList.toggle("is-open");
+      toggle.setAttribute("aria-expanded", open ? "true" : "false");
+    });
+  }
+
+  setupNav();
+  document.addEventListener("astro:page-load", setupNav);
+</script>
+
+<style>
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+</style>

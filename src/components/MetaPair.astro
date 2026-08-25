@@ -1,0 +1,16 @@
+---
+interface Props {
+  label: string;
+  value: string;
+  href?: string;
+}
+
+const { label, value, href } = Astro.props;
+---
+
+<div class="meta-pair">
+  <p class="meta-pair__label">{label}</p>
+  <p class="meta-pair__value">
+    {href ? <a href={href}>{value}</a> : value}
+  </p>
+</div>

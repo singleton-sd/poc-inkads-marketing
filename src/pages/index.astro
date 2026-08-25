@@ -4,24 +4,31 @@ import ButtonLink from "../components/ButtonLink.astro";
 import DeviceFrame from "../components/DeviceFrame.astro";
 import EditorialCard from "../components/EditorialCard.astro";
 import PlaceCard from "../components/PlaceCard.astro";
+import SystemList from "../components/SystemList.astro";
 import SystemStep from "../components/SystemStep.astro";
+import TextLink from "../components/TextLink.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { withBase } from "../lib/nav";
 
 const home = await getEntry("pages", "home");
 if (!home) throw new Error("The home page content entry is missing.");
+const base = import.meta.env.BASE_URL;
 ---
 
 <BaseLayout title={home.data.title} description={home.data.description}>
   <main id="main-content">
     <section class="shell hero" aria-labelledby="page-title">
       <div class="hero__copy">
-        <p class="eyebrow">E-paper / shared spaces</p>
+        <p class="eyebrow">E-paper · shared spaces</p>
         <h1 id="page-title">{home.data.headline}</h1>
         <p class="hero__summary">{home.data.summary}</p>
         <div class="hero__actions">
-          <ButtonLink href="#venues" label="For venues — manage a space" />
           <ButtonLink
-            href="#advertisers"
+            href={withBase("/contact", base)}
+            label="For venues — manage a space"
+          />
+          <ButtonLink
+            href={withBase("/contact", base)}
             label="For advertisers — place a message"
             variant="secondary"
           />
@@ -51,7 +58,7 @@ if (!home) throw new Error("The home page content entry is missing.");
       aria-labelledby="audiences-title"
     >
       <div class="section-heading">
-        <p class="eyebrow">Two paths / one network</p>
+        <p class="eyebrow">Two paths · one network</p>
         <h2 id="audiences-title">Designed around the space and the message.</h2>
       </div>
       <div class="card-grid">
@@ -61,18 +68,22 @@ if (!home) throw new Error("The home page content entry is missing.");
           title="Give overlooked space a useful role"
           description="Explore a considered display format designed to fit the character and practical needs of your venue."
         >
-          <ButtonLink href="#how-it-works" label="See the venue model" />
+          <TextLink
+            href={withBase("/venues", base)}
+            label="See the venue model"
+          />
         </EditorialCard>
         <EditorialCard
           id="advertisers"
           eyebrow="02 / Advertisers"
           title="Place messages in relevant contexts"
           description="Explore a tactile canvas intended for context-aware creative in places where people spend time."
+          accent="audience"
         >
-          <ButtonLink
-            href="#places"
+          <TextLink
+            href={withBase("/advertisers", base)}
             label="Explore placement contexts"
-            variant="secondary"
+            accent="audience"
           />
         </EditorialCard>
       </div>
@@ -85,7 +96,7 @@ if (!home) throw new Error("The home page content entry is missing.");
     >
       <div class="section-heading section-heading--split">
         <div>
-          <p class="eyebrow">A simple system / concept stage</p>
+          <p class="eyebrow">A simple system · concept stage</p>
           <h2 id="system-title">From message to place.</h2>
         </div>
         <p>
@@ -93,7 +104,7 @@ if (!home) throw new Error("The home page content entry is missing.");
           low-power display device, and the shared space around it.
         </p>
       </div>
-      <ol class="system-list">
+      <SystemList layout="columns">
         <SystemStep
           number="01"
           title="Match"
@@ -109,13 +120,13 @@ if (!home) throw new Error("The home page content entry is missing.");
           title="Display"
           description="The device presents the selected message within the venue’s shared space."
         />
-      </ol>
+      </SystemList>
     </section>
 
     <section id="places" class="places-section" aria-labelledby="places-title">
       <div class="shell">
         <div class="section-heading">
-          <p class="eyebrow">Use cases / built to adapt</p>
+          <p class="eyebrow">Use cases · built to adapt</p>
           <h2 id="places-title">Start specific. Think beyond one setting.</h2>
           <p class="section-heading__summary">
             Bathrooms are the initial proof-of-concept context, not the limit of
@@ -146,6 +157,12 @@ if (!home) throw new Error("The home page content entry is missing.");
             description="Other suitable physical settings where a static message can complement the environment."
           />
         </div>
+        <p class="section-follow-link">
+          <TextLink
+            href={withBase("/places", base)}
+            label="See all use cases"
+          />
+        </p>
       </div>
     </section>
 
@@ -157,9 +174,12 @@ if (!home) throw new Error("The home page content entry is missing.");
         you want to place.
       </p>
       <div class="hero__actions">
-        <ButtonLink href="#venues" label="Venue perspective" />
         <ButtonLink
-          href="#advertisers"
+          href={withBase("/venues", base)}
+          label="Venue perspective"
+        />
+        <ButtonLink
+          href={withBase("/advertisers", base)}
           label="Advertiser perspective"
           variant="secondary"
         />

@@ -6,9 +6,14 @@ source: Advertisers.dc.html
 chrome: [Header, Footer]
 header_active: Advertisers
 accent: "#8432ff"
-primary_cta: { label: Request a demo, href: Contact, fill: "#8432ff", text: "#fff" }
+primary_cta:
+  { label: Request a demo, href: Contact, fill: "#8432ff", text: "#fff" }
 image_slots:
-  - { id: advertiser-visual, size: "100% × 340px", placeholder: "Sample creative on e-paper display" }
+  - {
+      id: advertiser-visual,
+      size: "100% × 340px",
+      placeholder: "Sample creative on e-paper display",
+    }
 ---
 
 # Advertisers (for advertisers)

@@ -1,0 +1,17 @@
+---
+interface Props {
+  centered?: boolean;
+  labelledBy?: string;
+}
+
+const { centered = false, labelledBy } = Astro.props;
+---
+
+<section
+  class:list={["inverse-section", centered && "inverse-section--centered"]}
+  aria-labelledby={labelledBy}
+>
+  <div class="shell">
+    <slot />
+  </div>
+</section>

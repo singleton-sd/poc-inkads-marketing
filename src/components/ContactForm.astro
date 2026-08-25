@@ -1,0 +1,105 @@
+---
+import Select from "./Select.astro";
+import Textarea from "./Textarea.astro";
+import TextInput from "./TextInput.astro";
+
+interface Props {
+  successTitle?: string;
+  successBody?: string;
+  submitLabel?: string;
+}
+
+const {
+  successTitle = "Thanks — request received.",
+  successBody = "We'll be in touch shortly to schedule a demo.",
+  submitLabel = "Send request",
+} = Astro.props;
+
+const roleOptions = ["Venue owner / operator", "Advertiser / brand", "Other"];
+---
+
+<div class="contact-form-shell" data-contact-form>
+  <form class="contact-form" data-contact-form-fields novalidate>
+    <div class="contact-form__row">
+      <TextInput
+        id="contact-name"
+        name="name"
+        label="Name"
+        required
+        autocomplete="name"
+      />
+      <TextInput
+        id="contact-company"
+        name="company"
+        label="Venue / company"
+        required
+        autocomplete="organization"
+      />
+    </div>
+    <TextInput
+      id="contact-email"
+      name="email"
+      label="Email"
+      type="email"
+      required
+      autocomplete="email"
+    />
+    <Select
+      id="contact-role"
+      name="role"
+      label="I am a…"
+      options={roleOptions}
+      required
+    />
+    <Textarea
+      id="contact-message"
+      name="message"
+      label="Tell us about your space or campaign"
+    />
+    <button
+      class="button-link button-link--primary button-link--block"
+      type="submit"
+    >
+      {submitLabel}
+    </button>
+  </form>
+  <div
+    class="contact-form__success"
+    hidden
+    role="status"
+    aria-live="polite"
+    tabindex="-1"
+    data-contact-form-success
+  >
+    <h2>{successTitle}</h2>
+    <p>{successBody}</p>
+  </div>
+</div>
+
+<script>
+  function setupContactForm() {
+    const root = document.querySelector<HTMLElement>("[data-contact-form]");
+    if (!root) return;
+    const form = root.querySelector<HTMLFormElement>(
+      "[data-contact-form-fields]",
+    );
+    const success = root.querySelector<HTMLElement>(
+      "[data-contact-form-success]",
+    );
+    if (!form || !success) return;
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+      form.hidden = true;
+      success.hidden = false;
+      success.focus();
+    });
+  }
+
+  setupContactForm();
+  document.addEventListener("astro:page-load", setupContactForm);
+</script>

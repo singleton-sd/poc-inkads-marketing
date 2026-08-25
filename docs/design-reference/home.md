@@ -13,7 +13,12 @@ hero_widget: e-paper preview (480 × 800)
 default_preview_tab: Poster
 preview_tabs: [Poster, Advertiser, Yours]
 image_slots:
-  - { id: hero-own-creative, size: "flex fill inside 3:5 screen", placeholder: "Drop your artwork (480 × 800)", visible_when: "Yours tab" }
+  - {
+      id: hero-own-creative,
+      size: "flex fill inside 3:5 screen",
+      placeholder: "Drop your artwork (480 × 800)",
+      visible_when: "Yours tab",
+    }
 ---
 
 # Home
@@ -35,11 +40,11 @@ Placed thoughtfully.
 
 Device chrome: dark bezel, 14px radius, 3:5 screen (480 × 800 e-paper). Label row: “Preview on display” + three tabs.
 
-| Tab | Mode key | What it shows |
-| --- | --- | --- |
-| Poster (default) | `venue` | Real venue trivia poster image, grayscale + high-contrast 1-bit filter. Footer bar: InkAds · Updated 06:00 |
-| Advertiser | `advertiser` | Typeset 1-bit layout: Northbank Coffee Roasters / “Two streets away. Still warm.” / Scan for voucher + QR |
-| Yours | `own` | `hero-own-creative` drop slot (“Drop your artwork (480 × 800)”) + InkAds / Your creative bar |
+| Tab              | Mode key     | What it shows                                                                                              |
+| ---------------- | ------------ | ---------------------------------------------------------------------------------------------------------- |
+| Poster (default) | `venue`      | Real venue trivia poster image, grayscale + high-contrast 1-bit filter. Footer bar: InkAds · Updated 06:00 |
+| Advertiser       | `advertiser` | Typeset 1-bit layout: Northbank Coffee Roasters / “Two streets away. Still warm.” / Scan for voucher + QR  |
+| Yours            | `own`        | `hero-own-creative` drop slot (“Drop your artwork (480 × 800)”) + InkAds / Your creative bar               |
 
 Default poster src: College Lawn Hotel trivia artwork (`collegelawnhotel.com.au` … `COL_Trivia_Digi_WEB-1-595x842.jpg`), filtered `grayscale(1) contrast(2.6)`.
 
@@ -105,12 +110,12 @@ Three columns.
 
 Four cards:
 
-| Status | Title | Copy |
-| --- | --- | --- |
-| Initial focus (gold border) | Bathrooms | Testing how a compact display fits a private, high-dwell shared space. |
-| | Pubs & hospitality | Placements where people gather, pause, and make local decisions. |
-| | Shopping centres | A format to explore across varied retail environments and amenities. |
-| | High-traffic spaces | Other settings where a static message can complement the environment. |
+| Status                      | Title               | Copy                                                                   |
+| --------------------------- | ------------------- | ---------------------------------------------------------------------- |
+| Initial focus (gold border) | Bathrooms           | Testing how a compact display fits a private, high-dwell shared space. |
+|                             | Pubs & hospitality  | Placements where people gather, pause, and make local decisions.       |
+|                             | Shopping centres    | A format to explore across varied retail environments and amenities.   |
+|                             | High-traffic spaces | Other settings where a static message can complement the environment.  |
 
 Link: See all use cases → Places
 

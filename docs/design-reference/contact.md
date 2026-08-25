@@ -10,8 +10,16 @@ form_fields:
   - { name: name, type: text, required: true, placeholder: Name }
   - { name: company, type: text, required: true, placeholder: Venue / company }
   - { name: email, type: email, required: true, placeholder: Email }
-  - { name: role, type: select, options: ["Venue owner / operator", "Advertiser / brand", "Other"] }
-  - { name: message, type: textarea, placeholder: Tell us about your space or campaign }
+  - {
+      name: role,
+      type: select,
+      options: ["Venue owner / operator", "Advertiser / brand", "Other"],
+    }
+  - {
+      name: message,
+      type: textarea,
+      placeholder: Tell us about your space or campaign,
+    }
 submit_label: Send request
 success_title: Thanks — request received.
 success_body: We'll be in touch shortly to schedule a demo.

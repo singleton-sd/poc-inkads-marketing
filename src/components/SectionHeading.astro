@@ -1,0 +1,59 @@
+---
+interface Props {
+  eyebrow?: string;
+  title: string;
+  lead?: string;
+  align?: "left" | "center";
+  tone?: "dark" | "light" | "brand" | "audience";
+  level?: 1 | 2;
+  split?: boolean;
+  titleId?: string;
+}
+
+const {
+  eyebrow,
+  title,
+  lead,
+  align = "left",
+  tone = "dark",
+  level = 2,
+  split = false,
+  titleId,
+} = Astro.props;
+
+const HeadingTag = level === 1 ? "h1" : "h2";
+const eyebrowClass =
+  tone === "light"
+    ? "eyebrow eyebrow--on-light"
+    : tone === "audience"
+      ? "eyebrow eyebrow--audience"
+      : "eyebrow";
+---
+
+<div
+  class:list={[
+    level === 1 ? "page-hero" : "section-heading",
+    split && (level === 1 ? "page-hero--split" : "section-heading--split"),
+    align === "center" && "section-heading--center",
+  ]}
+>
+  <div>
+    {eyebrow && <p class={eyebrowClass}>{eyebrow}</p>}
+    <HeadingTag id={titleId}>{title}</HeadingTag>
+    {
+      lead && (
+        <p class={level === 1 ? "page-hero__lead" : "section-heading__lead"}>
+          {lead}
+        </p>
+      )
+    }
+    {
+      Astro.slots.has("actions") && (
+        <div class="page-hero__actions">
+          <slot name="actions" />
+        </div>
+      )
+    }
+  </div>
+  <slot />
+</div>

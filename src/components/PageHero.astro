@@ -1,0 +1,36 @@
+---
+import SectionHeading from "./SectionHeading.astro";
+
+interface Props {
+  eyebrow?: string;
+  title: string;
+  lead?: string;
+  tone?: "dark" | "light" | "audience";
+  split?: boolean;
+  titleId?: string;
+}
+
+const {
+  eyebrow,
+  title,
+  lead,
+  tone = "dark",
+  split = false,
+  titleId = "page-title",
+} = Astro.props;
+---
+
+<section class="shell" aria-labelledby={titleId}>
+  <SectionHeading
+    level={1}
+    eyebrow={eyebrow}
+    title={title}
+    lead={lead}
+    tone={tone}
+    split={split}
+    titleId={titleId}
+  >
+    <slot name="actions" slot="actions" />
+    <slot />
+  </SectionHeading>
+</section>

@@ -1,0 +1,11 @@
+---
+interface Props {
+  layout?: "columns" | "rows";
+}
+
+const { layout = "rows" } = Astro.props;
+---
+
+<ol role="list" class:list={["system-list", `system-list--${layout}`]}>
+  <slot />
+</ol>
