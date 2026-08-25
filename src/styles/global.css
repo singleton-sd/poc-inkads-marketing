@@ -616,6 +616,41 @@ main {
   text-transform: uppercase;
 }
 
+.inverse-section .media-placeholder {
+  border-color: #c9ccd1;
+  background: var(--ink-surface-soft);
+  color: var(--ink-on-inverse-soft);
+}
+
+.media-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(2rem, 5vw, 4rem);
+}
+
+.media-split h2 {
+  margin-top: 1rem;
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 500;
+  line-height: 1.1;
+}
+
+.media-split__body {
+  max-width: 48ch;
+  margin-top: 1.25rem;
+  font-weight: 300;
+  line-height: 1.7;
+}
+
+.places-page__cards {
+  padding-bottom: clamp(4rem, 8vw, 7rem);
+}
+
+.places-page__cards .places-grid {
+  margin-top: 0;
+}
+
 /* —— Cards & lists —— */
 .card-grid,
 .feature-grid,
@@ -1312,6 +1347,7 @@ textarea.field-control {
   .site-footer__top,
   .page-hero--split,
   .section-heading--split,
+  .media-split,
   .hero,
   .system-list--columns,
   .card-grid,
