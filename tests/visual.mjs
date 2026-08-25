@@ -1,19 +1,38 @@
 /**
- * Full-page visual screenshots for PR review.
+ * Full-page visual screenshots for PR review, with optional base comparison.
  *
- * Serves `dist/`, walks HTML routes (respecting Astro `BASE_URL` / preview
- * subpaths), and writes desktop + mobile PNGs under `test-results/visual/`.
+ * Serves the PR `dist/` build, screenshots every HTML route at desktop + mobile,
+ * then (when VISUAL_BASE_URL is set) screenshots the same paths on the base site
+ * (usually production) and writes pixel diffs.
  *
- * Run after `pnpm build`. Optional env:
- * - VISUAL_BASE_PATH — Astro base used for the build (e.g. `/pr-preview/pr-12/`)
- * - VISUAL_PORT — fixed port (default: ephemeral)
+ * Output under `test-results/visual/`:
+ * - `pr/<route>-<viewport>.png` — this PR
+ * - `base/<route>-<viewport>.png` — production / base (when the route exists)
+ * - `diff/<route>-<viewport>.png` — red pixel diff (when both exist and differ)
+ * - `index.html` — side-by-side review page
+ * - `manifest.json`
+ *
+ * Env:
+ * - VISUAL_BASE_PATH — Astro base used for the PR build (e.g. `/pr-preview/pr-12/`)
+ * - VISUAL_BASE_URL — site to treat as “before” (default: production custom domain)
+ * - VISUAL_PORT — fixed local port (default: ephemeral)
+ * - VISUAL_SKIP_BASE — set to `1` to only capture the PR build
  */
 import assert from "node:assert/strict";
 import http from "node:http";
-import { createReadStream, existsSync, mkdirSync, readdirSync } from "node:fs";
+import {
+  createReadStream,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  readdirSync,
+  writeFileSync,
+} from "node:fs";
 import { readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { PNG } from "pngjs";
+import pixelmatch from "pixelmatch";
 import { chromium } from "playwright";
 
 const rootDir = fileURLToPath(new URL("..", import.meta.url));
@@ -21,6 +40,10 @@ const distDir = path.join(rootDir, "dist");
 const outDir = path.join(rootDir, "test-results", "visual");
 const port = Number(process.env.VISUAL_PORT ?? 0);
 const basePath = normalizeBase(process.env.VISUAL_BASE_PATH ?? "/");
+const skipBase = process.env.VISUAL_SKIP_BASE === "1";
+const baseSiteUrl = (
+  process.env.VISUAL_BASE_URL ?? "https://inkads.poc.singletonsd.com"
+).replace(/\/$/, "");
 
 if (!existsSync(distDir)) {
   throw new Error(
@@ -64,7 +87,6 @@ function normalizePathname(urlPath) {
   const cleaned = stripBase(urlPath.replace(/\?.*$/, "").replace(/\/+$/, ""));
   if (cleaned === "" || cleaned === "/") return "/index.html";
   if (cleaned.endsWith(".html")) return cleaned;
-  // Astro static routes: /about/ -> /about/index.html or /about.html
   const asDir = `${cleaned}/index.html`;
   if (existsSync(path.join(distDir, asDir))) return asDir;
   const asFile = `${cleaned}.html`;
@@ -80,7 +102,6 @@ function collectHtmlRoutes(dir = distDir, prefix = "") {
     const full = path.join(dir, entry.name);
     const rel = path.posix.join(prefix, entry.name);
     if (entry.isDirectory()) {
-      // Skip Decap admin from marketing page visuals.
       if (entry.name === "admin") continue;
       routes.push(...collectHtmlRoutes(full, rel));
       continue;
@@ -113,6 +134,134 @@ function publicUrl(urlPath) {
   const suffix = urlPath.startsWith("/") ? urlPath.slice(1) : urlPath;
   if (basePath === "/") return `/${suffix}`;
   return `${basePath}${suffix}`;
+}
+
+function sitePath(urlPath) {
+  if (!urlPath || urlPath === "") return "/";
+  return urlPath.startsWith("/") ? urlPath : `/${urlPath}`;
+}
+
+async function screenshotPage(browser, url, viewport, filePath) {
+  const context = await browser.newContext({
+    viewport: { width: viewport.width, height: viewport.height },
+    deviceScaleFactor: 1,
+  });
+  const page = await context.newPage();
+  try {
+    const response = await page.goto(url, {
+      waitUntil: "networkidle",
+      timeout: 45_000,
+    });
+    const status = response?.status() ?? 0;
+    if (!response || status >= 400) {
+      return { ok: false, status };
+    }
+    await page.screenshot({
+      path: filePath,
+      fullPage: true,
+      animations: "disabled",
+    });
+    return { ok: true, status };
+  } finally {
+    await context.close();
+  }
+}
+
+function padPng(img, width, height) {
+  if (img.width === width && img.height === height) return img;
+  const out = new PNG({ width, height });
+  out.data.fill(0);
+  for (let y = 0; y < img.height; y++) {
+    for (let x = 0; x < img.width; x++) {
+      const src = (img.width * y + x) << 2;
+      const dst = (width * y + x) << 2;
+      out.data[dst] = img.data[src];
+      out.data[dst + 1] = img.data[src + 1];
+      out.data[dst + 2] = img.data[src + 2];
+      out.data[dst + 3] = img.data[src + 3];
+    }
+  }
+  return out;
+}
+
+function diffPngs(baseFilePath, prFilePath, diffFilePath) {
+  const baseImg = PNG.sync.read(readFileSync(baseFilePath));
+  const prImg = PNG.sync.read(readFileSync(prFilePath));
+  const width = Math.max(baseImg.width, prImg.width);
+  const height = Math.max(baseImg.height, prImg.height);
+  const baseNorm = padPng(baseImg, width, height);
+  const prNorm = padPng(prImg, width, height);
+  const diff = new PNG({ width, height });
+  const mismatched = pixelmatch(
+    baseNorm.data,
+    prNorm.data,
+    diff.data,
+    width,
+    height,
+    { threshold: 0.1 },
+  );
+  mkdirSync(path.dirname(diffFilePath), { recursive: true });
+  writeFileSync(diffFilePath, PNG.sync.write(diff));
+  return mismatched;
+}
+
+function buildReportHtml(entries) {
+  const rows = entries
+    .map((entry) => {
+      const baseCell = entry.baseFile
+        ? `<img src="${entry.baseFile}" alt="base ${entry.route} ${entry.viewport}" />`
+        : `<p class="missing">No base (new route or missing on ${baseSiteUrl})</p>`;
+      const diffCell = entry.diffFile
+        ? `<img src="${entry.diffFile}" alt="diff ${entry.route} ${entry.viewport}" />`
+        : entry.baseFile
+          ? `<p class="ok">No pixel diff</p>`
+          : `<p class="missing">—</p>`;
+      const changedLabel = entry.mismatched
+        ? ` · <span class="changed">${entry.mismatched} px changed</span>`
+        : "";
+      return `<section class="case">
+  <h2>${entry.route} · ${entry.viewport}${changedLabel}</h2>
+  <div class="grid">
+    <figure><figcaption>Base (before)</figcaption>${baseCell}</figure>
+    <figure><figcaption>PR (after)</figcaption><img src="${entry.prFile}" alt="pr ${entry.route} ${entry.viewport}" /></figure>
+    <figure><figcaption>Diff</figcaption>${diffCell}</figure>
+  </div>
+</section>`;
+    })
+    .join("\n");
+
+  return `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>InkAds visual review</title>
+  <style>
+    body { margin: 0; font: 14px/1.4 system-ui, sans-serif; background: #111; color: #eee; }
+    header { padding: 1.25rem 1.5rem; border-bottom: 1px solid #333; }
+    header p { color: #aaa; max-width: 70ch; }
+    .case { padding: 1.5rem; border-bottom: 1px solid #333; }
+    .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+    figure { margin: 0; background: #000; border: 1px solid #333; padding: 0.5rem; }
+    figcaption { font-size: 12px; color: #aaa; margin-bottom: 0.5rem; }
+    img { width: 100%; height: auto; display: block; background: #222; }
+    .missing, .ok { color: #888; padding: 2rem 0.5rem; }
+    .changed { color: #ffb300; font-weight: 600; }
+    @media (max-width: 1100px) { .grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>InkAds visual review</h1>
+    <p>
+      Base = <code>${baseSiteUrl}</code> (pre-PR).
+      PR = local build for this branch (post-PR).
+      Diff highlights changed pixels in red.
+    </p>
+  </header>
+  ${rows}
+</body>
+</html>
+`;
 }
 
 const server = http.createServer(async (req, res) => {
@@ -161,7 +310,9 @@ assert.ok(
 const origin = `http://127.0.0.1:${actualPort}`;
 
 await rm(outDir, { recursive: true, force: true });
-mkdirSync(outDir, { recursive: true });
+for (const dir of ["pr", "base", "diff"]) {
+  mkdirSync(path.join(outDir, dir), { recursive: true });
+}
 
 const routes = collectHtmlRoutes();
 assert.ok(routes.length > 0, "Expected at least one HTML route in dist/");
@@ -177,37 +328,53 @@ const manifest = [];
 try {
   for (const route of routes) {
     for (const viewport of viewports) {
-      const context = await browser.newContext({
-        viewport: { width: viewport.width, height: viewport.height },
-        deviceScaleFactor: 1,
-      });
-      const page = await context.newPage();
-      const url = `${origin}${publicUrl(route.urlPath)}`;
-      const response = await page.goto(url, {
-        waitUntil: "networkidle",
-        timeout: 30_000,
-      });
+      const slug = `${routeSlug(route.urlPath)}-${viewport.name}`;
+      const prRel = `pr/${slug}.png`;
+      const baseRel = `base/${slug}.png`;
+      const diffRel = `diff/${slug}.png`;
+      const prFile = path.join(outDir, prRel);
+      const baseFile = path.join(outDir, baseRel);
+      const diffFile = path.join(outDir, diffRel);
+
+      const prUrl = `${origin}${publicUrl(route.urlPath)}`;
+      const prShot = await screenshotPage(browser, prUrl, viewport, prFile);
       assert.ok(
-        response && response.ok(),
-        `Failed to load ${url}: ${response?.status()}`,
+        prShot.ok,
+        `Failed to load PR route ${prUrl}: ${prShot.status}`,
       );
 
-      // Prefer full page; clamp extremely tall pages for artifact size.
-      const filename = `${routeSlug(route.urlPath)}-${viewport.name}.png`;
-      const filePath = path.join(outDir, filename);
-      await page.screenshot({
-        path: filePath,
-        fullPage: true,
-        animations: "disabled",
-      });
+      let baseOk = false;
+      let mismatched = 0;
+      if (!skipBase) {
+        const baseUrl = `${baseSiteUrl}${sitePath(route.urlPath)}`;
+        const baseShot = await screenshotPage(
+          browser,
+          baseUrl,
+          viewport,
+          baseFile,
+        );
+        baseOk = baseShot.ok;
+        if (!baseOk) {
+          await rm(baseFile, { force: true });
+        } else {
+          mismatched = diffPngs(baseFile, prFile, diffFile);
+          if (mismatched === 0) {
+            await rm(diffFile, { force: true });
+          }
+        }
+      }
 
       manifest.push({
         route: route.urlPath || "/",
         viewport: viewport.name,
-        file: filename,
-        url: publicUrl(route.urlPath),
+        prFile: prRel,
+        baseFile: baseOk ? baseRel : null,
+        diffFile: mismatched > 0 ? diffRel : null,
+        mismatched: mismatched > 0 ? mismatched : 0,
+        prUrl: publicUrl(route.urlPath),
+        baseUrl: skipBase ? null : `${baseSiteUrl}${sitePath(route.urlPath)}`,
+        status: baseOk ? (mismatched > 0 ? "changed" : "unchanged") : "new",
       });
-      await context.close();
     }
   }
 } finally {
@@ -217,10 +384,21 @@ try {
 
 await writeFile(
   path.join(outDir, "manifest.json"),
-  `${JSON.stringify({ basePath, routes: manifest }, null, 2)}\n`,
+  `${JSON.stringify(
+    {
+      basePath,
+      baseSiteUrl: skipBase ? null : baseSiteUrl,
+      routes: manifest,
+    },
+    null,
+    2,
+  )}\n`,
   "utf8",
 );
+await writeFile(path.join(outDir, "index.html"), buildReportHtml(manifest));
 
+const changed = manifest.filter((m) => m.status === "changed").length;
+const created = manifest.filter((m) => m.status === "new").length;
 console.log(
-  `Visual screenshots: ${manifest.length} files written to ${outDir}`,
+  `Visual screenshots: ${manifest.length} comparisons → ${outDir} (${changed} changed, ${created} new). Open index.html`,
 );

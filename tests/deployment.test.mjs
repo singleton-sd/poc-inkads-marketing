@@ -64,10 +64,19 @@ test("PR workflow publishes subpath previews and updates the PR body", async () 
 test("visual screenshot helper is wired for post-build review artifacts", async () => {
   const pkg = await readFile(new URL("package.json", root), "utf8");
   const visual = await readFile(new URL("tests/visual.mjs", root), "utf8");
+  const template = await readFile(
+    new URL(".github/pull_request_template.md", root),
+    "utf8",
+  );
   assert.match(pkg, /"test:visual":\s*"node tests\/visual\.mjs"/);
+  assert.match(pkg, /"pixelmatch"/);
   assert.match(visual, /test-results\/visual/);
+  assert.match(visual, /VISUAL_BASE_URL/);
+  assert.match(visual, /index\.html/);
   assert.match(visual, /1440/);
   assert.match(visual, /390/);
+  assert.match(template, /inkads-preview:start/);
+  assert.match(template, /## Preview/);
 });
 
 test("Pages branch includes the production custom domain", async () => {
