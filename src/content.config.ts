@@ -9,6 +9,26 @@ const pages = defineCollection({
     description: z.string().min(1),
     headline: z.string().min(1),
     summary: z.string().min(1),
+    eyebrow: z.string().min(1).optional(),
+    ctaTitle: z.string().min(1).optional(),
+    ctaLabel: z.string().min(1).optional(),
+    ctaHref: z.string().min(1).optional(),
+    draft: z.boolean().default(false),
+  }),
+});
+
+const faqs = defineCollection({
+  loader: glob({ base: "./src/content/faqs", pattern: "**/*.{md,mdx}" }),
+  schema: z.object({
+    question: z.string().min(1),
+    answer: z.string().min(1),
+    order: z.number().int().nonnegative(),
+    link: z
+      .object({
+        label: z.string().min(1),
+        href: z.string().min(1),
+      })
+      .optional(),
     draft: z.boolean().default(false),
   }),
 });
@@ -23,4 +43,4 @@ const legal = defineCollection({
   }),
 });
 
-export const collections = { legal, pages };
+export const collections = { faqs, legal, pages };
