@@ -1,0 +1,45 @@
+---
+import { getEntry } from "astro:content";
+import ContactForm from "../components/ContactForm.astro";
+import MetaPair from "../components/MetaPair.astro";
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const contact = await getEntry("pages", "contact");
+if (!contact) throw new Error("The contact page content entry is missing.");
+
+const {
+  title,
+  description,
+  eyebrow = "Request a demo",
+  headline,
+  summary,
+  email = "hello@inkads.poc.singletonsd.com",
+  status = "Proof of concept · a Singleton SD product",
+  submitLabel = "Send request",
+  successTitle = "Thanks — request received.",
+  successBody = "We'll be in touch shortly to schedule a demo.",
+} = contact.data;
+---
+
+<BaseLayout title={title} description={description}>
+  <main id="main-content">
+    <section class="shell contact-page" aria-labelledby="page-title">
+      <div class="contact-page__copy">
+        <p class="eyebrow">{eyebrow}</p>
+        <h1 id="page-title">{headline}</h1>
+        <p class="contact-page__lead">{summary}</p>
+        <div class="contact-page__meta">
+          <MetaPair label="Email" value={email} href={`mailto:${email}`} />
+          <MetaPair label="Status" value={status} />
+        </div>
+      </div>
+      <div class="contact-page__form">
+        <ContactForm
+          submitLabel={submitLabel}
+          successTitle={successTitle}
+          successBody={successBody}
+        />
+      </div>
+    </section>
+  </main>
+</BaseLayout>

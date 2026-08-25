@@ -927,6 +927,41 @@ textarea.field-control {
   line-height: 1.6;
 }
 
+/* —— Contact page —— */
+.contact-page {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  align-items: start;
+  gap: clamp(2rem, 5vw, 4.5rem);
+  padding-block: clamp(4rem, 8vw, 7rem);
+}
+
+.contact-page__copy h1 {
+  margin-top: 1rem;
+  font-size: clamp(2.5rem, 6vw, 3.75rem);
+  font-weight: 500;
+  line-height: 1.05;
+}
+
+.contact-page__lead {
+  max-width: 38ch;
+  margin-top: 1.25rem;
+  color: var(--ink-text-muted);
+  font-size: 1.05rem;
+  font-weight: 300;
+  line-height: 1.7;
+}
+
+.contact-page__meta {
+  display: grid;
+  gap: 1.5rem;
+  margin-top: 2.75rem;
+}
+
+.contact-page__form {
+  min-width: 0;
+}
+
 /* —— E-paper preview —— */
 .epaper-preview {
   display: flex;
@@ -1313,6 +1348,7 @@ textarea.field-control {
   .page-hero--split,
   .section-heading--split,
   .hero,
+  .contact-page,
   .system-list--columns,
   .card-grid,
   .feature-grid,

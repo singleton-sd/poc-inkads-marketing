@@ -9,6 +9,12 @@ const pages = defineCollection({
     description: z.string().min(1),
     headline: z.string().min(1),
     summary: z.string().min(1),
+    eyebrow: z.string().min(1).optional(),
+    email: z.email().optional(),
+    status: z.string().min(1).optional(),
+    submitLabel: z.string().min(1).optional(),
+    successTitle: z.string().min(1).optional(),
+    successBody: z.string().min(1).optional(),
     draft: z.boolean().default(false),
   }),
 });
