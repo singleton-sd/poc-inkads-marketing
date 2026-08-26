@@ -18,7 +18,8 @@ workflow:
    and hosts a report at `…/pr-<number>/visual/` (`base/` · `pr/` · `diff/` ·
    `index.html`)
 4. Runs a required **`visual`** status check that **fails** when any route is
-   `changed` or `new` vs that base build
+   `changed` or `new` vs that base build. New routes still capture the baseline
+   `404` page as “before” and write a pixel `diff/` so reviewers can compare.
 5. Removes the preview deploy and hides the sticky comment when the PR closes
 
 Pull requests from forks are not given write access to publish.
