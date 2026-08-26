@@ -72,12 +72,17 @@ test("PR workflow publishes subpath previews and updates the PR body", async () 
     /format\('preview-pr-\{0\}',\s*github\.event\.number\)/,
   );
   assert.match(workflow, /cancel-in-progress:\s*true/);
+  assert.match(workflow, /id:\s*preview\n\s+continue-on-error:\s*true/);
+  assert.match(workflow, /Retry deploy preview/);
+  assert.match(workflow, /steps\.preview\.outcome == 'failure'/);
+  assert.match(workflow, /id:\s*remove_preview\n\s+continue-on-error:\s*true/);
+  assert.match(workflow, /Retry remove preview/);
+  assert.match(workflow, /steps\.remove_preview\.outcome == 'failure'/);
   assert.equal(
-    (workflow.match(/Wandalen\/wretry\.action@v3\.8\.0/g) ?? []).length,
-    2,
+    (workflow.match(/rossjrw\/pr-preview-action@v1\.8\.1/g) ?? []).length,
+    4,
   );
-  assert.equal((workflow.match(/attempt_limit:\s*6/g) ?? []).length, 2);
-  assert.equal((workflow.match(/attempt_delay:\s*20000/g) ?? []).length, 2);
+  assert.doesNotMatch(workflow, /Wandalen\/wretry/);
   assert.doesNotMatch(workflow, /\|\|\s*'pages-publish'/);
   assert.doesNotMatch(workflow, /pull_request_target/);
   assert.doesNotMatch(workflow, /secrets\./);

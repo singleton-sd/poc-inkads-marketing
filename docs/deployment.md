@@ -47,8 +47,9 @@ when `visual` fails so the report URL stays available.
 Preview runs use a **per-PR** concurrency group (`preview-pr-<n>`) so updating
 many open PRs at once does not cancel other queued previews. (A shared
 `pages-publish` group drops previously pending runs when a newer one queues.)
-Production still uses `pages-publish`. Preview deploy/remove steps retry on
-`gh-pages` push conflicts when parallel writes race.
+Production still uses `pages-publish`. Preview deploy/remove steps retry once
+on failure when parallel `gh-pages` writes race (composite actions cannot use
+`wretry.action`).
 
 ## One-time GitHub Pages configuration
 

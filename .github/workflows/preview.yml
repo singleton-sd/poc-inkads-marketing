@@ -7,7 +7,7 @@ on:
 # Per-PR groups so queued previews are not cancelled when many PRs update at
 # once (a shared pages-publish group drops previously pending runs). Label
 # accept stays on its own group. cancel-in-progress only replaces stale runs
-# for the same PR. Parallel gh-pages pushes retry below.
+# for the same PR. Parallel gh-pages pushes get a second deploy attempt below.
 concurrency:
   group: ${{ contains(fromJSON('["labeled","unlabeled"]'), github.event.action) && format('visual-label-pr-{0}', github.event.number) || format('preview-pr-{0}', github.event.number) }}
   cancel-in-progress: true
@@ -72,19 +72,27 @@ jobs:
           path: test-results/visual
           if-no-files-found: error
           retention-days: 14
+      # pr-preview-action is composite; wretry cannot wrap it. Retry push races
+      # against production / other previews with a second attempt.
       - name: Deploy preview
         id: preview
-        uses: Wandalen/wretry.action@v3.8.0
+        continue-on-error: true
+        uses: rossjrw/pr-preview-action@v1.8.1
         with:
-          attempt_limit: 6
-          attempt_delay: 20000
-          action: rossjrw/pr-preview-action@v1.8.1
-          with: |
-            source-dir: dist
-            preview-branch: gh-pages
-            pages-base-url: https://inkads.poc.singletonsd.com
-            umbrella-dir: pr-preview
-            comment: false
+          source-dir: dist
+          preview-branch: gh-pages
+          pages-base-url: https://inkads.poc.singletonsd.com
+          umbrella-dir: pr-preview
+          comment: false
+      - name: Retry deploy preview
+        if: steps.preview.outcome == 'failure'
+        uses: rossjrw/pr-preview-action@v1.8.1
+        with:
+          source-dir: dist
+          preview-branch: gh-pages
+          pages-base-url: https://inkads.poc.singletonsd.com
+          umbrella-dir: pr-preview
+          comment: false
       - name: Build sticky preview comment
         uses: actions/github-script@v8
         env:
@@ -254,17 +262,24 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v7
       - name: Remove preview
-        uses: Wandalen/wretry.action@v3.8.0
+        id: remove_preview
+        continue-on-error: true
+        uses: rossjrw/pr-preview-action@v1.8.1
         with:
-          attempt_limit: 6
-          attempt_delay: 20000
-          action: rossjrw/pr-preview-action@v1.8.1
-          with: |
-            source-dir: dist
-            preview-branch: gh-pages
-            pages-base-url: https://inkads.poc.singletonsd.com
-            umbrella-dir: pr-preview
-            comment: false
+          source-dir: dist
+          preview-branch: gh-pages
+          pages-base-url: https://inkads.poc.singletonsd.com
+          umbrella-dir: pr-preview
+          comment: false
+      - name: Retry remove preview
+        if: steps.remove_preview.outcome == 'failure'
+        uses: rossjrw/pr-preview-action@v1.8.1
+        with:
+          source-dir: dist
+          preview-branch: gh-pages
+          pages-base-url: https://inkads.poc.singletonsd.com
+          umbrella-dir: pr-preview
+          comment: false
       - name: Hide sticky preview comment
         uses: marocchino/sticky-pull-request-comment@v2
         with:
