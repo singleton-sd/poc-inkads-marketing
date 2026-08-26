@@ -18,7 +18,7 @@
  * - `manifest.json` — includes `summary` for CI gating
  *
  * Capture always exits 0 on successful screenshots. Use `pnpm test:visual:gate`
- * (or CI job `visual`) to fail when routes are `changed` or `new`.
+ * (or CI job `visual-review`) to fail when routes are `changed` or `new`.
  *
  * Env:
  * - VISUAL_BASE_PATH — Astro base used for the PR (and baseline) build

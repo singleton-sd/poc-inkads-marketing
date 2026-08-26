@@ -17,9 +17,10 @@ workflow:
    SHA** (same `/` Astro base as the PR visual build — not live production),
    and hosts a report at `…/pr-<number>/visual/` (`base/` · `pr/` · `diff/` ·
    `index.html`)
-4. Runs a required **`visual`** status check that **fails** when any route is
-   `changed` or `new` vs that base build. New routes still capture the baseline
-   `404` page as “before” and write a pixel `diff/` so reviewers can compare.
+4. Runs a required **`visual-review`** status check that **fails** when any
+   route is `changed` or `new` vs that base build. That is a review gate (not a
+   broken Playwright install). New routes still capture the baseline `404` page
+   as “before” and write a pixel `diff/` so reviewers can compare.
 5. Removes the preview deploy and hides the sticky comment when the PR closes
 
 Pull requests from forks are not given write access to publish.
@@ -30,22 +31,23 @@ Baseline is the PR’s base branch tip (usually `main`), built in CI. Live
 production is not used — it can lag when Pages deploys fail.
 
 1. Open the sticky **Preview** comment → **Open visual report**
-2. If the **`visual`** check is red, review base / PR / diff for listed routes
-3. When the diffs are intentional, add the **`visual-accepted`** label
-4. A thin workflow run clears **`visual`** automatically (no rebuild, no re-run)
-5. Merge when `visual` is green
+2. If **`visual-review`** is red, review base / PR / diff (new pages or pixel
+   changes — both need a human look)
+3. When the changes are intentional, add the **`visual-accepted`** label
+4. A thin workflow run clears **`visual-review`** automatically (no rebuild)
+5. Merge when `visual-review` is green
 
 Removing **`visual-accepted`** re-runs the gate against the last capture and fails
 again if diffs remain.
 
-CI-only PRs with no page changes should pass `visual` with zero diffs.
+CI-only PRs with no page changes should pass `visual-review` with zero diffs.
 
-### Required status check (one-time)
+### Required status check
 
-Under **Settings → Branches →** branch protection for `main`, require the status
-check named **`visual`** (job name from `.github/workflows/preview.yml`). Keep
-the existing preview/quality jobs as you prefer; `preview` still deploys even
-when `visual` fails so the report URL stays available.
+Under the **Main** ruleset, require the status check named **`visual-review`**
+(job name from `.github/workflows/preview.yml`). After renaming from `visual`,
+update the ruleset to the new name. `preview` still deploys even when
+`visual-review` fails so the report URL stays available.
 
 ## Preview concurrency
 
