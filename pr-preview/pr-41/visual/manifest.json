@@ -1,6 +1,9 @@
 {
-  "basePath": "/pr-preview/pr-41/",
-  "baseSiteUrl": "https://inkads.poc.singletonsd.com",
+  "basePath": "/",
+  "baseSha": "e1016f9dff32fb820e11d5456cc25647aa501de7",
+  "baseLabel": "local:/home/runner/work/poc-inkads-marketing/poc-inkads-marketing/visual-base/dist",
+  "baseSiteUrl": null,
+  "baseDistDir": "/home/runner/work/poc-inkads-marketing/poc-inkads-marketing/visual-base/dist",
   "summary": {
     "total": 6,
     "unchanged": 0,
@@ -22,9 +25,9 @@
       "prFile": "pr/404-desktop.png",
       "baseFile": "base/404-desktop.png",
       "diffFile": "diff/404-desktop.png",
-      "mismatched": 255167,
-      "prUrl": "/pr-preview/pr-41/404",
-      "baseUrl": "https://inkads.poc.singletonsd.com/404",
+      "mismatched": 56628,
+      "prUrl": "/404",
+      "baseUrl": "http://127.0.0.1:42979/404",
       "status": "changed"
     },
     {
@@ -33,9 +36,9 @@
       "prFile": "pr/404-mobile.png",
       "baseFile": "base/404-mobile.png",
       "diffFile": "diff/404-mobile.png",
-      "mismatched": 262758,
-      "prUrl": "/pr-preview/pr-41/404",
-      "baseUrl": "https://inkads.poc.singletonsd.com/404",
+      "mismatched": 17067,
+      "prUrl": "/404",
+      "baseUrl": "http://127.0.0.1:42979/404",
       "status": "changed"
     },
     {
@@ -44,9 +47,9 @@
       "prFile": "pr/home-desktop.png",
       "baseFile": "base/home-desktop.png",
       "diffFile": "diff/home-desktop.png",
-      "mismatched": 4431241,
-      "prUrl": "/pr-preview/pr-41/",
-      "baseUrl": "https://inkads.poc.singletonsd.com/",
+      "mismatched": 56628,
+      "prUrl": "/",
+      "baseUrl": "http://127.0.0.1:42979/",
       "status": "changed"
     },
     {
@@ -55,9 +58,9 @@
       "prFile": "pr/home-mobile.png",
       "baseFile": "base/home-mobile.png",
       "diffFile": "diff/home-mobile.png",
-      "mismatched": 802966,
-      "prUrl": "/pr-preview/pr-41/",
-      "baseUrl": "https://inkads.poc.singletonsd.com/",
+      "mismatched": 17067,
+      "prUrl": "/",
+      "baseUrl": "http://127.0.0.1:42979/",
       "status": "changed"
     },
     {
@@ -67,8 +70,8 @@
       "baseFile": null,
       "diffFile": null,
       "mismatched": 0,
-      "prUrl": "/pr-preview/pr-41/support",
-      "baseUrl": "https://inkads.poc.singletonsd.com/support",
+      "prUrl": "/support",
+      "baseUrl": "http://127.0.0.1:42979/support",
       "status": "new"
     },
     {
@@ -78,8 +81,8 @@
       "baseFile": null,
       "diffFile": null,
       "mismatched": 0,
-      "prUrl": "/pr-preview/pr-41/support",
-      "baseUrl": "https://inkads.poc.singletonsd.com/support",
+      "prUrl": "/support",
+      "baseUrl": "http://127.0.0.1:42979/support",
       "status": "new"
     }
   ]
