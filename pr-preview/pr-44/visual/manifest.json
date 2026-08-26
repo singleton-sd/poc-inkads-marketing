@@ -1,0 +1,64 @@
+{
+  "basePath": "/",
+  "baseSha": "e1016f9dff32fb820e11d5456cc25647aa501de7",
+  "baseLabel": "local:/home/runner/work/poc-inkads-marketing/poc-inkads-marketing/visual-base/dist",
+  "baseSiteUrl": null,
+  "baseDistDir": "/home/runner/work/poc-inkads-marketing/poc-inkads-marketing/visual-base/dist",
+  "summary": {
+    "total": 4,
+    "unchanged": 2,
+    "changed": 1,
+    "new": 0,
+    "changedRoutes": [
+      "/"
+    ],
+    "newRoutes": [],
+    "hasDiffs": true
+  },
+  "routes": [
+    {
+      "route": "404",
+      "viewport": "desktop",
+      "prFile": "pr/404-desktop.png",
+      "baseFile": "base/404-desktop.png",
+      "diffFile": null,
+      "mismatched": 0,
+      "prUrl": "/404",
+      "baseUrl": "http://127.0.0.1:33761/404",
+      "status": "unchanged"
+    },
+    {
+      "route": "404",
+      "viewport": "mobile",
+      "prFile": "pr/404-mobile.png",
+      "baseFile": "base/404-mobile.png",
+      "diffFile": null,
+      "mismatched": 0,
+      "prUrl": "/404",
+      "baseUrl": "http://127.0.0.1:33761/404",
+      "status": "unchanged"
+    },
+    {
+      "route": "/",
+      "viewport": "desktop",
+      "prFile": "pr/home-desktop.png",
+      "baseFile": "base/home-desktop.png",
+      "diffFile": "diff/home-desktop.png",
+      "mismatched": 2435229,
+      "prUrl": "/",
+      "baseUrl": "http://127.0.0.1:33761/",
+      "status": "changed"
+    },
+    {
+      "route": "/",
+      "viewport": "mobile",
+      "prFile": "pr/home-mobile.png",
+      "baseFile": "base/home-mobile.png",
+      "diffFile": "diff/home-mobile.png",
+      "mismatched": 737366,
+      "prUrl": "/",
+      "baseUrl": "http://127.0.0.1:33761/",
+      "status": "changed"
+    }
+  ]
+}
