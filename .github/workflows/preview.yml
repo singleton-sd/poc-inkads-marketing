@@ -253,7 +253,7 @@ jobs:
           ID=""
           for _ in $(seq 1 12); do
             ID="$(gh api "repos/${{ github.repository }}/actions/artifacts?name=${ARTIFACT}&per_page=20" \
-              --jq --arg sha "$HEAD_SHA" \
+              | jq -r --arg sha "$HEAD_SHA" \
               '[.artifacts[] | select(.expired==false and .workflow_run.head_sha==$sha)][0].id // empty')"
             if [ -n "$ID" ]; then
               break
