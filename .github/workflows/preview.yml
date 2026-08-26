@@ -71,6 +71,7 @@ jobs:
         env:
           VISUAL_BASE_PATH: /
           VISUAL_BASE_DIR: ${{ github.workspace }}/visual-base/dist
+          VISUAL_BASE_SHA: ${{ github.event.pull_request.base.sha }}
       - name: Build preview site
         run: pnpm build
         env:
@@ -247,36 +248,63 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
           set -euo pipefail
           ARTIFACT="visual-pr-${{ github.event.number }}"
           ID=""
           for _ in $(seq 1 12); do
-            ID="$(gh api "repos/${{ github.repository }}/actions/artifacts?name=${ARTIFACT}&per_page=20" \
-              | jq -r --arg sha "$HEAD_SHA" \
-              '[.artifacts[] | select(.expired==false and .workflow_run.head_sha==$sha)][0].id // empty')"
+            mapfile -t CANDIDATES < <(
+              gh api --paginate --slurp \
+                "repos/${{ github.repository }}/actions/artifacts?name=${ARTIFACT}&per_page=100" \
+                | jq -r --arg sha "$HEAD_SHA" '
+                  [.[] | .artifacts[]]
+                  | map(select(.expired == false and .workflow_run.head_sha == $sha))
+                  | .[].id
+                '
+            )
+            for candidate in "${CANDIDATES[@]:-}"; do
+              [ -n "$candidate" ] || continue
+              rm -rf /tmp/visual-candidate test-results/visual
+              mkdir -p /tmp/visual-candidate
+              gh api "repos/${{ github.repository }}/actions/artifacts/${candidate}/zip" \
+                > /tmp/visual-candidate.zip
+              unzip -qo /tmp/visual-candidate.zip -d /tmp/visual-candidate
+              ARTIFACT_BASE_SHA="$(
+                jq -r '.baseSha // empty' /tmp/visual-candidate/manifest.json
+              )"
+              if [ -z "$ARTIFACT_BASE_SHA" ]; then
+                echo "Skipping artifact ${candidate}: missing manifest.baseSha"
+                continue
+              fi
+              if [ "$ARTIFACT_BASE_SHA" != "$BASE_SHA" ]; then
+                echo "Skipping artifact ${candidate}: baseSha ${ARTIFACT_BASE_SHA} != ${BASE_SHA}"
+                continue
+              fi
+              mkdir -p test-results/visual
+              cp -R /tmp/visual-candidate/. test-results/visual/
+              ID="$candidate"
+              break
+            done
             if [ -n "$ID" ]; then
               break
             fi
-            echo "No ${ARTIFACT} artifact for ${HEAD_SHA} yet; waiting for preview capture..."
+            echo "No ${ARTIFACT} artifact for head ${HEAD_SHA} + base ${BASE_SHA} yet; waiting..."
             sleep 20
           done
           if [ -z "$ID" ]; then
-            echo "No ${ARTIFACT} artifact for head ${HEAD_SHA}. Push a commit so preview can capture visuals first."
+            echo "No ${ARTIFACT} artifact for head ${HEAD_SHA} with base ${BASE_SHA}."
             exit 1
           fi
-          mkdir -p test-results/visual
-          gh api "repos/${{ github.repository }}/actions/artifacts/${ID}/zip" > /tmp/visual.zip
-          unzip -o /tmp/visual.zip -d test-results/visual
-          # Prefer gate against this SHA only (avoid stale production-baseline artifacts).
-          echo "Using artifact ${ID} for ${HEAD_SHA}"
+          echo "Using artifact ${ID} for head ${HEAD_SHA} base ${BASE_SHA}"
           python3 - <<'PY'
           import json, pathlib
           manifest = json.loads(pathlib.Path("test-results/visual/manifest.json").read_text())
           summary = manifest.get("summary") or {}
           print(
               f"Artifact summary: changed={summary.get('changed')} new={summary.get('new')} "
-              f"hasDiffs={summary.get('hasDiffs')} baseLabel={manifest.get('baseLabel')}"
+              f"hasDiffs={summary.get('hasDiffs')} baseSha={manifest.get('baseSha')} "
+              f"baseLabel={manifest.get('baseLabel')}"
           )
           PY
       - name: Set up Node.js

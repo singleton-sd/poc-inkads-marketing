@@ -83,10 +83,13 @@ test("PR workflow publishes subpath previews and updates the PR body", async () 
     4,
   );
   assert.match(workflow, /VISUAL_BASE_DIR/);
+  assert.match(workflow, /VISUAL_BASE_SHA/);
   assert.match(workflow, /pull_request\.base\.sha/);
   assert.match(workflow, /path:\s*visual-base/);
   assert.match(workflow, /Build PR site for visual compare/);
   assert.match(workflow, /workflow_run\.head_sha/);
+  assert.match(workflow, /--paginate --slurp/);
+  assert.match(workflow, /manifest\.baseSha|ARTIFACT_BASE_SHA/);
   assert.doesNotMatch(workflow, /Wandalen\/wretry/);
   assert.doesNotMatch(workflow, /\|\|\s*'pages-publish'/);
   assert.doesNotMatch(workflow, /pull_request_target/);
@@ -110,7 +113,9 @@ test("visual screenshot helper is wired for hosted report and gate", async () =>
   assert.match(pkg, /"pixelmatch"/);
   assert.match(visual, /test-results\/visual/);
   assert.match(visual, /VISUAL_BASE_DIR/);
+  assert.match(visual, /VISUAL_BASE_SHA/);
   assert.match(visual, /VISUAL_BASE_URL/);
+  assert.match(visual, /baseSha/);
   assert.match(visual, /index\.html/);
   assert.match(visual, /entry\.name === "visual"/);
   assert.match(visual, /1440/);
