@@ -1,14 +1,16 @@
 {
-  "basePath": "/pr-preview/pr-39/",
-  "baseSiteUrl": "https://inkads.poc.singletonsd.com",
+  "basePath": "/",
+  "baseSha": "e1016f9dff32fb820e11d5456cc25647aa501de7",
+  "baseLabel": "local:/home/runner/work/poc-inkads-marketing/poc-inkads-marketing/visual-base/dist",
+  "baseSiteUrl": null,
+  "baseDistDir": "/home/runner/work/poc-inkads-marketing/poc-inkads-marketing/visual-base/dist",
   "summary": {
     "total": 6,
-    "unchanged": 0,
-    "changed": 2,
+    "unchanged": 2,
+    "changed": 1,
     "new": 1,
     "changedRoutes": [
-      "/",
-      "404"
+      "/"
     ],
     "newRoutes": [
       "places"
@@ -21,22 +23,22 @@
       "viewport": "desktop",
       "prFile": "pr/404-desktop.png",
       "baseFile": "base/404-desktop.png",
-      "diffFile": "diff/404-desktop.png",
-      "mismatched": 203519,
-      "prUrl": "/pr-preview/pr-39/404",
-      "baseUrl": "https://inkads.poc.singletonsd.com/404",
-      "status": "changed"
+      "diffFile": null,
+      "mismatched": 0,
+      "prUrl": "/404",
+      "baseUrl": "http://127.0.0.1:34375/404",
+      "status": "unchanged"
     },
     {
       "route": "404",
       "viewport": "mobile",
       "prFile": "pr/404-mobile.png",
       "baseFile": "base/404-mobile.png",
-      "diffFile": "diff/404-mobile.png",
-      "mismatched": 248914,
-      "prUrl": "/pr-preview/pr-39/404",
-      "baseUrl": "https://inkads.poc.singletonsd.com/404",
-      "status": "changed"
+      "diffFile": null,
+      "mismatched": 0,
+      "prUrl": "/404",
+      "baseUrl": "http://127.0.0.1:34375/404",
+      "status": "unchanged"
     },
     {
       "route": "/",
@@ -44,9 +46,9 @@
       "prFile": "pr/home-desktop.png",
       "baseFile": "base/home-desktop.png",
       "diffFile": "diff/home-desktop.png",
-      "mismatched": 4461887,
-      "prUrl": "/pr-preview/pr-39/",
-      "baseUrl": "https://inkads.poc.singletonsd.com/",
+      "mismatched": 150,
+      "prUrl": "/",
+      "baseUrl": "http://127.0.0.1:34375/",
       "status": "changed"
     },
     {
@@ -55,9 +57,9 @@
       "prFile": "pr/home-mobile.png",
       "baseFile": "base/home-mobile.png",
       "diffFile": "diff/home-mobile.png",
-      "mismatched": 814492,
-      "prUrl": "/pr-preview/pr-39/",
-      "baseUrl": "https://inkads.poc.singletonsd.com/",
+      "mismatched": 150,
+      "prUrl": "/",
+      "baseUrl": "http://127.0.0.1:34375/",
       "status": "changed"
     },
     {
@@ -67,8 +69,8 @@
       "baseFile": null,
       "diffFile": null,
       "mismatched": 0,
-      "prUrl": "/pr-preview/pr-39/places",
-      "baseUrl": "https://inkads.poc.singletonsd.com/places",
+      "prUrl": "/places",
+      "baseUrl": "http://127.0.0.1:34375/places",
       "status": "new"
     },
     {
@@ -78,8 +80,8 @@
       "baseFile": null,
       "diffFile": null,
       "mismatched": 0,
-      "prUrl": "/pr-preview/pr-39/places",
-      "baseUrl": "https://inkads.poc.singletonsd.com/places",
+      "prUrl": "/places",
+      "baseUrl": "http://127.0.0.1:34375/places",
       "status": "new"
     }
   ]
