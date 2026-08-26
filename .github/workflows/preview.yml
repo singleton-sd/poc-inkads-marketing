@@ -246,18 +246,39 @@ jobs:
         if: steps.accept.outputs.accepted != 'true' && needs.preview.result == 'skipped'
         env:
           GH_TOKEN: ${{ github.token }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           set -euo pipefail
           ARTIFACT="visual-pr-${{ github.event.number }}"
-          ID="$(gh api "repos/${{ github.repository }}/actions/artifacts?name=${ARTIFACT}&per_page=5" \
-            --jq '[.artifacts[] | select(.expired==false)][0].id // empty')"
+          ID=""
+          for _ in $(seq 1 12); do
+            ID="$(gh api "repos/${{ github.repository }}/actions/artifacts?name=${ARTIFACT}&per_page=20" \
+              --jq --arg sha "$HEAD_SHA" \
+              '[.artifacts[] | select(.expired==false and .workflow_run.head_sha==$sha)][0].id // empty')"
+            if [ -n "$ID" ]; then
+              break
+            fi
+            echo "No ${ARTIFACT} artifact for ${HEAD_SHA} yet; waiting for preview capture..."
+            sleep 20
+          done
           if [ -z "$ID" ]; then
-            echo "No ${ARTIFACT} artifact found. Push a commit so preview can capture visuals first."
+            echo "No ${ARTIFACT} artifact for head ${HEAD_SHA}. Push a commit so preview can capture visuals first."
             exit 1
           fi
           mkdir -p test-results/visual
           gh api "repos/${{ github.repository }}/actions/artifacts/${ID}/zip" > /tmp/visual.zip
           unzip -o /tmp/visual.zip -d test-results/visual
+          # Prefer gate against this SHA only (avoid stale production-baseline artifacts).
+          echo "Using artifact ${ID} for ${HEAD_SHA}"
+          python3 - <<'PY'
+          import json, pathlib
+          manifest = json.loads(pathlib.Path("test-results/visual/manifest.json").read_text())
+          summary = manifest.get("summary") or {}
+          print(
+              f"Artifact summary: changed={summary.get('changed')} new={summary.get('new')} "
+              f"hasDiffs={summary.get('hasDiffs')} baseLabel={manifest.get('baseLabel')}"
+          )
+          PY
       - name: Set up Node.js
         if: steps.accept.outputs.accepted != 'true'
         uses: actions/setup-node@v7

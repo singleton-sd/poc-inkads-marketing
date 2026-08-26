@@ -86,6 +86,7 @@ test("PR workflow publishes subpath previews and updates the PR body", async () 
   assert.match(workflow, /pull_request\.base\.sha/);
   assert.match(workflow, /path:\s*visual-base/);
   assert.match(workflow, /Build PR site for visual compare/);
+  assert.match(workflow, /workflow_run\.head_sha/);
   assert.doesNotMatch(workflow, /Wandalen\/wretry/);
   assert.doesNotMatch(workflow, /\|\|\s*'pages-publish'/);
   assert.doesNotMatch(workflow, /pull_request_target/);
