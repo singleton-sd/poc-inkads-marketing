@@ -1,6 +1,6 @@
 {
   "basePath": "/",
-  "baseSha": "8ea62ca5df857cef2ff34b8bf2876cbb1164689e",
+  "baseSha": "75bf1c2531bbfb6ab2d54fcc2c6e9352bb858dd2",
   "baseLabel": "local:/home/runner/work/poc-inkads-marketing/poc-inkads-marketing/visual-base/dist",
   "baseSiteUrl": null,
   "baseDistDir": "/home/runner/work/poc-inkads-marketing/poc-inkads-marketing/visual-base/dist",
@@ -28,7 +28,7 @@
       "diffFile": "diff/404-desktop.png",
       "mismatched": 56628,
       "prUrl": "/404",
-      "baseUrl": "http://127.0.0.1:42231/404",
+      "baseUrl": "http://127.0.0.1:37015/404",
       "status": "changed"
     },
     {
@@ -39,7 +39,7 @@
       "diffFile": "diff/404-mobile.png",
       "mismatched": 17067,
       "prUrl": "/404",
-      "baseUrl": "http://127.0.0.1:42231/404",
+      "baseUrl": "http://127.0.0.1:37015/404",
       "status": "changed"
     },
     {
@@ -50,7 +50,7 @@
       "diffFile": "diff/how-it-works-desktop.png",
       "mismatched": 56628,
       "prUrl": "/how-it-works",
-      "baseUrl": "http://127.0.0.1:42231/how-it-works",
+      "baseUrl": "http://127.0.0.1:37015/how-it-works",
       "status": "changed"
     },
     {
@@ -61,7 +61,7 @@
       "diffFile": "diff/how-it-works-mobile.png",
       "mismatched": 17067,
       "prUrl": "/how-it-works",
-      "baseUrl": "http://127.0.0.1:42231/how-it-works",
+      "baseUrl": "http://127.0.0.1:37015/how-it-works",
       "status": "changed"
     },
     {
@@ -72,7 +72,7 @@
       "diffFile": "diff/home-desktop.png",
       "mismatched": 56628,
       "prUrl": "/",
-      "baseUrl": "http://127.0.0.1:42231/",
+      "baseUrl": "http://127.0.0.1:37015/",
       "status": "changed"
     },
     {
@@ -83,7 +83,7 @@
       "diffFile": "diff/home-mobile.png",
       "mismatched": 17067,
       "prUrl": "/",
-      "baseUrl": "http://127.0.0.1:42231/",
+      "baseUrl": "http://127.0.0.1:37015/",
       "status": "changed"
     },
     {
@@ -94,7 +94,7 @@
       "diffFile": "diff/support-desktop.png",
       "mismatched": 2830297,
       "prUrl": "/support",
-      "baseUrl": "http://127.0.0.1:42231/support",
+      "baseUrl": "http://127.0.0.1:37015/support",
       "status": "new"
     },
     {
@@ -105,7 +105,7 @@
       "diffFile": "diff/support-mobile.png",
       "mismatched": 860426,
       "prUrl": "/support",
-      "baseUrl": "http://127.0.0.1:42231/support",
+      "baseUrl": "http://127.0.0.1:37015/support",
       "status": "new"
     }
   ]
