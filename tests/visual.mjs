@@ -1,13 +1,18 @@
 /**
- * Full-page visual screenshots for PR review, with optional base comparison.
+ * Full-page visual screenshots for PR review, with base comparison.
  *
  * Serves the PR `dist/` build, screenshots every HTML route at desktop + mobile,
- * then (when VISUAL_BASE_URL is set) screenshots the same paths on the base site
- * (usually production) and writes pixel diffs.
+ * then screenshots the same paths from a baseline and writes pixel diffs.
+ *
+ * Baseline (preferred for CI): `VISUAL_BASE_DIR` — a locally built `dist/` of the
+ * PR base SHA (same Astro base path as the PR visual build). This avoids false
+ * diffs when live production is stale or behind main.
+ *
+ * Fallback: `VISUAL_BASE_URL` (default production) when no local baseline dir.
  *
  * Output under `test-results/visual/`:
  * - `pr/<route>-<viewport>.png` — this PR
- * - `base/<route>-<viewport>.png` — production / base (when the route exists)
+ * - `base/<route>-<viewport>.png` — baseline (when the route exists)
  * - `diff/<route>-<viewport>.png` — red pixel diff (when both exist and differ)
  * - `index.html` — side-by-side review page
  * - `manifest.json` — includes `summary` for CI gating
@@ -16,9 +21,11 @@
  * (or CI job `visual`) to fail when routes are `changed` or `new`.
  *
  * Env:
- * - VISUAL_BASE_PATH — Astro base used for the PR build (e.g. `/pr-preview/pr-12/`)
- * - VISUAL_BASE_URL — site to treat as “before” (default: production custom domain)
- * - VISUAL_PORT — fixed local port (default: ephemeral)
+ * - VISUAL_BASE_PATH — Astro base used for the PR (and baseline) build
+ * - VISUAL_BASE_DIR — local baseline `dist/` directory (preferred over URL)
+ * - VISUAL_BASE_SHA — git SHA of the baseline build (recorded in manifest)
+ * - VISUAL_BASE_URL — remote “before” site if VISUAL_BASE_DIR is unset
+ * - VISUAL_PORT — fixed local port for the PR server (default: ephemeral)
  * - VISUAL_SKIP_BASE — set to `1` to only capture the PR build
  */
 import assert from "node:assert/strict";
@@ -44,14 +51,22 @@ const outDir = path.join(rootDir, "test-results", "visual");
 const port = Number(process.env.VISUAL_PORT ?? 0);
 const basePath = normalizeBase(process.env.VISUAL_BASE_PATH ?? "/");
 const skipBase = process.env.VISUAL_SKIP_BASE === "1";
+const baseDistDir = process.env.VISUAL_BASE_DIR
+  ? path.resolve(process.env.VISUAL_BASE_DIR)
+  : null;
+const baseSha = (process.env.VISUAL_BASE_SHA ?? "").trim() || null;
 const baseSiteUrl = (
   process.env.VISUAL_BASE_URL ?? "https://inkads.poc.singletonsd.com"
 ).replace(/\/$/, "");
+const baseLabel = baseDistDir ? `local:${baseDistDir}` : baseSiteUrl;
 
 if (!existsSync(distDir)) {
   throw new Error(
     `Missing dist directory at ${distDir}. Run pnpm build first.`,
   );
+}
+if (baseDistDir && !existsSync(baseDistDir)) {
+  throw new Error(`Missing VISUAL_BASE_DIR at ${baseDistDir}.`);
 }
 
 function normalizeBase(value) {
@@ -77,23 +92,26 @@ function contentTypeForPath(pathname) {
   return "application/octet-stream";
 }
 
-function stripBase(urlPath) {
-  if (basePath === "/") return urlPath;
-  if (urlPath === basePath.slice(0, -1)) return "/";
-  if (urlPath.startsWith(basePath)) {
-    return `/${urlPath.slice(basePath.length)}`;
+function stripBase(urlPath, pathPrefix) {
+  if (pathPrefix === "/") return urlPath;
+  if (urlPath === pathPrefix.slice(0, -1)) return "/";
+  if (urlPath.startsWith(pathPrefix)) {
+    return `/${urlPath.slice(pathPrefix.length)}`;
   }
   return urlPath;
 }
 
-function normalizePathname(urlPath) {
-  const cleaned = stripBase(urlPath.replace(/\?.*$/, "").replace(/\/+$/, ""));
+function normalizePathname(root, pathPrefix, urlPath) {
+  const cleaned = stripBase(
+    urlPath.replace(/\?.*$/, "").replace(/\/+$/, ""),
+    pathPrefix,
+  );
   if (cleaned === "" || cleaned === "/") return "/index.html";
   if (cleaned.endsWith(".html")) return cleaned;
   const asDir = `${cleaned}/index.html`;
-  if (existsSync(path.join(distDir, asDir))) return asDir;
+  if (existsSync(path.join(root, asDir))) return asDir;
   const asFile = `${cleaned}.html`;
-  if (existsSync(path.join(distDir, asFile))) return asFile;
+  if (existsSync(path.join(root, asFile))) return asFile;
   return cleaned.startsWith("/") ? cleaned : `/${cleaned}`;
 }
 
@@ -143,6 +161,54 @@ function publicUrl(urlPath) {
 function sitePath(urlPath) {
   if (!urlPath || urlPath === "") return "/";
   return urlPath.startsWith("/") ? urlPath : `/${urlPath}`;
+}
+
+function createStaticServer(root, pathPrefix) {
+  return http.createServer(async (req, res) => {
+    try {
+      if (!req.url) {
+        res.statusCode = 400;
+        res.end("Bad request");
+        return;
+      }
+
+      const pathname = normalizePathname(root, pathPrefix, req.url);
+      const fsPath = path.join(root, pathname);
+
+      if (!existsSync(fsPath)) {
+        res.statusCode = 404;
+        res.end("Not found");
+        return;
+      }
+
+      res.setHeader("Content-Type", contentTypeForPath(pathname));
+      if (
+        pathname.endsWith(".html") ||
+        pathname.endsWith(".css") ||
+        pathname.endsWith(".js") ||
+        pathname.endsWith(".xml") ||
+        pathname.endsWith(".txt") ||
+        pathname.endsWith(".svg")
+      ) {
+        res.end(await readFile(fsPath));
+        return;
+      }
+
+      createReadStream(fsPath).pipe(res);
+    } catch (err) {
+      res.statusCode = 500;
+      res.end(String(err));
+    }
+  });
+}
+
+async function listen(server, preferredPort = 0) {
+  await new Promise((resolve) =>
+    server.listen(preferredPort, "127.0.0.1", resolve),
+  );
+  const actual = server.address()?.port;
+  assert.ok(typeof actual === "number" && actual > 0, "Failed to pick a port");
+  return actual;
 }
 
 async function screenshotPage(browser, url, viewport, filePath) {
@@ -214,7 +280,7 @@ function buildReportHtml(entries) {
     .map((entry) => {
       const baseCell = entry.baseFile
         ? `<img src="${entry.baseFile}" alt="base ${entry.route} ${entry.viewport}" />`
-        : `<p class="missing">No base (new route or missing on ${baseSiteUrl})</p>`;
+        : `<p class="missing">No base (new route or missing on baseline)</p>`;
       const diffCell = entry.diffFile
         ? `<img src="${entry.diffFile}" alt="diff ${entry.route} ${entry.viewport}" />`
         : entry.baseFile
@@ -257,7 +323,7 @@ function buildReportHtml(entries) {
   <header>
     <h1>InkAds visual review</h1>
     <p>
-      Base = <code>${baseSiteUrl}</code> (pre-PR).
+      Base = <code>${baseLabel}</code> (pre-PR).
       PR = local build for this branch (post-PR).
       Diff highlights changed pixels in red.
     </p>
@@ -268,50 +334,17 @@ function buildReportHtml(entries) {
 `;
 }
 
-const server = http.createServer(async (req, res) => {
-  try {
-    if (!req.url) {
-      res.statusCode = 400;
-      res.end("Bad request");
-      return;
-    }
+const prServer = createStaticServer(distDir, basePath);
+const prPort = await listen(prServer, port);
+const prOrigin = `http://127.0.0.1:${prPort}`;
 
-    const pathname = normalizePathname(req.url);
-    const fsPath = path.join(distDir, pathname);
-
-    if (!existsSync(fsPath)) {
-      res.statusCode = 404;
-      res.end("Not found");
-      return;
-    }
-
-    res.setHeader("Content-Type", contentTypeForPath(pathname));
-    if (
-      pathname.endsWith(".html") ||
-      pathname.endsWith(".css") ||
-      pathname.endsWith(".js") ||
-      pathname.endsWith(".xml") ||
-      pathname.endsWith(".txt") ||
-      pathname.endsWith(".svg")
-    ) {
-      res.end(await readFile(fsPath));
-      return;
-    }
-
-    createReadStream(fsPath).pipe(res);
-  } catch (err) {
-    res.statusCode = 500;
-    res.end(String(err));
-  }
-});
-
-await new Promise((resolve) => server.listen(port, "127.0.0.1", resolve));
-const actualPort = server.address()?.port;
-assert.ok(
-  typeof actualPort === "number" && actualPort > 0,
-  "Failed to pick an available port",
-);
-const origin = `http://127.0.0.1:${actualPort}`;
+let baseOrigin = null;
+let baseServer = null;
+if (!skipBase && baseDistDir) {
+  baseServer = createStaticServer(baseDistDir, basePath);
+  const basePort = await listen(baseServer, 0);
+  baseOrigin = `http://127.0.0.1:${basePort}`;
+}
 
 await rm(outDir, { recursive: true, force: true });
 for (const dir of ["pr", "base", "diff"]) {
@@ -340,7 +373,7 @@ try {
       const baseFile = path.join(outDir, baseRel);
       const diffFile = path.join(outDir, diffRel);
 
-      const prUrl = `${origin}${publicUrl(route.urlPath)}`;
+      const prUrl = `${prOrigin}${publicUrl(route.urlPath)}`;
       const prShot = await screenshotPage(browser, prUrl, viewport, prFile);
       assert.ok(
         prShot.ok,
@@ -349,8 +382,11 @@ try {
 
       let baseOk = false;
       let mismatched = 0;
+      let baseUrl = null;
       if (!skipBase) {
-        const baseUrl = `${baseSiteUrl}${sitePath(route.urlPath)}`;
+        baseUrl = baseOrigin
+          ? `${baseOrigin}${publicUrl(route.urlPath)}`
+          : `${baseSiteUrl}${sitePath(route.urlPath)}`;
         const baseShot = await screenshotPage(
           browser,
           baseUrl,
@@ -376,14 +412,15 @@ try {
         diffFile: mismatched > 0 ? diffRel : null,
         mismatched: mismatched > 0 ? mismatched : 0,
         prUrl: publicUrl(route.urlPath),
-        baseUrl: skipBase ? null : `${baseSiteUrl}${sitePath(route.urlPath)}`,
+        baseUrl: skipBase ? null : baseUrl,
         status: baseOk ? (mismatched > 0 ? "changed" : "unchanged") : "new",
       });
     }
   }
 } finally {
   await browser.close();
-  server.close();
+  prServer.close();
+  baseServer?.close();
 }
 
 const changedRoutes = [
@@ -410,7 +447,10 @@ await writeFile(
   `${JSON.stringify(
     {
       basePath,
-      baseSiteUrl: skipBase ? null : baseSiteUrl,
+      baseSha: skipBase ? null : baseSha,
+      baseLabel: skipBase ? null : baseLabel,
+      baseSiteUrl: skipBase || baseDistDir ? null : baseSiteUrl,
+      baseDistDir: skipBase ? null : baseDistDir,
       summary,
       routes: manifest,
     },
