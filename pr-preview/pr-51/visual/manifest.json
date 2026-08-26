@@ -1,5 +1,6 @@
 {
   "basePath": "/",
+  "baseSha": "5c19fd326f544e87961f4d8159524f4776088267",
   "baseLabel": "local:/home/runner/work/poc-inkads-marketing/poc-inkads-marketing/visual-base/dist",
   "baseSiteUrl": null,
   "baseDistDir": "/home/runner/work/poc-inkads-marketing/poc-inkads-marketing/visual-base/dist",
@@ -21,7 +22,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/404",
-      "baseUrl": "http://127.0.0.1:44471/404",
+      "baseUrl": "http://127.0.0.1:37379/404",
       "status": "unchanged"
     },
     {
@@ -32,7 +33,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/404",
-      "baseUrl": "http://127.0.0.1:44471/404",
+      "baseUrl": "http://127.0.0.1:37379/404",
       "status": "unchanged"
     },
     {
@@ -43,7 +44,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/",
-      "baseUrl": "http://127.0.0.1:44471/",
+      "baseUrl": "http://127.0.0.1:37379/",
       "status": "unchanged"
     },
     {
@@ -54,7 +55,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/",
-      "baseUrl": "http://127.0.0.1:44471/",
+      "baseUrl": "http://127.0.0.1:37379/",
       "status": "unchanged"
     }
   ]
