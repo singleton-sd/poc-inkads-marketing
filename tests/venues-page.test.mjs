@@ -25,7 +25,8 @@ test("venues content matches the design-reference copy", async () => {
   assert.match(content, /Minimal installation/);
   assert.match(content, /Remotely changeable content/);
   assert.match(content, /Clean, quiet display/);
-  assert.match(content, /Venue-owned messaging, plus revenue/);
+  assert.match(content, /Venue-owned messaging/);
+  assert.doesNotMatch(content, /plus revenue/i);
   assert.match(content, /A light footprint for your team\./);
   assert.match(content, /See the venue model in your space\./);
   assert.match(content, /Venue installation photo/);

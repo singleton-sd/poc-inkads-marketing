@@ -15,7 +15,7 @@ benefits:
     description: Messaging updates on a schedule without a technician on site or a poster reprint.
   - title: Clean, quiet display
     description: No bright video screen — a static, paper-like canvas that suits considered interiors.
-  - title: Venue-owned messaging, plus revenue
+  - title: Venue-owned messaging
     description: Mix your own announcements with third-party advertising, on your terms.
 processEyebrow: What's involved
 processHeadline: A light footprint for your team.
