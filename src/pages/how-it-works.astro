@@ -1,0 +1,112 @@
+---
+import { getEntry } from "astro:content";
+import ButtonLink from "../components/ButtonLink.astro";
+import CtaBand from "../components/CtaBand.astro";
+import FeatureGrid from "../components/FeatureGrid.astro";
+import FeatureItem from "../components/FeatureItem.astro";
+import InverseSection from "../components/InverseSection.astro";
+import SectionHeading from "../components/SectionHeading.astro";
+import SystemList from "../components/SystemList.astro";
+import SystemStep from "../components/SystemStep.astro";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { withBase } from "../lib/nav";
+
+const page = await getEntry("pages", "how-it-works");
+if (!page) throw new Error("The how-it-works page content entry is missing.");
+
+const {
+  title,
+  description,
+  headline,
+  summary,
+  eyebrow,
+  steps,
+  featuresEyebrow,
+  featuresHeadline,
+  features,
+  ctaTitle,
+  primaryCta,
+  secondaryCta,
+} = page.data;
+
+if (
+  !eyebrow ||
+  !steps?.length ||
+  !featuresEyebrow ||
+  !featuresHeadline ||
+  !features?.length ||
+  !ctaTitle ||
+  !primaryCta ||
+  !secondaryCta
+) {
+  throw new Error("The how-it-works page content is incomplete.");
+}
+
+const base = import.meta.env.BASE_URL;
+---
+
+<BaseLayout title={title} description={description}>
+  <main id="main-content">
+    <section class="shell how-it-works-intro" aria-labelledby="page-title">
+      <SectionHeading
+        level={1}
+        eyebrow={eyebrow}
+        title={headline}
+        lead={summary}
+        titleId="page-title"
+      />
+      <SystemList layout="rows">
+        {
+          steps.map((step) => (
+            <SystemStep
+              number={step.number}
+              title={step.title}
+              description={step.description}
+            />
+          ))
+        }
+      </SystemList>
+    </section>
+
+    <InverseSection labelledBy="why-epaper-title">
+      <SectionHeading
+        eyebrow={featuresEyebrow}
+        title={featuresHeadline}
+        tone="light"
+        titleId="why-epaper-title"
+      />
+      <FeatureGrid>
+        {
+          features.map((feature) => (
+            <FeatureItem
+              title={feature.title}
+              description={feature.description}
+            />
+          ))
+        }
+      </FeatureGrid>
+    </InverseSection>
+
+    <CtaBand title={ctaTitle} titleId="how-it-works-cta">
+      <ButtonLink
+        href={withBase(primaryCta.href, base)}
+        label={primaryCta.label}
+      />
+      <ButtonLink
+        href={withBase(secondaryCta.href, base)}
+        label={secondaryCta.label}
+        variant="secondary"
+      />
+    </CtaBand>
+  </main>
+</BaseLayout>
+
+<style>
+  .how-it-works-intro {
+    padding-bottom: clamp(4rem, 8vw, 7rem);
+  }
+
+  .how-it-works-intro :global(.page-hero) {
+    padding-bottom: 0;
+  }
+</style>
