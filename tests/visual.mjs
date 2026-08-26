@@ -176,6 +176,13 @@ function createStaticServer(root, pathPrefix) {
       const fsPath = path.join(root, pathname);
 
       if (!existsSync(fsPath)) {
+        const notFound = path.join(root, "404.html");
+        if (existsSync(notFound)) {
+          res.statusCode = 404;
+          res.setHeader("Content-Type", "text/html; charset=utf-8");
+          res.end(await readFile(notFound));
+          return;
+        }
         res.statusCode = 404;
         res.end("Not found");
         return;
@@ -211,7 +218,13 @@ async function listen(server, preferredPort = 0) {
   return actual;
 }
 
-async function screenshotPage(browser, url, viewport, filePath) {
+async function screenshotPage(
+  browser,
+  url,
+  viewport,
+  filePath,
+  { allowNotFound = false } = {},
+) {
   const context = await browser.newContext({
     viewport: { width: viewport.width, height: viewport.height },
     deviceScaleFactor: 1,
@@ -223,7 +236,10 @@ async function screenshotPage(browser, url, viewport, filePath) {
       timeout: 45_000,
     });
     const status = response?.status() ?? 0;
-    if (!response || status >= 400) {
+    if (!response || status >= 500) {
+      return { ok: false, status };
+    }
+    if (status >= 400 && !(allowNotFound && status === 404)) {
       return { ok: false, status };
     }
     await page.screenshot({
@@ -278,21 +294,28 @@ function diffPngs(baseFilePath, prFilePath, diffFilePath) {
 function buildReportHtml(entries) {
   const rows = entries
     .map((entry) => {
+      const baseCaption =
+        entry.status === "new" && entry.baseFile
+          ? "Base (before — route missing / 404)"
+          : "Base (before)";
       const baseCell = entry.baseFile
         ? `<img src="${entry.baseFile}" alt="base ${entry.route} ${entry.viewport}" />`
-        : `<p class="missing">No base (new route or missing on baseline)</p>`;
+        : `<p class="missing">No base (could not capture baseline)</p>`;
       const diffCell = entry.diffFile
         ? `<img src="${entry.diffFile}" alt="diff ${entry.route} ${entry.viewport}" />`
         : entry.baseFile
           ? `<p class="ok">No pixel diff</p>`
           : `<p class="missing">—</p>`;
-      const changedLabel = entry.mismatched
-        ? ` · <span class="changed">${entry.mismatched} px changed</span>`
-        : "";
+      const statusLabel =
+        entry.status === "new"
+          ? ` · <span class="changed">new route</span>`
+          : entry.mismatched
+            ? ` · <span class="changed">${entry.mismatched} px changed</span>`
+            : "";
       return `<section class="case">
-  <h2>${entry.route} · ${entry.viewport}${changedLabel}</h2>
+  <h2>${entry.route} · ${entry.viewport}${statusLabel}</h2>
   <div class="grid">
-    <figure><figcaption>Base (before)</figcaption>${baseCell}</figure>
+    <figure><figcaption>${baseCaption}</figcaption>${baseCell}</figure>
     <figure><figcaption>PR (after)</figcaption><img src="${entry.prFile}" alt="pr ${entry.route} ${entry.viewport}" /></figure>
     <figure><figcaption>Diff</figcaption>${diffCell}</figure>
   </div>
@@ -376,11 +399,12 @@ try {
       const prUrl = `${prOrigin}${publicUrl(route.urlPath)}`;
       const prShot = await screenshotPage(browser, prUrl, viewport, prFile);
       assert.ok(
-        prShot.ok,
+        prShot.ok && prShot.status < 400,
         `Failed to load PR route ${prUrl}: ${prShot.status}`,
       );
 
       let baseOk = false;
+      let baseMissing = false;
       let mismatched = 0;
       let baseUrl = null;
       if (!skipBase) {
@@ -392,8 +416,10 @@ try {
           baseUrl,
           viewport,
           baseFile,
+          { allowNotFound: true },
         );
         baseOk = baseShot.ok;
+        baseMissing = baseOk && baseShot.status === 404;
         if (!baseOk) {
           await rm(baseFile, { force: true });
         } else {
@@ -404,6 +430,14 @@ try {
         }
       }
 
+      const status = !baseOk
+        ? "new"
+        : baseMissing
+          ? "new"
+          : mismatched > 0
+            ? "changed"
+            : "unchanged";
+
       manifest.push({
         route: route.urlPath || "/",
         viewport: viewport.name,
@@ -413,7 +447,7 @@ try {
         mismatched: mismatched > 0 ? mismatched : 0,
         prUrl: publicUrl(route.urlPath),
         baseUrl: skipBase ? null : baseUrl,
-        status: baseOk ? (mismatched > 0 ? "changed" : "unchanged") : "new",
+        status,
       });
     }
   }
