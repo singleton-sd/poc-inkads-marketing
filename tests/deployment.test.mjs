@@ -116,6 +116,8 @@ test("visual screenshot helper is wired for hosted report and gate", async () =>
   assert.match(visual, /VISUAL_BASE_SHA/);
   assert.match(visual, /VISUAL_BASE_URL/);
   assert.match(visual, /baseSha/);
+  assert.match(visual, /allowNotFound/);
+  assert.match(visual, /404\.html/);
   assert.match(visual, /index\.html/);
   assert.match(visual, /entry\.name === "visual"/);
   assert.match(visual, /1440/);
@@ -128,6 +130,7 @@ test("visual screenshot helper is wired for hosted report and gate", async () =>
   assert.match(deployment, /Open visual report/);
   assert.match(deployment, /required.*visual/i);
   assert.match(deployment, /base SHA|base branch/i);
+  assert.match(deployment, /New routes still capture/i);
 });
 
 test("Pages branch includes the production custom domain", async () => {
