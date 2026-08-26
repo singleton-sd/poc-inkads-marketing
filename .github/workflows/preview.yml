@@ -4,10 +4,13 @@ on:
   pull_request:
     types: [opened, reopened, synchronize, closed, labeled, unlabeled]
 
-# Label accept/reject must not serialize behind Pages publishes.
+# Per-PR groups so queued previews are not cancelled when many PRs update at
+# once (a shared pages-publish group drops previously pending runs). Label
+# accept stays on its own group. cancel-in-progress only replaces stale runs
+# for the same PR. Parallel gh-pages pushes retry below.
 concurrency:
-  group: ${{ contains(fromJSON('["labeled","unlabeled"]'), github.event.action) && format('visual-label-pr-{0}', github.event.number) || 'pages-publish' }}
-  cancel-in-progress: false
+  group: ${{ contains(fromJSON('["labeled","unlabeled"]'), github.event.action) && format('visual-label-pr-{0}', github.event.number) || format('preview-pr-{0}', github.event.number) }}
+  cancel-in-progress: true
 
 permissions:
   contents: write
@@ -71,13 +74,17 @@ jobs:
           retention-days: 14
       - name: Deploy preview
         id: preview
-        uses: rossjrw/pr-preview-action@v1.8.1
+        uses: Wandalen/wretry.action@v3.8.0
         with:
-          source-dir: dist
-          preview-branch: gh-pages
-          pages-base-url: https://inkads.poc.singletonsd.com
-          umbrella-dir: pr-preview
-          comment: false
+          attempt_limit: 6
+          attempt_delay: 20000
+          action: rossjrw/pr-preview-action@v1.8.1
+          with: |
+            source-dir: dist
+            preview-branch: gh-pages
+            pages-base-url: https://inkads.poc.singletonsd.com
+            umbrella-dir: pr-preview
+            comment: false
       - name: Build sticky preview comment
         uses: actions/github-script@v8
         env:
@@ -247,13 +254,17 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v7
       - name: Remove preview
-        uses: rossjrw/pr-preview-action@v1.8.1
+        uses: Wandalen/wretry.action@v3.8.0
         with:
-          source-dir: dist
-          preview-branch: gh-pages
-          pages-base-url: https://inkads.poc.singletonsd.com
-          umbrella-dir: pr-preview
-          comment: false
+          attempt_limit: 6
+          attempt_delay: 20000
+          action: rossjrw/pr-preview-action@v1.8.1
+          with: |
+            source-dir: dist
+            preview-branch: gh-pages
+            pages-base-url: https://inkads.poc.singletonsd.com
+            umbrella-dir: pr-preview
+            comment: false
       - name: Hide sticky preview comment
         uses: marocchino/sticky-pull-request-comment@v2
         with:

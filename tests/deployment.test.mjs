@@ -63,6 +63,15 @@ test("PR workflow publishes subpath previews and updates the PR body", async () 
   assert.match(workflow, /visual-accepted/);
   assert.match(workflow, /\blabeled\b/);
   assert.match(workflow, /\bunlabeled\b/);
+  assert.match(
+    workflow,
+    /format\('preview-pr-\{0\}',\s*github\.event\.number\)/,
+  );
+  assert.match(workflow, /Wandalen\/wretry\.action@v3\.8\.0/);
+  assert.doesNotMatch(
+    workflow,
+    /format\('preview-pr-\{0\}'[\s\S]*\|\|\s*'pages-publish'/,
+  );
   assert.doesNotMatch(workflow, /pull_request_target/);
   assert.doesNotMatch(workflow, /secrets\./);
 });

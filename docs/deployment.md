@@ -42,6 +42,14 @@ check named **`visual`** (job name from `.github/workflows/preview.yml`). Keep
 the existing preview/quality jobs as you prefer; `preview` still deploys even
 when `visual` fails so the report URL stays available.
 
+## Preview concurrency
+
+Preview runs use a **per-PR** concurrency group (`preview-pr-<n>`) so updating
+many open PRs at once does not cancel other queued previews. (A shared
+`pages-publish` group drops previously pending runs when a newer one queues.)
+Production still uses `pages-publish`. Preview deploy/remove steps retry on
+`gh-pages` push conflicts when parallel writes race.
+
 ## One-time GitHub Pages configuration
 
 Configure the repository to deploy GitHub Pages from the `gh-pages` branch and
