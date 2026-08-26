@@ -1,0 +1,86 @@
+{
+  "basePath": "/pr-preview/pr-41/",
+  "baseSiteUrl": "https://inkads.poc.singletonsd.com",
+  "summary": {
+    "total": 6,
+    "unchanged": 0,
+    "changed": 2,
+    "new": 1,
+    "changedRoutes": [
+      "/",
+      "404"
+    ],
+    "newRoutes": [
+      "support"
+    ],
+    "hasDiffs": true
+  },
+  "routes": [
+    {
+      "route": "404",
+      "viewport": "desktop",
+      "prFile": "pr/404-desktop.png",
+      "baseFile": "base/404-desktop.png",
+      "diffFile": "diff/404-desktop.png",
+      "mismatched": 255167,
+      "prUrl": "/pr-preview/pr-41/404",
+      "baseUrl": "https://inkads.poc.singletonsd.com/404",
+      "status": "changed"
+    },
+    {
+      "route": "404",
+      "viewport": "mobile",
+      "prFile": "pr/404-mobile.png",
+      "baseFile": "base/404-mobile.png",
+      "diffFile": "diff/404-mobile.png",
+      "mismatched": 262758,
+      "prUrl": "/pr-preview/pr-41/404",
+      "baseUrl": "https://inkads.poc.singletonsd.com/404",
+      "status": "changed"
+    },
+    {
+      "route": "/",
+      "viewport": "desktop",
+      "prFile": "pr/home-desktop.png",
+      "baseFile": "base/home-desktop.png",
+      "diffFile": "diff/home-desktop.png",
+      "mismatched": 4431241,
+      "prUrl": "/pr-preview/pr-41/",
+      "baseUrl": "https://inkads.poc.singletonsd.com/",
+      "status": "changed"
+    },
+    {
+      "route": "/",
+      "viewport": "mobile",
+      "prFile": "pr/home-mobile.png",
+      "baseFile": "base/home-mobile.png",
+      "diffFile": "diff/home-mobile.png",
+      "mismatched": 802966,
+      "prUrl": "/pr-preview/pr-41/",
+      "baseUrl": "https://inkads.poc.singletonsd.com/",
+      "status": "changed"
+    },
+    {
+      "route": "support",
+      "viewport": "desktop",
+      "prFile": "pr/support-desktop.png",
+      "baseFile": null,
+      "diffFile": null,
+      "mismatched": 0,
+      "prUrl": "/pr-preview/pr-41/support",
+      "baseUrl": "https://inkads.poc.singletonsd.com/support",
+      "status": "new"
+    },
+    {
+      "route": "support",
+      "viewport": "mobile",
+      "prFile": "pr/support-mobile.png",
+      "baseFile": null,
+      "diffFile": null,
+      "mismatched": 0,
+      "prUrl": "/pr-preview/pr-41/support",
+      "baseUrl": "https://inkads.poc.singletonsd.com/support",
+      "status": "new"
+    }
+  ]
+}
