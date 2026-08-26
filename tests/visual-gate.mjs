@@ -1,8 +1,10 @@
 /**
- * Fail CI when visual capture found changed or new routes vs production.
+ * Fail CI when visual capture found changed or new routes vs the PR base.
  *
  * Reads `test-results/visual/manifest.json` from `pnpm test:visual`.
  * Set VISUAL_ACCEPTED=1 (or label `visual-accepted` in CI) to pass anyway.
+ * This backs the `visual-review` required check — a human review gate, not a
+ * Playwright infrastructure failure.
  */
 import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
@@ -57,7 +59,7 @@ if (!manifest.summary && Array.isArray(manifest.routes)) {
 }
 
 const lines = [
-  `Visual gate: ${summary.total} comparisons`,
+  `Visual review: ${summary.total} comparisons`,
   `- unchanged viewports: ${summary.unchanged}`,
   `- changed routes (${summary.changed}): ${summary.changedRoutes.join(", ") || "—"}`,
   `- new routes (${summary.new}): ${summary.newRoutes.join(", ") || "—"}`,
@@ -68,18 +70,25 @@ for (const line of lines) {
 }
 
 if (!summary.hasDiffs) {
-  console.log("Visual gate passed: no changes vs production.");
+  console.log("Visual review passed: no new or changed pages vs PR base.");
   process.exit(0);
 }
 
 if (accepted) {
   console.log(
-    "Visual gate passed: diffs present but VISUAL_ACCEPTED is set (label visual-accepted).",
+    "Visual review passed: changes present but VISUAL_ACCEPTED is set (label visual-accepted).",
   );
   process.exit(0);
 }
 
+const reason =
+  summary.changed > 0 && summary.new > 0
+    ? `pixel changes (${summary.changedRoutes.join(", ") || "—"}) and new pages (${summary.newRoutes.join(", ") || "—"})`
+    : summary.new > 0
+      ? `new page(s): ${summary.newRoutes.join(", ") || "—"}`
+      : `pixel changes: ${summary.changedRoutes.join(", ") || "—"}`;
+
 console.error(
-  "Visual gate failed: pixel diffs or new routes vs PR base. Review the hosted visual report, then add the visual-accepted label (that alone clears the check; no rebuild).",
+  `Visual review required (${reason}). Open the hosted visual report, then add the visual-accepted label (that alone clears the visual-review check; no rebuild).`,
 );
 process.exit(1);
