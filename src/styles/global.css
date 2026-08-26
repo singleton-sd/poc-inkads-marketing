@@ -31,6 +31,7 @@
   --ink-space-md: 1.5rem;
   --ink-border: #292c30;
   --ink-border-strong: #ffb300;
+  --ink-inverse-border: #c9ccd1;
   --ink-focus: #ffd54f;
   --ink-inverse: #ffffff;
   --ink-on-inverse: #000000;
@@ -617,7 +618,7 @@ main {
 }
 
 .inverse-section .media-placeholder {
-  border-color: #c9ccd1;
+  border-color: var(--ink-inverse-border);
   background: var(--ink-surface-soft);
   color: var(--ink-on-inverse-soft);
 }

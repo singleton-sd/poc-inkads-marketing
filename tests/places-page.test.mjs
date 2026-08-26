@@ -8,12 +8,12 @@ const contentPath = new URL("src/content/pages/places.md", root);
 
 test("places page uses shared chrome primitives from the design kit", async () => {
   const page = await readFile(pagePath, "utf8");
-  assert.match(page, /PageHero/);
-  assert.match(page, /PlaceCard/);
-  assert.match(page, /InverseSection/);
-  assert.match(page, /MediaPlaceholder/);
-  assert.match(page, /CtaBand/);
-  assert.match(page, /BaseLayout/);
+  assert.match(page, /<PageHero\b/);
+  assert.match(page, /<PlaceCard\b/);
+  assert.match(page, /<InverseSection\b/);
+  assert.match(page, /<MediaPlaceholder\b/);
+  assert.match(page, /<CtaBand\b/);
+  assert.match(page, /<BaseLayout\b/);
 });
 
 test("places content covers bathrooms as the initial focus plus extended contexts", async () => {
@@ -27,7 +27,7 @@ test("places content covers bathrooms as the initial focus plus extended context
     "Shopping centres",
     "High-traffic spaces",
   ]) {
-    assert.match(content, new RegExp(place.replace("&", "&amp;|&")));
+    assert.match(content, new RegExp(place.replace("&", "(?:&amp;|&)")));
   }
 });
 
