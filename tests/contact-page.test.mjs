@@ -29,17 +29,30 @@ test("contact form remains client-side only with a success panel", async () => {
 
   assert.match(form, /data-contact-form/);
   assert.match(form, /data-contact-form-success/);
-  assert.match(form, /Thanks — request received\./);
+  assert.match(form, /Form preview complete\./);
+  assert.match(form, /Nothing was sent\./);
   assert.doesNotMatch(form, /fetch\(|action=/);
 });
 
-test("contact content avoids unvalidated outcome claims", async () => {
+test("contact content uses transparent non-delivery messaging", async () => {
   const page = await readFile(new URL("src/pages/contact.astro", root), "utf8");
   const content = await readFile(
     new URL("src/content/pages/contact.md", root),
     "utf8",
   );
-  const publicCopy = `${page}\n${content}`;
+  const form = await readFile(
+    new URL("src/components/ContactForm.astro", root),
+    "utf8",
+  );
+  const publicCopy = `${page}\n${content}\n${form}`;
+
+  assert.match(publicCopy, /preview only/i);
+  assert.match(publicCopy, /Nothing was sent\./);
+  assert.match(publicCopy, /hello@inkads\.poc\.singletonsd\.com/);
+  assert.doesNotMatch(
+    publicCopy,
+    /Send request|request received|We'll be in touch/i,
+  );
   assert.doesNotMatch(
     publicCopy,
     /\b(guaranteed|proven roi|industry-leading|best-in-class|revenue lift)\b/i,

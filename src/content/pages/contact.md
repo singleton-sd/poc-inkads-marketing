@@ -1,14 +1,14 @@
 ---
 title: Request a demo | InkAds
-description: Tell us about your venue or brand and we'll follow up to scope an InkAds pilot.
+description: Preview the InkAds demo-request form, or email hello@inkads.poc.singletonsd.com to start a conversation.
 eyebrow: Request a demo
 headline: Let's talk about your space or campaign.
-summary: Tell us a bit about your venue or brand and we'll follow up to scope a pilot.
+summary: This form is a preview only — it does not send your details. Email hello@inkads.poc.singletonsd.com to reach us.
 email: hello@inkads.poc.singletonsd.com
 status: Proof of concept · a Singleton SD product
-submitLabel: Send request
-successTitle: Thanks — request received.
-successBody: We'll be in touch shortly to schedule a demo.
+submitLabel: Preview form
+successTitle: Form preview complete.
+successBody: Nothing was sent. Email hello@inkads.poc.singletonsd.com to request a demo.
 ---
 
 Request a demo of InkAds for your venue or campaign.
