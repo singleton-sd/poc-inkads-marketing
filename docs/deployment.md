@@ -13,16 +13,20 @@ workflow:
 2. Puts a managed **Preview** section at the **top** of the PR body (see
    `.github/pull_request_template.md` for the starting placeholder)
 3. Captures Playwright full-page screenshots (desktop 1440 + mobile 390) for
-   every built HTML route, compares each route to production
-   (`https://inkads.poc.singletonsd.com`), and hosts a report at
-   `…/pr-<number>/visual/` (`base/` · `pr/` · `diff/` · `index.html`)
+   every built HTML route, compares each route to a **build of the PR base
+   SHA** (same `/` Astro base as the PR visual build — not live production),
+   and hosts a report at `…/pr-<number>/visual/` (`base/` · `pr/` · `diff/` ·
+   `index.html`)
 4. Runs a required **`visual`** status check that **fails** when any route is
-   `changed` or `new` vs production
+   `changed` or `new` vs that base build
 5. Removes the preview deploy and hides the sticky comment when the PR closes
 
 Pull requests from forks are not given write access to publish.
 
 ## Visual review and accept
+
+Baseline is the PR’s base branch tip (usually `main`), built in CI. Live
+production is not used — it can lag when Pages deploys fail.
 
 1. Open the sticky **Preview** comment → **Open visual report**
 2. If the **`visual`** check is red, review base / PR / diff for listed routes
@@ -33,7 +37,7 @@ Pull requests from forks are not given write access to publish.
 Removing **`visual-accepted`** re-runs the gate against the last capture and fails
 again if diffs remain.
 
-Merge updates production; the next PR compares against that new baseline.
+CI-only PRs with no page changes should pass `visual` with zero diffs.
 
 ### Required status check (one-time)
 

@@ -82,6 +82,10 @@ test("PR workflow publishes subpath previews and updates the PR body", async () 
     (workflow.match(/rossjrw\/pr-preview-action@v1\.8\.1/g) ?? []).length,
     4,
   );
+  assert.match(workflow, /VISUAL_BASE_DIR/);
+  assert.match(workflow, /pull_request\.base\.sha/);
+  assert.match(workflow, /path:\s*visual-base/);
+  assert.match(workflow, /Build PR site for visual compare/);
   assert.doesNotMatch(workflow, /Wandalen\/wretry/);
   assert.doesNotMatch(workflow, /\|\|\s*'pages-publish'/);
   assert.doesNotMatch(workflow, /pull_request_target/);
@@ -104,6 +108,7 @@ test("visual screenshot helper is wired for hosted report and gate", async () =>
   assert.match(pkg, /"test:visual:gate":\s*"node tests\/visual-gate\.mjs"/);
   assert.match(pkg, /"pixelmatch"/);
   assert.match(visual, /test-results\/visual/);
+  assert.match(visual, /VISUAL_BASE_DIR/);
   assert.match(visual, /VISUAL_BASE_URL/);
   assert.match(visual, /index\.html/);
   assert.match(visual, /entry\.name === "visual"/);
@@ -116,6 +121,7 @@ test("visual screenshot helper is wired for hosted report and gate", async () =>
   assert.match(template, /visual-accepted/);
   assert.match(deployment, /Open visual report/);
   assert.match(deployment, /required.*visual/i);
+  assert.match(deployment, /base SHA|base branch/i);
 });
 
 test("Pages branch includes the production custom domain", async () => {

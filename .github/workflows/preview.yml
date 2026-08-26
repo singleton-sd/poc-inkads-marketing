@@ -51,16 +51,30 @@ jobs:
         run: pnpm lint
       - name: Run tests
         run: pnpm test
-      - name: Build preview site
+      - name: Check out PR base for visual baseline
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: visual-base
+      - name: Install baseline dependencies
+        working-directory: visual-base
+        run: pnpm install --frozen-lockfile
+      - name: Build visual baseline
+        working-directory: visual-base
         run: pnpm build
-        env:
-          PREVIEW_BASE_PATH: /pr-preview/pr-${{ github.event.number }}/
+      - name: Build PR site for visual compare
+        run: pnpm build
       - name: Install Playwright browsers
         run: pnpm playwright:install
       - name: Capture visual screenshots
         run: pnpm test:visual
         env:
-          VISUAL_BASE_PATH: /pr-preview/pr-${{ github.event.number }}/
+          VISUAL_BASE_PATH: /
+          VISUAL_BASE_DIR: ${{ github.workspace }}/visual-base/dist
+      - name: Build preview site
+        run: pnpm build
+        env:
+          PREVIEW_BASE_PATH: /pr-preview/pr-${{ github.event.number }}/
       - name: Host visual report under preview
         run: |
           rm -rf dist/visual
@@ -121,8 +135,8 @@ jobs:
                 ? summary.newRoutes.map((r) => `\`${r}\``).join(", ")
                 : "—";
             const statusLine = summary.hasDiffs
-              ? `⚠️ Visual diffs detected (${summary.changed} changed routes, ${summary.new} new). The **visual** check fails until you add the \`visual-accepted\` label (no rebuild — that label alone clears the check).`
-              : "✅ No visual diffs vs production.";
+              ? `⚠️ Visual diffs detected (${summary.changed} changed routes, ${summary.new} new vs PR base). The **visual** check fails until you add the \`visual-accepted\` label (no rebuild — that label alone clears the check).`
+              : "✅ No visual diffs vs PR base branch.";
             const body = [
               "## Preview",
               "",
