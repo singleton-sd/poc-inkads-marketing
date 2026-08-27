@@ -1,17 +1,18 @@
 {
   "basePath": "/",
-  "baseSha": "85ef6f1bc5ff1f242d972364a5ae3ffabf4872bf",
+  "baseSha": "22da74eb39a37dff77543990eafc0d1aae201ad3",
   "baseLabel": "local:/home/runner/work/poc-inkads-marketing/poc-inkads-marketing/visual-base/dist",
   "baseSiteUrl": null,
   "baseDistDir": "/home/runner/work/poc-inkads-marketing/poc-inkads-marketing/visual-base/dist",
   "summary": {
-    "total": 8,
-    "unchanged": 4,
-    "changed": 3,
+    "total": 10,
+    "unchanged": 5,
+    "changed": 4,
     "new": 0,
     "changedRoutes": [
       "/",
       "how-it-works",
+      "pricing",
       "support"
     ],
     "newRoutes": [],
@@ -26,7 +27,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/404",
-      "baseUrl": "http://127.0.0.1:43095/404",
+      "baseUrl": "http://127.0.0.1:36705/404",
       "status": "unchanged"
     },
     {
@@ -37,7 +38,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/404",
-      "baseUrl": "http://127.0.0.1:43095/404",
+      "baseUrl": "http://127.0.0.1:36705/404",
       "status": "unchanged"
     },
     {
@@ -48,7 +49,7 @@
       "diffFile": "diff/how-it-works-desktop.png",
       "mismatched": 12324,
       "prUrl": "/how-it-works",
-      "baseUrl": "http://127.0.0.1:43095/how-it-works",
+      "baseUrl": "http://127.0.0.1:36705/how-it-works",
       "status": "changed"
     },
     {
@@ -59,7 +60,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/how-it-works",
-      "baseUrl": "http://127.0.0.1:43095/how-it-works",
+      "baseUrl": "http://127.0.0.1:36705/how-it-works",
       "status": "unchanged"
     },
     {
@@ -70,7 +71,7 @@
       "diffFile": "diff/home-desktop.png",
       "mismatched": 2437027,
       "prUrl": "/",
-      "baseUrl": "http://127.0.0.1:43095/",
+      "baseUrl": "http://127.0.0.1:36705/",
       "status": "changed"
     },
     {
@@ -81,8 +82,30 @@
       "diffFile": "diff/home-mobile.png",
       "mismatched": 737657,
       "prUrl": "/",
-      "baseUrl": "http://127.0.0.1:43095/",
+      "baseUrl": "http://127.0.0.1:36705/",
       "status": "changed"
+    },
+    {
+      "route": "pricing",
+      "viewport": "desktop",
+      "prFile": "pr/pricing-desktop.png",
+      "baseFile": "base/pricing-desktop.png",
+      "diffFile": "diff/pricing-desktop.png",
+      "mismatched": 384741,
+      "prUrl": "/pricing",
+      "baseUrl": "http://127.0.0.1:36705/pricing",
+      "status": "changed"
+    },
+    {
+      "route": "pricing",
+      "viewport": "mobile",
+      "prFile": "pr/pricing-mobile.png",
+      "baseFile": "base/pricing-mobile.png",
+      "diffFile": null,
+      "mismatched": 0,
+      "prUrl": "/pricing",
+      "baseUrl": "http://127.0.0.1:36705/pricing",
+      "status": "unchanged"
     },
     {
       "route": "support",
@@ -92,7 +115,7 @@
       "diffFile": "diff/support-desktop.png",
       "mismatched": 457755,
       "prUrl": "/support",
-      "baseUrl": "http://127.0.0.1:43095/support",
+      "baseUrl": "http://127.0.0.1:36705/support",
       "status": "changed"
     },
     {
@@ -103,7 +126,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/support",
-      "baseUrl": "http://127.0.0.1:43095/support",
+      "baseUrl": "http://127.0.0.1:36705/support",
       "status": "unchanged"
     }
   ]
