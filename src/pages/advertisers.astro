@@ -1,0 +1,90 @@
+---
+import { getEntry } from "astro:content";
+import ButtonLink from "../components/ButtonLink.astro";
+import CtaBand from "../components/CtaBand.astro";
+import FeatureGrid from "../components/FeatureGrid.astro";
+import FeatureItem from "../components/FeatureItem.astro";
+import InverseSection from "../components/InverseSection.astro";
+import MediaPlaceholder from "../components/MediaPlaceholder.astro";
+import PageHero from "../components/PageHero.astro";
+import SectionHeading from "../components/SectionHeading.astro";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { withBase } from "../lib/nav";
+
+const page = await getEntry("pages", "advertisers");
+if (!page) throw new Error("The advertisers page content entry is missing.");
+
+const {
+  title,
+  description,
+  headline,
+  summary,
+  eyebrow,
+  ctaLabel = "Request a demo",
+  mediaLabel = "Sample creative on e-paper display",
+  benefitsEyebrow = "Why advertisers consider InkAds",
+  benefits = [],
+  designingEyebrow = "Designing for e-paper",
+  designingHeadline,
+  designingBody,
+  closingHeadline,
+} = page.data;
+
+if (!designingHeadline || !designingBody || !closingHeadline) {
+  throw new Error(
+    "Advertisers page content is missing designing or closing copy.",
+  );
+}
+
+const base = import.meta.env.BASE_URL;
+const contactHref = withBase("/contact", base);
+---
+
+<BaseLayout title={title} description={description}>
+  <main id="main-content">
+    <PageHero
+      eyebrow={eyebrow}
+      title={headline}
+      lead={summary}
+      tone="audience"
+      split
+    >
+      <ButtonLink
+        slot="actions"
+        href={contactHref}
+        label={ctaLabel}
+        variant="audience"
+      />
+      <MediaPlaceholder label={mediaLabel} minHeight="340px" />
+    </PageHero>
+
+    <InverseSection labelledBy="benefits-title">
+      <p class="eyebrow eyebrow--audience">{benefitsEyebrow}</p>
+      <h2 id="benefits-title" class="sr-only">{benefitsEyebrow}</h2>
+      <FeatureGrid>
+        {
+          benefits.map((benefit) => (
+            <FeatureItem
+              title={benefit.title}
+              description={benefit.description}
+            />
+          ))
+        }
+      </FeatureGrid>
+    </InverseSection>
+
+    <section class="shell designing-section" aria-labelledby="designing-title">
+      <SectionHeading
+        tone="audience"
+        eyebrow={designingEyebrow}
+        title={designingHeadline}
+        lead={designingBody}
+        titleId="designing-title"
+      />
+    </section>
+
+    <CtaBand title={closingHeadline} tone="audience">
+      <ButtonLink href={contactHref} label={ctaLabel} variant="on-audience" />
+    </CtaBand>
+  </main>
+</BaseLayout>
