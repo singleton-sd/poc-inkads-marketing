@@ -2,6 +2,11 @@ import { defineCollection } from "astro:content";
 import { glob } from "astro/loaders";
 import { z } from "astro/zod";
 
+const ctaLink = z.object({
+  label: z.string().min(1),
+  href: z.string().min(1),
+});
+
 const featureItem = z.object({
   title: z.string().min(1),
   description: z.string().min(1),
@@ -21,6 +26,21 @@ const pages = defineCollection({
     summary: z.string().min(1),
     draft: z.boolean().default(false),
     eyebrow: z.string().min(1).optional(),
+    steps: z
+      .array(
+        z.object({
+          number: z.string().min(1),
+          title: z.string().min(1),
+          description: z.string().min(1),
+        }),
+      )
+      .optional(),
+    featuresEyebrow: z.string().min(1).optional(),
+    featuresHeadline: z.string().min(1).optional(),
+    features: z.array(featureItem).optional(),
+    ctaTitle: z.string().min(1).optional(),
+    primaryCta: ctaLink.optional(),
+    secondaryCta: ctaLink.optional(),
     ctaLabel: z.string().min(1).optional(),
     ctaHref: z.string().min(1).optional(),
     mediaLabel: z.string().min(1).optional(),

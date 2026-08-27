@@ -1,0 +1,104 @@
+---
+import { getEntry, render } from "astro:content";
+import ButtonLink from "../components/ButtonLink.astro";
+import CtaBand from "../components/CtaBand.astro";
+import MetaPair from "../components/MetaPair.astro";
+import PageHero from "../components/PageHero.astro";
+import ProcessRow from "../components/ProcessRow.astro";
+import SectionHeading from "../components/SectionHeading.astro";
+import TextLink from "../components/TextLink.astro";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { withBase } from "../lib/nav";
+
+const support = await getEntry("pages", "support");
+if (!support) throw new Error("The support page content entry is missing.");
+const { Content } = await render(support);
+const base = import.meta.env.BASE_URL;
+const supportEmail = "hello@inkads.poc.singletonsd.com";
+---
+
+<BaseLayout title={support.data.title} description={support.data.description}>
+  <main id="main-content">
+    <PageHero
+      eyebrow="Support"
+      title={support.data.headline}
+      lead={support.data.summary}
+    />
+
+    <section
+      class="shell support-section"
+      aria-labelledby="support-overview-title"
+    >
+      <SectionHeading
+        eyebrow="About this page"
+        title="A public help destination for the pilot."
+        titleId="support-overview-title"
+      />
+      <div class="page-copy">
+        <Content />
+      </div>
+    </section>
+
+    <section class="shell support-section" aria-labelledby="support-help-title">
+      <SectionHeading
+        eyebrow="How we can help"
+        title="Practical questions during the pilot."
+        lead="We can point you toward the right next step for sign-in, placement context, or a conversation about the concept."
+        titleId="support-help-title"
+      />
+      <ul class="process-list">
+        <ProcessRow
+          label="Sign-in help"
+          detail="Questions about accessing InkAds through the display device flow or related Microsoft Entra sign-in."
+        />
+        <ProcessRow
+          label="Pilot orientation"
+          detail="Clarifying what the proof of concept covers for venues and advertisers — without unvalidated claims."
+        />
+        <ProcessRow
+          label="General contact"
+          detail="Anything else about InkAds or Singleton SD can start with a short message via email or the contact page."
+        />
+      </ul>
+    </section>
+
+    <section
+      class="shell support-section"
+      aria-labelledby="support-contact-title"
+    >
+      <SectionHeading
+        eyebrow="Contact path"
+        title="Reach the team."
+        lead="This proof of concept uses email and the contact page only — no support portal."
+        titleId="support-contact-title"
+      />
+      <div class="support-contact">
+        <MetaPair
+          label="Email"
+          value={supportEmail}
+          href={`mailto:${supportEmail}`}
+        />
+        <MetaPair label="Status" value="Proof of concept · Singleton SD" />
+        <p class="support-contact__link">
+          <TextLink
+            href={withBase("/contact", base)}
+            label="Or use the contact page"
+          />
+        </p>
+      </div>
+    </section>
+
+    <CtaBand title="Need a longer conversation?" tone="brand">
+      <ButtonLink
+        href={`mailto:${supportEmail}`}
+        label="Email support"
+        variant="inverse"
+      />
+      <ButtonLink
+        href={withBase("/contact", base)}
+        label="Go to contact"
+        variant="ghost-inverse"
+      />
+    </CtaBand>
+  </main>
+</BaseLayout>
