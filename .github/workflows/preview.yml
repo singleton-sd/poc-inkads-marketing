@@ -135,9 +135,13 @@ jobs:
               summary.newRoutes?.length > 0
                 ? summary.newRoutes.map((r) => `\`${r}\``).join(", ")
                 : "—";
-            const statusLine = summary.hasDiffs
-              ? `⚠️ Visual diffs detected (${summary.changed} changed routes, ${summary.new} new vs PR base). The **visual** check fails until you add the \`visual-accepted\` label (no rebuild — that label alone clears the check).`
-              : "✅ No visual diffs vs PR base branch.";
+            const statusLine = !summary.hasDiffs
+              ? "✅ Visual review clear vs PR base (no new or changed pages)."
+              : summary.changed > 0 && summary.new > 0
+                ? `⚠️ Visual review needed: ${summary.changed} changed route(s), ${summary.new} new. Open the report, then add \`visual-accepted\` (no rebuild).`
+                : summary.new > 0
+                  ? `⚠️ Visual review needed: ${summary.new} new page(s) vs base. Open the report, then add \`visual-accepted\` (no rebuild).`
+                  : `⚠️ Visual review needed: ${summary.changed} changed route(s) vs base. Open the report, then add \`visual-accepted\` (no rebuild).`;
             const body = [
               "## Preview",
               "",
@@ -150,6 +154,7 @@ jobs:
               `- Changed routes: ${changedList}`,
               `- New routes: ${newList}`,
               `- Unchanged viewports: ${summary.unchanged ?? 0}`,
+              `- Required check: **visual-review** (cleared by \`visual-accepted\` after you review)`,
               `- Artifact backup: \`visual-pr-${context.issue.number}\``,
               "",
             ].join("\n");
@@ -198,8 +203,8 @@ jobs:
               body,
             });
 
-  visual:
-    name: visual
+  visual-review:
+    name: visual-review
     needs: [preview]
     if: >
       always() &&
@@ -236,7 +241,7 @@ jobs:
       - name: Accept intentional visual diffs
         if: steps.accept.outputs.accepted == 'true'
         run: |
-          echo "visual-accepted label present — clearing the visual check (no rebuild or re-screenshot)."
+          echo "visual-accepted label present — clearing visual-review (no rebuild or re-screenshot)."
       - name: Download visual artifact from this run
         if: steps.accept.outputs.accepted != 'true' && needs.preview.result == 'success'
         uses: actions/download-artifact@v4
