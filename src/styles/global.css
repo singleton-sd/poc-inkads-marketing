@@ -666,7 +666,7 @@ main {
 }
 
 .places-page__cards {
-  padding-bottom: clamp(4rem, 8vw, 7rem);
+  padding-bottom: var(--ink-space-section);
 }
 
 .places-page__cards .places-grid {

@@ -22,7 +22,7 @@ places:
 constraint:
   eyebrow: A constraint, not a limitation
   headline: Not built to compete with video signage.
-  body: InkAds is not intended to compete with animated LCD or video signage. Its strength is low-power, static advertising that can remain visible for long periods and update remotely — a fit for spaces where a bright screen would feel out of place.
+  body: InkAds is not intended to compete with animated LCD or video signage. The concept focuses on static advertising designed for low power use, intended to stay visible for long periods and update remotely — a fit for spaces where a bright screen would feel out of place.
   mediaLabel: Venue photo placeholder
 cta:
   title: Have a space in mind?
