@@ -44,11 +44,9 @@ collections:
       - label: Headline
         name: headline
         widget: string
-        required: false
       - label: Summary
         name: summary
         widget: text
-        required: false
       - label: CTA title
         name: ctaTitle
         widget: string

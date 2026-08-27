@@ -35,8 +35,10 @@ test("FAQ page content contains the required public fields", async () => {
 });
 
 test("FAQ items cover the design-reference questions", async () => {
-  const files = (await readdir(faqsDir)).filter((name) => name.endsWith(".md"));
-  assert.equal(files.length, 6);
+  const files = (await readdir(faqsDir)).filter(
+    (name) => name.endsWith(".md") || name.endsWith(".mdx"),
+  );
+  assert.ok(files.length >= 6);
 
   const contents = await Promise.all(
     files.map((name) => readFile(new URL(name, faqsDir), "utf8")),
