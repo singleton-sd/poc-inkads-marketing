@@ -1,0 +1,52 @@
+---
+import { getEntry } from "astro:content";
+import EditorialCard from "../components/EditorialCard.astro";
+import InverseSection from "../components/InverseSection.astro";
+import PageHero from "../components/PageHero.astro";
+import TextLink from "../components/TextLink.astro";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { withBase } from "../lib/nav";
+
+const pricing = await getEntry("pages", "pricing");
+if (!pricing) throw new Error("The pricing page content entry is missing.");
+
+const { eyebrow, headline, summary, note, pilots } = pricing.data;
+const base = import.meta.env.BASE_URL;
+---
+
+<BaseLayout title={pricing.data.title} description={pricing.data.description}>
+  <main id="main-content">
+    <PageHero eyebrow={eyebrow} title={headline} lead={summary} />
+
+    {
+      pilots && pilots.length > 0 && (
+        <section class="shell pricing-pilots" aria-label="Pilot options">
+          <div class="card-grid">
+            {pilots.map((pilot) => (
+              <EditorialCard
+                eyebrow={pilot.eyebrow}
+                title={pilot.title}
+                description={pilot.description}
+                accent={pilot.accent}
+              >
+                <TextLink
+                  href={withBase(pilot.href, base)}
+                  label={pilot.ctaLabel}
+                  accent={pilot.accent}
+                />
+              </EditorialCard>
+            ))}
+          </div>
+        </section>
+      )
+    }
+
+    {
+      note && (
+        <InverseSection centered>
+          <p>{note}</p>
+        </InverseSection>
+      )
+    }
+  </main>
+</BaseLayout>
