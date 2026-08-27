@@ -61,6 +61,7 @@ const pages = defineCollection({
       .min(1)
       .optional(),
     parentBrand: z.string().min(1).optional(),
+    ctaTitle: z.string().min(1).optional(),
     email: z.email().optional(),
     status: z.string().min(1).optional(),
     submitLabel: z.string().min(1).optional(),
@@ -92,7 +93,6 @@ const pages = defineCollection({
     featuresEyebrow: z.string().min(1).optional(),
     featuresHeadline: z.string().min(1).optional(),
     features: z.array(featureItem).optional(),
-    ctaTitle: z.string().min(1).optional(),
     primaryCta: ctaLink.optional(),
     secondaryCta: ctaLink.optional(),
     places: z.array(placeCardSchema).optional(),
@@ -125,6 +125,29 @@ const pages = defineCollection({
   }),
 });
 
+const faqs = defineCollection({
+  loader: glob({ base: "./src/content/faqs", pattern: "**/*.{md,mdx}" }),
+  schema: z
+    .object({
+      question: z.string().min(1),
+      answer: z.string().min(1),
+      order: z.number().int().nonnegative(),
+      link: z
+        .object({
+          label: z.string().min(1),
+          href: z.string().min(1),
+        })
+        .optional(),
+      draft: z.boolean().default(false),
+    })
+    // FaqItem only renders the anchor around a label found in the answer, so a
+    // label that never appears would silently drop the link.
+    .refine((entry) => !entry.link || entry.answer.includes(entry.link.label), {
+      message: "link.label must appear in answer so the anchor can render",
+      path: ["link", "label"],
+    }),
+});
+
 const legal = defineCollection({
   loader: glob({ base: "./src/content/legal", pattern: "**/*.{md,mdx}" }),
   schema: z.object({
@@ -135,4 +158,4 @@ const legal = defineCollection({
   }),
 });
 
-export const collections = { legal, pages };
+export const collections = { faqs, legal, pages };

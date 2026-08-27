@@ -1,13 +1,44 @@
 ---
+import { withBase } from "../lib/nav";
+
 interface Props {
   question: string;
-  answer: string;
+  answer?: string;
+  link?: {
+    label: string;
+    href: string;
+  };
 }
 
-const { question, answer } = Astro.props;
+const { question, answer, link } = Astro.props;
+const base = import.meta.env.BASE_URL;
+
+const linkIndex = answer && link ? answer.indexOf(link.label) : -1;
+const answerBefore =
+  answer && linkIndex >= 0 ? answer.slice(0, linkIndex) : answer;
+const answerAfter =
+  answer && linkIndex >= 0 && link
+    ? answer.slice(linkIndex + link.label.length)
+    : "";
 ---
 
 <li class="faq-item">
   <h3>{question}</h3>
-  <p>{answer}</p>
+  {
+    answer ? (
+      <p>
+        {link && linkIndex >= 0 ? (
+          <>
+            {answerBefore}
+            <a href={withBase(link.href, base)}>{link.label}</a>
+            {answerAfter}
+          </>
+        ) : (
+          answer
+        )}
+      </p>
+    ) : (
+      <slot />
+    )
+  }
 </li>

@@ -1,0 +1,48 @@
+---
+import { getCollection, getEntry } from "astro:content";
+import ButtonLink from "../components/ButtonLink.astro";
+import CtaBand from "../components/CtaBand.astro";
+import FaqItem from "../components/FaqItem.astro";
+import PageHero from "../components/PageHero.astro";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { withBase } from "../lib/nav";
+
+const page = await getEntry("pages", "faq");
+if (!page) throw new Error("The FAQ page content entry is missing.");
+
+const faqs = (await getCollection("faqs"))
+  .filter((entry) => !entry.data.draft)
+  .sort((a, b) => a.data.order - b.data.order);
+
+const base = import.meta.env.BASE_URL;
+const eyebrow = page.data.eyebrow ?? "FAQ";
+const ctaTitle = page.data.ctaTitle ?? "Still have a question?";
+const ctaLabel = page.data.ctaLabel ?? "Contact us";
+const ctaHref = page.data.ctaHref ?? "/contact";
+---
+
+<BaseLayout title={page.data.title} description={page.data.description}>
+  <main id="main-content">
+    <PageHero eyebrow={eyebrow} title={page.data.headline}>
+      <ul class="faq-list" role="list">
+        {
+          faqs.map((item) => (
+            <FaqItem
+              question={item.data.question}
+              answer={item.data.answer}
+              link={item.data.link}
+            />
+          ))
+        }
+      </ul>
+    </PageHero>
+
+    <CtaBand title={ctaTitle} tone="brand" titleId="faq-cta-title">
+      <ButtonLink
+        href={withBase(ctaHref, base)}
+        label={ctaLabel}
+        variant="inverse"
+      />
+    </CtaBand>
+  </main>
+</BaseLayout>

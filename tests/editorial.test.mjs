@@ -19,6 +19,7 @@ test("Decap admin targets this repository and models landing and legal content",
     /ssd-pocpk-decap-oauth-dev-ae|azurewebsites\.net|poc-plattform-kit/,
   );
   assert.match(config, /folder: src\/content\/pages/);
+  assert.match(config, /folder: src\/content\/faqs/);
   assert.match(config, /folder: src\/content\/legal/);
   assert.match(config, /name: effectiveDate/);
 });
@@ -60,7 +61,8 @@ test("Astro schemas validate landing and future legal frontmatter", async () => 
   const schema = await readFile(new URL("src/content.config.ts", root), "utf8");
 
   assert.match(schema, /base: "\.\/src\/content\/pages"/);
+  assert.match(schema, /base: "\.\/src\/content\/faqs"/);
   assert.match(schema, /base: "\.\/src\/content\/legal"/);
   assert.match(schema, /effectiveDate: z\.coerce\.date\(\)/);
-  assert.match(schema, /export const collections = \{ legal, pages \}/);
+  assert.match(schema, /export const collections = \{ faqs, legal, pages \}/);
 });

@@ -933,6 +933,16 @@ main {
   line-height: 1.65;
 }
 
+.faq-item a {
+  color: var(--ink-brand);
+  text-decoration: none;
+}
+
+.faq-item a:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.25em;
+}
+
 .meta-pair {
   display: flex;
   flex-direction: column;
