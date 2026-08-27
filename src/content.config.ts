@@ -20,6 +20,11 @@ const ctaLink = z.object({
   href: z.string().min(1),
 });
 
+const benefitSchema = z.object({
+  title: z.string().min(1),
+  description: z.string().min(1),
+});
+
 const placeCardSchema = z.object({
   index: z.string().min(1),
   title: z.string().min(1),
@@ -36,6 +41,11 @@ const pages = defineCollection({
     headline: z.string().min(1),
     summary: z.string().min(1),
     eyebrow: z.string().min(1).optional(),
+    email: z.email().optional(),
+    status: z.string().min(1).optional(),
+    submitLabel: z.string().min(1).optional(),
+    successTitle: z.string().min(1).optional(),
+    successBody: z.string().min(1).optional(),
     note: z.string().min(1).optional(),
     pilots: z
       .array(
@@ -87,6 +97,14 @@ const pages = defineCollection({
         label: z.string().min(1),
       })
       .optional(),
+    ctaLabel: z.string().min(1).optional(),
+    mediaLabel: z.string().min(1).optional(),
+    benefitsEyebrow: z.string().min(1).optional(),
+    benefits: z.array(benefitSchema).optional(),
+    designingEyebrow: z.string().min(1).optional(),
+    designingHeadline: z.string().min(1).optional(),
+    designingBody: z.string().min(1).optional(),
+    closingHeadline: z.string().min(1).optional(),
   }),
 });
 
