@@ -44,15 +44,14 @@ collections:
       - label: Headline
         name: headline
         widget: string
-        required: false
       - label: Summary
         name: summary
         widget: text
-        required: true
       - label: Columns
         name: columns
         widget: list
-        required: true
+        required: false
+        hint: About page only.
         fields:
           - label: Title
             name: title
@@ -65,15 +64,16 @@ collections:
       - label: Parent brand copy
         name: parentBrand
         widget: text
-        required: true
+        required: false
+        hint: About page only.
       - label: CTA title
         name: ctaTitle
         widget: string
-        required: true
+        required: false
       - label: Primary CTA label
         name: primaryCta
         widget: object
-        required: true
+        required: false
         fields:
           - label: Label
             name: label
@@ -86,7 +86,7 @@ collections:
       - label: Secondary CTA
         name: secondaryCta
         widget: object
-        required: true
+        required: false
         fields:
           - label: Label
             name: label
