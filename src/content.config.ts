@@ -29,7 +29,6 @@ const pages = defineCollection({
     primaryCta: ctaLink.optional(),
     secondaryCta: ctaLink.optional(),
     draft: z.boolean().default(false),
-    eyebrow: z.string().min(1).optional(),
     steps: z
       .array(
         z.object({
@@ -49,9 +48,6 @@ const pages = defineCollection({
         }),
       )
       .optional(),
-    ctaTitle: z.string().min(1).optional(),
-    primaryCta: ctaLink.optional(),
-    secondaryCta: ctaLink.optional(),
   }),
 });
 
