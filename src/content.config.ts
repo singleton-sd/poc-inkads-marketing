@@ -3,18 +3,18 @@ import { glob } from "astro/loaders";
 import { z } from "astro/zod";
 
 const ctaLink = z.object({
-  label: z.string().min(1),
-  href: z.string().min(1),
+  label: z.string().trim().min(1),
+  href: z.string().trim().min(1),
 });
 
 const featureItem = z.object({
-  title: z.string().min(1),
-  description: z.string().min(1),
+  title: z.string().trim().min(1),
+  description: z.string().trim().min(1),
 });
 
 const processStep = z.object({
-  label: z.string().min(1),
-  detail: z.string().min(1),
+  label: z.string().trim().min(1),
+  detail: z.string().trim().min(1),
 });
 
 const pages = defineCollection({
