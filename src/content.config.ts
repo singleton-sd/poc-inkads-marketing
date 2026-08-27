@@ -4,15 +4,20 @@ import { z } from "astro/zod";
 
 import { footerNav, primaryNav } from "./lib/nav";
 
+/** Root-relative single-slash paths only, so a nav entry cannot widen the enum. */
+const isInternalRoute = (href: string) => /^\/(?!\/)/.test(href);
+
 /** Site-nav paths only — rejects javascript:, data:, and other schemes. */
 const approvedInternalRoutes = Array.from(
-  new Set([
-    "/",
-    ...primaryNav.map((item) => item.href),
-    ...Object.values(footerNav).flatMap((group) =>
-      group.map((item) => item.href),
-    ),
-  ]),
+  new Set(
+    [
+      "/",
+      ...primaryNav.map((item) => item.href),
+      ...Object.values(footerNav).flatMap((group) =>
+        group.map((item) => item.href),
+      ),
+    ].filter(isInternalRoute),
+  ),
 ) as [string, ...string[]];
 
 const ctaLink = z.object({

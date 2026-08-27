@@ -36,7 +36,6 @@ collections:
       - label: Summary
         name: summary
         widget: text
-        required: false
         hint: Hero lead / supporting sentence.
       - label: Eyebrow
         name: eyebrow
@@ -49,15 +48,6 @@ collections:
       - label: Headline
         name: headline
         widget: string
-        required: false
-      - label: Summary
-        name: summary
-        widget: text
-        required: true
-      - label: Eyebrow
-        name: eyebrow
-        widget: string
-        required: false
       - label: CTA label
         name: ctaLabel
         widget: string
@@ -100,25 +90,6 @@ collections:
         name: closingHeadline
         widget: string
         required: false
-      - label: Media label
-        name: mediaLabel
-        widget: string
-        required: false
-      - label: Benefits eyebrow
-        name: benefitsEyebrow
-        widget: string
-        required: false
-      - label: Benefits
-        name: benefits
-        widget: list
-        required: false
-        fields:
-          - label: Title
-            name: title
-            widget: string
-          - label: Description
-            name: description
-            widget: text
       - label: Designing eyebrow
         name: designingEyebrow
         widget: string
@@ -130,10 +101,6 @@ collections:
       - label: Designing body
         name: designingBody
         widget: text
-        required: false
-      - label: Closing headline
-        name: closingHeadline
-        widget: string
         required: false
       - label: Last updated
         name: updated
