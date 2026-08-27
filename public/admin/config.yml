@@ -45,9 +45,17 @@ collections:
         name: brand
         widget: string
         required: false
+      - label: Eyebrow
+        name: eyebrow
+        widget: string
+        required: false
       - label: Headline
         name: headline
         widget: string
+      - label: CTA title
+        name: ctaTitle
+        widget: string
+        required: false
       - label: CTA label
         name: ctaLabel
         widget: string
@@ -109,6 +117,44 @@ collections:
       - label: Body
         name: body
         widget: markdown
+
+  - name: faqs
+    label: FAQ items
+    label_singular: FAQ item
+    folder: src/content/faqs
+    create: true
+    delete: true
+    slug: "{{slug}}"
+    extension: md
+    format: frontmatter
+    fields:
+      - label: Question
+        name: question
+        widget: string
+      - label: Answer
+        name: answer
+        widget: text
+      - label: Order
+        name: order
+        widget: number
+        value_type: int
+        min: 0
+      - label: Inline link
+        name: link
+        widget: object
+        required: false
+        hint: Optional label matched inside the answer (for example Pricing).
+        fields:
+          - label: Label
+            name: label
+            widget: string
+          - label: URL
+            name: href
+            widget: string
+      - label: Draft
+        name: draft
+        widget: boolean
+        default: false
 
   - name: legal
     label: Legal pages
