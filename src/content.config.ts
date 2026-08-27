@@ -29,7 +29,6 @@ const pages = defineCollection({
       )
       .optional(),
     draft: z.boolean().default(false),
-    eyebrow: z.string().min(1).optional(),
     steps: z
       .array(
         z.object({
