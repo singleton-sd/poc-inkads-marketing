@@ -58,9 +58,11 @@ test("PR workflow publishes subpath previews and updates the PR body", async () 
   assert.match(workflow, /pnpm test:visual/);
   assert.match(workflow, /visual-pr-\$\{\{\s*github\.event\.number\s*\}\}/);
   assert.match(workflow, /dist\/visual/);
-  assert.match(workflow, /name:\s*visual/);
+  assert.match(workflow, /name:\s*visual-review/);
   assert.match(workflow, /visual-gate\.mjs/);
   assert.match(workflow, /visual-accepted/);
+  assert.match(workflow, /Visual review needed/);
+  assert.doesNotMatch(workflow, /^\s+name:\s*visual$/m);
   assert.match(workflow, /\blabeled\b/);
   assert.match(workflow, /\bunlabeled\b/);
   assert.match(
@@ -116,6 +118,8 @@ test("visual screenshot helper is wired for hosted report and gate", async () =>
   assert.match(visual, /VISUAL_BASE_SHA/);
   assert.match(visual, /VISUAL_BASE_URL/);
   assert.match(visual, /baseSha/);
+  assert.match(visual, /allowNotFound/);
+  assert.match(visual, /404\.html/);
   assert.match(visual, /index\.html/);
   assert.match(visual, /entry\.name === "visual"/);
   assert.match(visual, /1440/);
@@ -126,8 +130,9 @@ test("visual screenshot helper is wired for hosted report and gate", async () =>
   assert.match(template, /## Preview/);
   assert.match(template, /visual-accepted/);
   assert.match(deployment, /Open visual report/);
-  assert.match(deployment, /required.*visual/i);
+  assert.match(deployment, /visual-review/);
   assert.match(deployment, /base SHA|base branch/i);
+  assert.match(deployment, /New routes still capture|baseline `404`/i);
 });
 
 test("Pages branch includes the production custom domain", async () => {

@@ -20,6 +20,7 @@ export const footerNav = {
   Company: [
     { label: "About", href: "/about" },
     { label: "FAQ", href: "/faq" },
+    { label: "Support", href: "/support" },
     { label: "Contact", href: "/contact" },
   ],
 } as const;

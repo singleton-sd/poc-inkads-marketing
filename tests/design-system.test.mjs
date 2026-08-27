@@ -122,6 +122,10 @@ test("header and footer expose the Claude Design IA", async () => {
       .flat()
       .some((item) => item.href === "/faq"),
   );
+  assert.ok(
+    footerNav.Company.some((item) => item.href === "/support"),
+    "expected Support in Company footer column",
+  );
 
   assert.equal(isActivePath("/about", "/about", "/"), true);
   assert.equal(isActivePath("/venues", "/about", "/"), false);

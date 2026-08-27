@@ -1341,6 +1341,39 @@ textarea.field-control {
   }
 }
 
+/* —— Support page —— */
+.support-section {
+  padding-block: clamp(3rem, 6vw, 5rem);
+}
+
+.support-section .process-list,
+.support-section .page-copy {
+  margin-top: 2.5rem;
+  max-width: 46rem;
+}
+
+.page-copy {
+  color: var(--ink-text-muted);
+  font-weight: 300;
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+
+.page-copy p + p {
+  margin-top: 1.25rem;
+}
+
+.support-contact {
+  display: grid;
+  gap: 1.5rem;
+  margin-top: 2.5rem;
+  max-width: 32rem;
+}
+
+.support-contact__link {
+  margin-top: 0.5rem;
+}
+
 @media (max-width: 480px) {
   .shell {
     width: min(100% - 2rem, var(--ink-shell-max));
