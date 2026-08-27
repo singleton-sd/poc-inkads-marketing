@@ -18,7 +18,7 @@ const {
 
 <article class:list={["place-card", { "place-card--featured": featured }]}>
   <div class="place-card__heading">
-    <p class="eyebrow">{index}</p>
+    <p class:list={["eyebrow", !featured && "eyebrow--muted"]}>{index}</p>
     {featured && <p class="place-card__tag">{tag}</p>}
   </div>
   <h3>{title}</h3>

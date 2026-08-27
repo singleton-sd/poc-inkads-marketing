@@ -32,6 +32,7 @@
   --ink-space-section: clamp(4rem, 8vw, 7rem);
   --ink-border: #292c30;
   --ink-border-strong: #ffb300;
+  --ink-inverse-border: #c9ccd1;
   --ink-focus: #ffd54f;
   --ink-inverse: #ffffff;
   --ink-on-inverse: #000000;
@@ -639,6 +640,41 @@ main {
   font-size: 0.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+.inverse-section .media-placeholder {
+  border-color: var(--ink-inverse-border);
+  background: var(--ink-surface-soft);
+  color: var(--ink-on-inverse-soft);
+}
+
+.media-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(2rem, 5vw, 4rem);
+}
+
+.media-split h2 {
+  margin-top: 1rem;
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 500;
+  line-height: 1.1;
+}
+
+.media-split__body {
+  max-width: 48ch;
+  margin-top: 1.25rem;
+  font-weight: 300;
+  line-height: 1.7;
+}
+
+.places-page__cards {
+  padding-bottom: var(--ink-space-section);
+}
+
+.places-page__cards .places-grid {
+  margin-top: 0;
 }
 
 /* —— Cards & lists —— */
@@ -1380,6 +1416,7 @@ textarea.field-control {
   .site-footer__top,
   .page-hero--split,
   .section-heading--split,
+  .media-split,
   .hero,
   .contact-page,
   .system-list--columns,

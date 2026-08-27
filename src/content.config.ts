@@ -35,6 +35,14 @@ const processStep = z.object({
   detail: z.string().trim().min(1),
 });
 
+const placeCardSchema = z.object({
+  index: z.string().min(1),
+  title: z.string().min(1),
+  description: z.string().min(1),
+  featured: z.boolean().optional(),
+  tag: z.string().optional(),
+});
+
 const pages = defineCollection({
   loader: glob({ base: "./src/content/pages", pattern: "**/*.{md,mdx}" }),
   schema: z.object({
@@ -77,6 +85,21 @@ const pages = defineCollection({
     ctaTitle: z.string().min(1).optional(),
     primaryCta: ctaLink.optional(),
     secondaryCta: ctaLink.optional(),
+    places: z.array(placeCardSchema).optional(),
+    constraint: z
+      .object({
+        eyebrow: z.string().min(1),
+        headline: z.string().min(1),
+        body: z.string().min(1),
+        mediaLabel: z.string().min(1),
+      })
+      .optional(),
+    cta: z
+      .object({
+        title: z.string().min(1),
+        label: z.string().min(1),
+      })
+      .optional(),
     ctaLabel: z.string().min(1).optional(),
     ctaHref: z.string().min(1).optional(),
     mediaLabel: z.string().min(1).optional(),
