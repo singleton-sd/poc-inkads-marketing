@@ -19,23 +19,6 @@ const pages = defineCollection({
     ctaLabel: z.string().min(1).optional(),
     ctaHref: z.string().min(1).optional(),
     draft: z.boolean().default(false),
-  }),
-});
-
-const faqs = defineCollection({
-  loader: glob({ base: "./src/content/faqs", pattern: "**/*.{md,mdx}" }),
-  schema: z.object({
-    question: z.string().min(1),
-    answer: z.string().min(1),
-    order: z.number().int().nonnegative(),
-    link: z
-      .object({
-        label: z.string().min(1),
-        href: z.string().min(1),
-      })
-      .optional(),
-    draft: z.boolean().default(false),
-    eyebrow: z.string().min(1).optional(),
     steps: z
       .array(
         z.object({
@@ -55,9 +38,24 @@ const faqs = defineCollection({
         }),
       )
       .optional(),
-    ctaTitle: z.string().min(1).optional(),
     primaryCta: ctaLink.optional(),
     secondaryCta: ctaLink.optional(),
+  }),
+});
+
+const faqs = defineCollection({
+  loader: glob({ base: "./src/content/faqs", pattern: "**/*.{md,mdx}" }),
+  schema: z.object({
+    question: z.string().min(1),
+    answer: z.string().min(1),
+    order: z.number().int().nonnegative(),
+    link: z
+      .object({
+        label: z.string().min(1),
+        href: z.string().min(1),
+      })
+      .optional(),
+    draft: z.boolean().default(false),
   }),
 });
 
