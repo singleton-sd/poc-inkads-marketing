@@ -21,7 +21,6 @@ const pages = defineCollection({
     successTitle: z.string().min(1).optional(),
     successBody: z.string().min(1).optional(),
     draft: z.boolean().default(false),
-    eyebrow: z.string().min(1).optional(),
     steps: z
       .array(
         z.object({
