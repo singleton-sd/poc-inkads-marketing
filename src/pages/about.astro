@@ -1,0 +1,75 @@
+---
+import { getEntry } from "astro:content";
+import BrandLockup from "../components/BrandLockup.astro";
+import ButtonLink from "../components/ButtonLink.astro";
+import CtaBand from "../components/CtaBand.astro";
+import FeatureGrid from "../components/FeatureGrid.astro";
+import FeatureItem from "../components/FeatureItem.astro";
+import InverseSection from "../components/InverseSection.astro";
+import PageHero from "../components/PageHero.astro";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { withBase } from "../lib/nav";
+
+const about = await getEntry("pages", "about");
+if (!about) throw new Error("The about page content entry is missing.");
+
+const {
+  title,
+  description,
+  eyebrow,
+  headline,
+  summary,
+  columns,
+  parentBrand,
+  ctaTitle,
+  primaryCta,
+  secondaryCta,
+} = about.data;
+
+if (
+  !columns?.length ||
+  !parentBrand ||
+  !ctaTitle ||
+  !primaryCta ||
+  !secondaryCta
+) {
+  throw new Error("The about page content entry is missing required sections.");
+}
+
+const base = import.meta.env.BASE_URL;
+---
+
+<BaseLayout title={title} description={description}>
+  <main id="main-content">
+    <PageHero eyebrow={eyebrow ?? "About"} title={headline} lead={summary} />
+
+    <section class="shell about-columns" aria-label="Project context">
+      <FeatureGrid>
+        {
+          columns.map((column) => (
+            <FeatureItem title={column.title} description={column.body} />
+          ))
+        }
+      </FeatureGrid>
+    </section>
+
+    <InverseSection centered labelledBy="parent-brand-copy">
+      <div class="about-parent">
+        <BrandLockup variant="light" showByline />
+        <p id="parent-brand-copy">{parentBrand}</p>
+      </div>
+    </InverseSection>
+
+    <CtaBand title={ctaTitle} titleId="about-cta-title">
+      <ButtonLink
+        href={withBase(primaryCta.href, base)}
+        label={primaryCta.label}
+      />
+      <ButtonLink
+        href={withBase(secondaryCta.href, base)}
+        label={secondaryCta.label}
+        variant="secondary"
+      />
+    </CtaBand>
+  </main>
+</BaseLayout>

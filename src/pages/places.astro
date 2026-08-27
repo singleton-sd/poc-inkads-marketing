@@ -1,0 +1,73 @@
+---
+import { getEntry } from "astro:content";
+import ButtonLink from "../components/ButtonLink.astro";
+import CtaBand from "../components/CtaBand.astro";
+import InverseSection from "../components/InverseSection.astro";
+import MediaPlaceholder from "../components/MediaPlaceholder.astro";
+import PageHero from "../components/PageHero.astro";
+import PlaceCard from "../components/PlaceCard.astro";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { withBase } from "../lib/nav";
+
+const placesPage = await getEntry("pages", "places");
+if (!placesPage) throw new Error("The places page content entry is missing.");
+
+const {
+  title,
+  description,
+  headline,
+  summary,
+  eyebrow,
+  places,
+  constraint,
+  cta,
+} = placesPage.data;
+
+if (!places?.length || !constraint || !cta) {
+  throw new Error("The places page content is incomplete.");
+}
+
+const base = import.meta.env.BASE_URL;
+---
+
+<BaseLayout title={title} description={description}>
+  <main id="main-content">
+    <PageHero
+      eyebrow={eyebrow}
+      title={headline}
+      lead={summary}
+      titleId="page-title"
+    />
+
+    <section class="shell places-page__cards" aria-label="Use case contexts">
+      <div class="places-grid">
+        {
+          places.map((place) => (
+            <PlaceCard
+              index={place.index}
+              title={place.title}
+              description={place.description}
+              featured={place.featured}
+              tag={place.tag}
+            />
+          ))
+        }
+      </div>
+    </section>
+
+    <InverseSection labelledBy="constraint-title">
+      <div class="media-split">
+        <MediaPlaceholder label={constraint.mediaLabel} />
+        <div>
+          <p class="eyebrow">{constraint.eyebrow}</p>
+          <h2 id="constraint-title">{constraint.headline}</h2>
+          <p class="media-split__body">{constraint.body}</p>
+        </div>
+      </div>
+    </InverseSection>
+
+    <CtaBand title={cta.title} titleId="places-cta-title">
+      <ButtonLink href={withBase("/contact", base)} label={cta.label} />
+    </CtaBand>
+  </main>
+</BaseLayout>

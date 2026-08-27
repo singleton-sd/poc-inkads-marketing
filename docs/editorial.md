@@ -1,9 +1,10 @@
 # Editorial workflow
 
-InkAds content is stored as Markdown in Git. The landing-page source lives in
-`src/content/pages`, and future legal pages live in `src/content/legal`. Astro
-validates both collections during `pnpm build`, so a pull request containing
-invalid or incomplete frontmatter will fail the build before it can be merged.
+InkAds content is stored as Markdown in Git. Page copy lives in
+`src/content/pages`, FAQ answers live in `src/content/faqs`, and future legal
+pages live in `src/content/legal`. Astro validates these collections during
+`pnpm build`, so a pull request containing invalid or incomplete frontmatter
+will fail the build before it can be merged.
 
 ## Editing through Git
 
@@ -18,6 +19,14 @@ Landing-page frontmatter requires:
 - `headline`
 - `summary`
 - optional `eyebrow`, `note`, and `pilots` (used by pages such as Pricing)
+- optional `draft` (defaults to `false`)
+
+FAQ item frontmatter requires:
+
+- `question`
+- `answer`
+- `order`
+- optional `link` (`label` + `href` matched inside the answer)
 - optional `draft` (defaults to `false`)
 
 Legal-page frontmatter requires:
@@ -40,7 +49,7 @@ pnpm build
 
 The production build includes a static Decap application at `/admin/`. Its
 configuration targets `singleton-sd/poc-inkads-marketing` and maps the same
-landing and legal fields enforced by the Astro schemas.
+page, FAQ, and legal fields enforced by the Astro schemas.
 
 GitHub Pages can serve the static admin files, but it cannot execute the OAuth
 callback or safely hold the OAuth client secret. CMS login therefore uses the
