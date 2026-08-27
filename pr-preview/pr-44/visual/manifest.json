@@ -1,12 +1,12 @@
 {
   "basePath": "/",
-  "baseSha": "22da74eb39a37dff77543990eafc0d1aae201ad3",
+  "baseSha": "81bc4932bc16b05499e016eedb419257c8e57481",
   "baseLabel": "local:/home/runner/work/poc-inkads-marketing/poc-inkads-marketing/visual-base/dist",
   "baseSiteUrl": null,
   "baseDistDir": "/home/runner/work/poc-inkads-marketing/poc-inkads-marketing/visual-base/dist",
   "summary": {
-    "total": 10,
-    "unchanged": 5,
+    "total": 14,
+    "unchanged": 9,
     "changed": 4,
     "new": 0,
     "changedRoutes": [
@@ -27,7 +27,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/404",
-      "baseUrl": "http://127.0.0.1:36705/404",
+      "baseUrl": "http://127.0.0.1:45049/404",
       "status": "unchanged"
     },
     {
@@ -38,7 +38,51 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/404",
-      "baseUrl": "http://127.0.0.1:36705/404",
+      "baseUrl": "http://127.0.0.1:45049/404",
+      "status": "unchanged"
+    },
+    {
+      "route": "advertisers",
+      "viewport": "desktop",
+      "prFile": "pr/advertisers-desktop.png",
+      "baseFile": "base/advertisers-desktop.png",
+      "diffFile": null,
+      "mismatched": 0,
+      "prUrl": "/advertisers",
+      "baseUrl": "http://127.0.0.1:45049/advertisers",
+      "status": "unchanged"
+    },
+    {
+      "route": "advertisers",
+      "viewport": "mobile",
+      "prFile": "pr/advertisers-mobile.png",
+      "baseFile": "base/advertisers-mobile.png",
+      "diffFile": null,
+      "mismatched": 0,
+      "prUrl": "/advertisers",
+      "baseUrl": "http://127.0.0.1:45049/advertisers",
+      "status": "unchanged"
+    },
+    {
+      "route": "contact",
+      "viewport": "desktop",
+      "prFile": "pr/contact-desktop.png",
+      "baseFile": "base/contact-desktop.png",
+      "diffFile": null,
+      "mismatched": 0,
+      "prUrl": "/contact",
+      "baseUrl": "http://127.0.0.1:45049/contact",
+      "status": "unchanged"
+    },
+    {
+      "route": "contact",
+      "viewport": "mobile",
+      "prFile": "pr/contact-mobile.png",
+      "baseFile": "base/contact-mobile.png",
+      "diffFile": null,
+      "mismatched": 0,
+      "prUrl": "/contact",
+      "baseUrl": "http://127.0.0.1:45049/contact",
       "status": "unchanged"
     },
     {
@@ -49,7 +93,7 @@
       "diffFile": "diff/how-it-works-desktop.png",
       "mismatched": 12324,
       "prUrl": "/how-it-works",
-      "baseUrl": "http://127.0.0.1:36705/how-it-works",
+      "baseUrl": "http://127.0.0.1:45049/how-it-works",
       "status": "changed"
     },
     {
@@ -60,7 +104,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/how-it-works",
-      "baseUrl": "http://127.0.0.1:36705/how-it-works",
+      "baseUrl": "http://127.0.0.1:45049/how-it-works",
       "status": "unchanged"
     },
     {
@@ -71,7 +115,7 @@
       "diffFile": "diff/home-desktop.png",
       "mismatched": 2437027,
       "prUrl": "/",
-      "baseUrl": "http://127.0.0.1:36705/",
+      "baseUrl": "http://127.0.0.1:45049/",
       "status": "changed"
     },
     {
@@ -82,7 +126,7 @@
       "diffFile": "diff/home-mobile.png",
       "mismatched": 737657,
       "prUrl": "/",
-      "baseUrl": "http://127.0.0.1:36705/",
+      "baseUrl": "http://127.0.0.1:45049/",
       "status": "changed"
     },
     {
@@ -93,7 +137,7 @@
       "diffFile": "diff/pricing-desktop.png",
       "mismatched": 384741,
       "prUrl": "/pricing",
-      "baseUrl": "http://127.0.0.1:36705/pricing",
+      "baseUrl": "http://127.0.0.1:45049/pricing",
       "status": "changed"
     },
     {
@@ -104,7 +148,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/pricing",
-      "baseUrl": "http://127.0.0.1:36705/pricing",
+      "baseUrl": "http://127.0.0.1:45049/pricing",
       "status": "unchanged"
     },
     {
@@ -115,7 +159,7 @@
       "diffFile": "diff/support-desktop.png",
       "mismatched": 457755,
       "prUrl": "/support",
-      "baseUrl": "http://127.0.0.1:36705/support",
+      "baseUrl": "http://127.0.0.1:45049/support",
       "status": "changed"
     },
     {
@@ -126,7 +170,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/support",
-      "baseUrl": "http://127.0.0.1:36705/support",
+      "baseUrl": "http://127.0.0.1:45049/support",
       "status": "unchanged"
     }
   ]
