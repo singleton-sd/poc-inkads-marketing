@@ -2,6 +2,11 @@ import { defineCollection } from "astro:content";
 import { glob } from "astro/loaders";
 import { z } from "astro/zod";
 
+const ctaLink = z.object({
+  label: z.string().min(1),
+  href: z.string().min(1),
+});
+
 const benefitSchema = z.object({
   title: z.string().min(1),
   description: z.string().min(1),
@@ -14,16 +19,38 @@ const pages = defineCollection({
     description: z.string().min(1),
     headline: z.string().min(1),
     summary: z.string().min(1),
-    eyebrow: z.string().optional(),
-    ctaLabel: z.string().optional(),
-    mediaLabel: z.string().optional(),
-    benefitsEyebrow: z.string().optional(),
-    benefits: z.array(benefitSchema).optional(),
-    designingEyebrow: z.string().optional(),
-    designingHeadline: z.string().optional(),
-    designingBody: z.string().optional(),
-    closingHeadline: z.string().optional(),
     draft: z.boolean().default(false),
+    eyebrow: z.string().min(1).optional(),
+    steps: z
+      .array(
+        z.object({
+          number: z.string().min(1),
+          title: z.string().min(1),
+          description: z.string().min(1),
+        }),
+      )
+      .optional(),
+    featuresEyebrow: z.string().min(1).optional(),
+    featuresHeadline: z.string().min(1).optional(),
+    features: z
+      .array(
+        z.object({
+          title: z.string().min(1),
+          description: z.string().min(1),
+        }),
+      )
+      .optional(),
+    ctaTitle: z.string().min(1).optional(),
+    primaryCta: ctaLink.optional(),
+    secondaryCta: ctaLink.optional(),
+    ctaLabel: z.string().min(1).optional(),
+    mediaLabel: z.string().min(1).optional(),
+    benefitsEyebrow: z.string().min(1).optional(),
+    benefits: z.array(benefitSchema).optional(),
+    designingEyebrow: z.string().min(1).optional(),
+    designingHeadline: z.string().min(1).optional(),
+    designingBody: z.string().min(1).optional(),
+    closingHeadline: z.string().min(1).optional(),
   }),
 });
 
