@@ -2,6 +2,19 @@ import { defineCollection } from "astro:content";
 import { glob } from "astro/loaders";
 import { z } from "astro/zod";
 
+import { footerNav, primaryNav } from "./lib/nav";
+
+/** Site-nav paths only — rejects javascript:, data:, and other schemes. */
+const approvedInternalRoutes = Array.from(
+  new Set([
+    "/",
+    ...primaryNav.map((item) => item.href),
+    ...Object.values(footerNav).flatMap((group) =>
+      group.map((item) => item.href),
+    ),
+  ]),
+) as [string, ...string[]];
+
 const ctaLink = z.object({
   label: z.string().trim().min(1),
   href: z.string().trim().min(1),
@@ -24,8 +37,26 @@ const pages = defineCollection({
     description: z.string().min(1),
     headline: z.string().min(1),
     summary: z.string().min(1),
-    draft: z.boolean().default(false),
     eyebrow: z.string().min(1).optional(),
+    email: z.email().optional(),
+    status: z.string().min(1).optional(),
+    submitLabel: z.string().min(1).optional(),
+    successTitle: z.string().min(1).optional(),
+    successBody: z.string().min(1).optional(),
+    note: z.string().min(1).optional(),
+    pilots: z
+      .array(
+        z.object({
+          eyebrow: z.string().min(1),
+          title: z.string().min(1),
+          description: z.string().min(1),
+          ctaLabel: z.string().min(1),
+          href: z.enum(approvedInternalRoutes),
+          accent: z.enum(["brand", "audience"]).default("brand"),
+        }),
+      )
+      .optional(),
+    draft: z.boolean().default(false),
     steps: z
       .array(
         z.object({
@@ -49,6 +80,9 @@ const pages = defineCollection({
     processEyebrow: z.string().min(1).optional(),
     processHeadline: z.string().min(1).optional(),
     process: z.array(processStep).optional(),
+    designingEyebrow: z.string().min(1).optional(),
+    designingHeadline: z.string().min(1).optional(),
+    designingBody: z.string().min(1).optional(),
     closingHeadline: z.string().min(1).optional(),
   }),
 });
