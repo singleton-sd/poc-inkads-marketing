@@ -29,6 +29,29 @@ const pages = defineCollection({
     primaryCta: ctaLink.optional(),
     secondaryCta: ctaLink.optional(),
     draft: z.boolean().default(false),
+    eyebrow: z.string().min(1).optional(),
+    steps: z
+      .array(
+        z.object({
+          number: z.string().min(1),
+          title: z.string().min(1),
+          description: z.string().min(1),
+        }),
+      )
+      .optional(),
+    featuresEyebrow: z.string().min(1).optional(),
+    featuresHeadline: z.string().min(1).optional(),
+    features: z
+      .array(
+        z.object({
+          title: z.string().min(1),
+          description: z.string().min(1),
+        }),
+      )
+      .optional(),
+    ctaTitle: z.string().min(1).optional(),
+    primaryCta: ctaLink.optional(),
+    secondaryCta: ctaLink.optional(),
   }),
 });
 
