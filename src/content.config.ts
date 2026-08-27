@@ -4,25 +4,35 @@ import { z } from "astro/zod";
 
 import { footerNav, primaryNav } from "./lib/nav";
 
+/** Root-relative single-slash paths only, so a nav entry cannot widen the enum. */
+const isInternalRoute = (href: string) => /^\/(?!\/)/.test(href);
+
 /** Site-nav paths only — rejects javascript:, data:, and other schemes. */
 const approvedInternalRoutes = Array.from(
-  new Set([
-    "/",
-    ...primaryNav.map((item) => item.href),
-    ...Object.values(footerNav).flatMap((group) =>
-      group.map((item) => item.href),
-    ),
-  ]),
+  new Set(
+    [
+      "/",
+      ...primaryNav.map((item) => item.href),
+      ...Object.values(footerNav).flatMap((group) =>
+        group.map((item) => item.href),
+      ),
+    ].filter(isInternalRoute),
+  ),
 ) as [string, ...string[]];
 
 const ctaLink = z.object({
-  label: z.string().min(1),
-  href: z.string().min(1),
+  label: z.string().trim().min(1),
+  href: z.string().trim().min(1),
 });
 
-const benefitSchema = z.object({
-  title: z.string().min(1),
-  description: z.string().min(1),
+const featureItem = z.object({
+  title: z.string().trim().min(1),
+  description: z.string().trim().min(1),
+});
+
+const processStep = z.object({
+  label: z.string().trim().min(1),
+  detail: z.string().trim().min(1),
 });
 
 const pages = defineCollection({
@@ -63,21 +73,18 @@ const pages = defineCollection({
       .optional(),
     featuresEyebrow: z.string().min(1).optional(),
     featuresHeadline: z.string().min(1).optional(),
-    features: z
-      .array(
-        z.object({
-          title: z.string().min(1),
-          description: z.string().min(1),
-        }),
-      )
-      .optional(),
+    features: z.array(featureItem).optional(),
     ctaTitle: z.string().min(1).optional(),
     primaryCta: ctaLink.optional(),
     secondaryCta: ctaLink.optional(),
     ctaLabel: z.string().min(1).optional(),
+    ctaHref: z.string().min(1).optional(),
     mediaLabel: z.string().min(1).optional(),
     benefitsEyebrow: z.string().min(1).optional(),
-    benefits: z.array(benefitSchema).optional(),
+    benefits: z.array(featureItem).optional(),
+    processEyebrow: z.string().min(1).optional(),
+    processHeadline: z.string().min(1).optional(),
+    process: z.array(processStep).optional(),
     designingEyebrow: z.string().min(1).optional(),
     designingHeadline: z.string().min(1).optional(),
     designingBody: z.string().min(1).optional(),

@@ -33,6 +33,14 @@ collections:
         widget: text
         required: false
         hint: Short meta description for SEO.
+      - label: Summary
+        name: summary
+        widget: text
+        hint: Hero lead / supporting sentence.
+      - label: Eyebrow
+        name: eyebrow
+        widget: string
+        required: false
       - label: Brand
         name: brand
         widget: string
@@ -40,24 +48,15 @@ collections:
       - label: Headline
         name: headline
         widget: string
-        required: false
-      - label: Summary
-        name: summary
-        widget: text
-        required: true
-      - label: Eyebrow
-        name: eyebrow
-        widget: string
-        required: false
       - label: CTA label
         name: ctaLabel
         widget: string
         required: false
       - label: CTA URL
-        name: ctaUrl
+        name: ctaHref
         widget: string
         required: false
-      - label: Media label
+      - label: Media placeholder label
         name: mediaLabel
         widget: string
         required: false
@@ -70,12 +69,27 @@ collections:
         widget: list
         required: false
         fields:
-          - label: Title
-            name: title
-            widget: string
-          - label: Description
-            name: description
-            widget: text
+          - { label: Title, name: title, widget: string }
+          - { label: Description, name: description, widget: text }
+      - label: Process eyebrow
+        name: processEyebrow
+        widget: string
+        required: false
+      - label: Process headline
+        name: processHeadline
+        widget: string
+        required: false
+      - label: Process steps
+        name: process
+        widget: list
+        required: false
+        fields:
+          - { label: Label, name: label, widget: string }
+          - { label: Detail, name: detail, widget: text }
+      - label: Closing headline
+        name: closingHeadline
+        widget: string
+        required: false
       - label: Designing eyebrow
         name: designingEyebrow
         widget: string
@@ -87,10 +101,6 @@ collections:
       - label: Designing body
         name: designingBody
         widget: text
-        required: false
-      - label: Closing headline
-        name: closingHeadline
-        widget: string
         required: false
       - label: Last updated
         name: updated
