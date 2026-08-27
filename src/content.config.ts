@@ -2,6 +2,19 @@ import { defineCollection } from "astro:content";
 import { glob } from "astro/loaders";
 import { z } from "astro/zod";
 
+import { footerNav, primaryNav } from "./lib/nav";
+
+/** Site-nav paths only — rejects javascript:, data:, and other schemes. */
+const approvedInternalRoutes = Array.from(
+  new Set([
+    "/",
+    ...primaryNav.map((item) => item.href),
+    ...Object.values(footerNav).flatMap((group) =>
+      group.map((item) => item.href),
+    ),
+  ]),
+) as [string, ...string[]];
+
 const ctaLink = z.object({
   label: z.string().min(1),
   href: z.string().min(1),
@@ -18,6 +31,19 @@ const pages = defineCollection({
     ctaTitle: z.string().min(1).optional(),
     ctaLabel: z.string().min(1).optional(),
     ctaHref: z.string().min(1).optional(),
+    note: z.string().min(1).optional(),
+    pilots: z
+      .array(
+        z.object({
+          eyebrow: z.string().min(1),
+          title: z.string().min(1),
+          description: z.string().min(1),
+          ctaLabel: z.string().min(1),
+          href: z.enum(approvedInternalRoutes),
+          accent: z.enum(["brand", "audience"]).default("brand"),
+        }),
+      )
+      .optional(),
     draft: z.boolean().default(false),
     steps: z
       .array(
