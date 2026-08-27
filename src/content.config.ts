@@ -48,9 +48,19 @@ const pages = defineCollection({
   schema: z.object({
     title: z.string().min(1),
     description: z.string().min(1),
+    eyebrow: z.string().min(1).optional(),
     headline: z.string().min(1),
     summary: z.string().min(1),
-    eyebrow: z.string().min(1).optional(),
+    columns: z
+      .array(
+        z.object({
+          title: z.string().min(1),
+          body: z.string().min(1),
+        }),
+      )
+      .min(1)
+      .optional(),
+    parentBrand: z.string().min(1).optional(),
     ctaTitle: z.string().min(1).optional(),
     email: z.email().optional(),
     status: z.string().min(1).optional(),
