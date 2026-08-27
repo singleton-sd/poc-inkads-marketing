@@ -32,5 +32,5 @@ test("pricing pilots link to contact for scoped quotes", async () => {
   const content = await readFile(contentPath, "utf8");
   assert.match(content, /Request pilot pricing/);
   assert.match(content, /Request placement pricing/);
-  assert.match(content, /href: \/contact/);
+  assert.equal((content.match(/^ {4}href: \/contact$/gm) ?? []).length, 2);
 });

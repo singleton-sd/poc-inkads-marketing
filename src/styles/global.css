@@ -29,6 +29,7 @@
   --ink-epaper-muted: #333333;
   --ink-epaper-border: #777777;
   --ink-space-md: 1.5rem;
+  --ink-space-section: clamp(4rem, 8vw, 7rem);
   --ink-border: #292c30;
   --ink-border-strong: #ffb300;
   --ink-focus: #ffd54f;
@@ -1144,7 +1145,7 @@ textarea.field-control {
 }
 
 .pricing-pilots {
-  padding-bottom: clamp(4rem, 8vw, 7rem);
+  padding-bottom: var(--ink-space-section);
 }
 
 .pricing-pilots .card-grid {
