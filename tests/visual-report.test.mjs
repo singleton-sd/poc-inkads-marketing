@@ -60,11 +60,11 @@ test("visual report expands changed and new routes by default", () => {
   const html = buildReportHtml(sampleEntries, { baseLabel: "main@abc" });
   assert.match(
     html,
-    /<details class="route-case route-case--review" open>[\s\S]*?\/ ·/,
+    /<details class="route-case route-case--review" open>\s*<summary>\/ ·/,
   );
   assert.match(
     html,
-    /<details class="route-case route-case--review" open>[\s\S]*?\/venues ·/,
+    /<details class="route-case route-case--review" open>\s*<summary>\/venues ·/,
   );
 });
 
@@ -72,7 +72,7 @@ test("visual report collapses unchanged routes by default", () => {
   const html = buildReportHtml(sampleEntries, { baseLabel: "main@abc" });
   assert.match(
     html,
-    /<details class="route-case route-case--unchanged">[\s\S]*?\/pricing · unchanged/,
+    /<details class="route-case route-case--unchanged">\s*<summary>\/pricing · unchanged/,
   );
   assert.doesNotMatch(
     html,
