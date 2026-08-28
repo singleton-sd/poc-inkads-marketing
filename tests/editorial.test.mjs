@@ -18,7 +18,7 @@ test("Decap admin targets this repository and models landing and legal content",
     config,
     /ssd-pocpk-decap-oauth-dev-ae|azurewebsites\.net|poc-plattform-kit/,
   );
-  assert.match(config, /folder: src\/content\/pages/);
+  assert.match(config, /file: src\/content\/pages\/home\.md/);
   assert.match(config, /folder: src\/content\/faqs/);
   assert.match(config, /folder: src\/content\/legal/);
   assert.match(config, /name: effectiveDate/);
