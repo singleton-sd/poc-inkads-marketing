@@ -122,6 +122,7 @@ test("visual screenshot helper is wired for hosted report and gate", async () =>
   assert.match(visual, /404\.html/);
   assert.match(visual, /index\.html/);
   assert.match(visual, /entry\.name === "visual"/);
+  assert.match(visual, /visual-report-html\.mjs/);
   assert.match(visual, /1440/);
   assert.match(visual, /390/);
   assert.match(gate, /VISUAL_ACCEPTED/);

@@ -14,7 +14,7 @@
  * - `pr/<route>-<viewport>.png` — this PR
  * - `base/<route>-<viewport>.png` — baseline (when the route exists)
  * - `diff/<route>-<viewport>.png` — red pixel diff (when both exist and differ)
- * - `index.html` — side-by-side review page
+ * - `index.html` — side-by-side review page (routes grouped; unchanged collapsed)
  * - `manifest.json` — includes `summary` for CI gating
  *
  * Capture always exits 0 on successful screenshots. Use `pnpm test:visual:gate`
@@ -44,6 +44,7 @@ import { fileURLToPath } from "node:url";
 import { PNG } from "pngjs";
 import pixelmatch from "pixelmatch";
 import { chromium } from "playwright";
+import { buildReportHtml } from "./visual-report-html.mjs";
 
 const rootDir = fileURLToPath(new URL("..", import.meta.url));
 const distDir = path.join(rootDir, "dist");
@@ -291,72 +292,6 @@ function diffPngs(baseFilePath, prFilePath, diffFilePath) {
   return mismatched;
 }
 
-function buildReportHtml(entries) {
-  const rows = entries
-    .map((entry) => {
-      const baseCaption =
-        entry.status === "new" && entry.baseFile
-          ? "Base (before — route missing / 404)"
-          : "Base (before)";
-      const baseCell = entry.baseFile
-        ? `<img src="${entry.baseFile}" alt="base ${entry.route} ${entry.viewport}" />`
-        : `<p class="missing">No base (could not capture baseline)</p>`;
-      const diffCell = entry.diffFile
-        ? `<img src="${entry.diffFile}" alt="diff ${entry.route} ${entry.viewport}" />`
-        : entry.baseFile
-          ? `<p class="ok">No pixel diff</p>`
-          : `<p class="missing">—</p>`;
-      const statusLabel =
-        entry.status === "new"
-          ? ` · <span class="changed">new route</span>`
-          : entry.mismatched
-            ? ` · <span class="changed">${entry.mismatched} px changed</span>`
-            : "";
-      return `<section class="case">
-  <h2>${entry.route} · ${entry.viewport}${statusLabel}</h2>
-  <div class="grid">
-    <figure><figcaption>${baseCaption}</figcaption>${baseCell}</figure>
-    <figure><figcaption>PR (after)</figcaption><img src="${entry.prFile}" alt="pr ${entry.route} ${entry.viewport}" /></figure>
-    <figure><figcaption>Diff</figcaption>${diffCell}</figure>
-  </div>
-</section>`;
-    })
-    .join("\n");
-
-  return `<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <title>InkAds visual review</title>
-  <style>
-    body { margin: 0; font: 14px/1.4 system-ui, sans-serif; background: #111; color: #eee; }
-    header { padding: 1.25rem 1.5rem; border-bottom: 1px solid #333; }
-    header p { color: #aaa; max-width: 70ch; }
-    .case { padding: 1.5rem; border-bottom: 1px solid #333; }
-    .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
-    figure { margin: 0; background: #000; border: 1px solid #333; padding: 0.5rem; }
-    figcaption { font-size: 12px; color: #aaa; margin-bottom: 0.5rem; }
-    img { width: 100%; height: auto; display: block; background: #222; }
-    .missing, .ok { color: #888; padding: 2rem 0.5rem; }
-    .changed { color: #ffb300; font-weight: 600; }
-    @media (max-width: 1100px) { .grid { grid-template-columns: 1fr; } }
-  </style>
-</head>
-<body>
-  <header>
-    <h1>InkAds visual review</h1>
-    <p>
-      Base = <code>${baseLabel}</code> (pre-PR).
-      PR = local build for this branch (post-PR).
-      Diff highlights changed pixels in red.
-    </p>
-  </header>
-  ${rows}
-</body>
-</html>
-`;
-}
-
 const prServer = createStaticServer(distDir, basePath);
 const prPort = await listen(prServer, port);
 const prOrigin = `http://127.0.0.1:${prPort}`;
@@ -493,7 +428,10 @@ await writeFile(
   )}\n`,
   "utf8",
 );
-await writeFile(path.join(outDir, "index.html"), buildReportHtml(manifest));
+await writeFile(
+  path.join(outDir, "index.html"),
+  buildReportHtml(manifest, { baseLabel }),
+);
 
 console.log(
   `Visual screenshots: ${summary.total} comparisons → ${outDir} (${summary.changed} changed routes, ${summary.new} new routes). Open index.html`,
