@@ -6,7 +6,9 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import "../styles/pages/contact.css";
 
 const contact = await getEntry("pages", "contact");
-if (!contact) throw new Error("The contact page content entry is missing.");
+if (!contact || contact.data.template !== "contact") {
+  throw new Error("The contact page content entry is missing.");
+}
 
 const {
   title,

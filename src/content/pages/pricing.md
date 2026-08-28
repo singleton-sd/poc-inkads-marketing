@@ -1,4 +1,5 @@
 ---
+template: pricing
 title: Pricing | InkAds
 description: Pilot pricing for InkAds venues and advertisers. No published rate card — talk to us to scope a pilot.
 eyebrow: Pricing

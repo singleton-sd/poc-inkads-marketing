@@ -12,7 +12,9 @@ import { withBase } from "../lib/nav";
 import "../styles/pages/support.css";
 
 const support = await getEntry("pages", "support");
-if (!support) throw new Error("The support page content entry is missing.");
+if (!support || support.data.template !== "support") {
+  throw new Error("The support page content entry is missing.");
+}
 const { Content } = await render(support);
 const base = import.meta.env.BASE_URL;
 const supportEmail = "hello@inkads.poc.singletonsd.com";
