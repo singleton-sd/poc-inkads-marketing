@@ -1,9 +1,10 @@
 ---
 title: InkAds | E-paper advertising for shared spaces
-description: A low-power e-paper advertising network for venues and advertisers.
+description: An e-paper advertising network concept for pubs, shopping centres, bathrooms, waiting areas, cafés, gyms and other high-traffic indoor spaces — designed around low-power displays.
 headline: Useful messages. Placed thoughtfully.
-summary: InkAds is exploring a low-power e-paper advertising network that connects venues and advertisers through calm, context-aware displays.
+summary: InkAds is an e-paper advertising network concept for pubs, shopping centres, bathrooms, waiting areas, cafés, gyms and other high-traffic indoor spaces — calm, static displays instead of another bright screen, designed for low power use.
 ---
 
-InkAds is a proof of concept. Product imagery and final campaign creative remain
-replaceable as the concept develops.
+InkAds is a proof of concept for connecting venue space with advertiser messages
+through e-paper displays designed for low power use. Product imagery and final
+campaign creative remain replaceable as the concept develops.
