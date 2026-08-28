@@ -32,7 +32,8 @@ production is not used — it can lag when Pages deploys fail.
 
 1. Open the sticky **Preview** comment → **Open visual report**
 2. If **`visual-review`** is red, review base / PR / diff (new pages or pixel
-   changes — both need a human look)
+   changes — both need a human look). Unchanged routes are collapsed by default;
+   use **Expand all** or open only the routes listed in the sticky comment.
 3. When the changes are intentional, add the **`visual-accepted`** label
 4. A thin workflow run clears **`visual-review`** automatically (no rebuild)
 5. Merge when `visual-review` is green
