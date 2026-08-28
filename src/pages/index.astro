@@ -13,6 +13,7 @@ import SystemStep from "../components/SystemStep.astro";
 import TextLink from "../components/TextLink.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { withBase } from "../lib/nav";
+import "../styles/pages/home.css";
 
 const home = await getEntry("pages", "home");
 if (!home) throw new Error("The home page content entry is missing.");

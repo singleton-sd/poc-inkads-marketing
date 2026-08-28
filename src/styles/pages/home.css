@@ -1,0 +1,14 @@
+.audience-section,
+.system-section,
+.places-section {
+  padding-block: clamp(4rem, 8vw, 7rem);
+}
+
+.section-follow-link {
+  margin-top: var(--ink-space-md);
+}
+
+.system-section {
+  border-block: 1px solid var(--ink-border);
+  background: var(--ink-surface-band);
+}

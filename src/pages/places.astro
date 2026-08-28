@@ -8,6 +8,7 @@ import PageHero from "../components/PageHero.astro";
 import PlaceCard from "../components/PlaceCard.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { withBase } from "../lib/nav";
+import "../styles/pages/places.css";
 
 const placesPage = await getEntry("pages", "places");
 if (!placesPage) throw new Error("The places page content entry is missing.");

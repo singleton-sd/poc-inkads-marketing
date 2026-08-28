@@ -3,6 +3,7 @@ import { getEntry } from "astro:content";
 import ContactForm from "../components/ContactForm.astro";
 import MetaPair from "../components/MetaPair.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
+import "../styles/pages/contact.css";
 
 const contact = await getEntry("pages", "contact");
 if (!contact) throw new Error("The contact page content entry is missing.");
