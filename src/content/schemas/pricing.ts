@@ -1,6 +1,6 @@
 import { z } from "astro/zod";
 
-import { approvedInternalRoutes, draftField, pageSeo } from "./shared";
+import { draftField, internalRoute, pageSeo } from "./shared";
 
 export const pricingPageSchema = pageSeo.extend({
   template: z.literal("pricing"),
@@ -13,7 +13,7 @@ export const pricingPageSchema = pageSeo.extend({
         title: z.string().min(1),
         description: z.string().min(1),
         ctaLabel: z.string().min(1),
-        href: z.enum(approvedInternalRoutes),
+        href: internalRoute,
         accent: z.enum(["brand", "audience"]).default("brand"),
       }),
     )

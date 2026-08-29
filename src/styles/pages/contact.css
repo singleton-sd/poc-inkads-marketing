@@ -3,7 +3,7 @@
   grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
   align-items: start;
   gap: clamp(2rem, 5vw, 4.5rem);
-  padding-block: clamp(4rem, 8vw, 7rem);
+  padding-block: var(--ink-space-section);
 }
 
 .contact-page__copy h1 {

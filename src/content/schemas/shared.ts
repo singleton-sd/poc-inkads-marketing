@@ -18,9 +18,11 @@ export const approvedInternalRoutes = Array.from(
   ),
 ) as [string, ...string[]];
 
+export const internalRoute = z.enum(approvedInternalRoutes);
+
 export const ctaLink = z.object({
   label: z.string().trim().min(1),
-  href: z.string().trim().min(1),
+  href: internalRoute,
 });
 
 export const featureItem = z.object({
@@ -42,10 +44,10 @@ export const placeCard = z.object({
 });
 
 export const pageSeo = z.object({
-  title: z.string().min(1),
-  description: z.string().min(1),
-  headline: z.string().min(1),
-  summary: z.string().min(1),
+  title: z.string().trim().min(1),
+  description: z.string().trim().min(1),
+  headline: z.string().trim().min(1),
+  summary: z.string().trim().min(1),
 });
 
 export const draftField = z.boolean().default(false);

@@ -1,12 +1,18 @@
 import { z } from "astro/zod";
 
-import { draftField, featureItem, pageSeo, processStep } from "./shared";
+import {
+  draftField,
+  featureItem,
+  internalRoute,
+  pageSeo,
+  processStep,
+} from "./shared";
 
 export const venuesPageSchema = pageSeo.extend({
   template: z.literal("venues"),
   eyebrow: z.string().min(1),
   ctaLabel: z.string().min(1),
-  ctaHref: z.string().min(1),
+  ctaHref: internalRoute,
   mediaLabel: z.string().min(1),
   benefitsEyebrow: z.string().min(1),
   benefits: z.array(featureItem).min(1),
