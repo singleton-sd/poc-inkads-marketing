@@ -21,3 +21,72 @@ const { label = "InkAds e-paper display concept" } = Astro.props;
   </div>
   <figcaption>Product visual placeholder</figcaption>
 </figure>
+
+<style>
+  .device-frame {
+    position: relative;
+    margin: 0;
+    border: 1px solid var(--ink-border);
+    border-radius: 14px;
+    background: var(--ink-surface-deep);
+    padding: 14px;
+    box-shadow: var(--ink-shadow);
+  }
+
+  .device-frame__screen {
+    min-height: 430px;
+    border-radius: 8px;
+    background: var(--ink-epaper-surface);
+    padding: 1.5rem;
+    color: var(--ink-epaper-ink);
+  }
+
+  .device-frame__signal {
+    display: flex;
+    justify-content: flex-end;
+    gap: 4px;
+  }
+
+  .device-frame__signal span {
+    display: block;
+    width: 5px;
+    height: 5px;
+    background: currentcolor;
+  }
+
+  .device-frame__label,
+  .device-frame__meta {
+    font-family: var(--ink-font-label);
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .device-frame__label {
+    margin-top: 2rem;
+  }
+
+  .device-frame__content {
+    display: flex;
+    min-height: 280px;
+    align-items: center;
+    font-family: var(--ink-font-heading);
+    font-size: clamp(1.75rem, 4vw, 2.75rem);
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    line-height: 1.05;
+  }
+
+  .device-frame__meta {
+    border-top: 1px solid currentcolor;
+    padding-top: 0.75rem;
+  }
+
+  .device-frame figcaption {
+    padding: 0.875rem 0.5rem 0.25rem;
+    font-family: var(--ink-font-label);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    color: var(--ink-text-muted);
+  }
+</style>

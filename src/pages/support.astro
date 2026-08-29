@@ -9,6 +9,7 @@ import SectionHeading from "../components/SectionHeading.astro";
 import TextLink from "../components/TextLink.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { withBase } from "../lib/nav";
+import "../styles/pages/support.css";
 
 const support = await getEntry("pages", "support");
 if (!support) throw new Error("The support page content entry is missing.");

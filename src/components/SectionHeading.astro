@@ -57,3 +57,21 @@ const eyebrowClass =
   </div>
   <slot />
 </div>
+
+<style>
+  .section-heading h2 {
+    margin-top: 1rem;
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 500;
+    line-height: 1.1;
+  }
+
+  .section-heading--center {
+    max-width: none;
+    text-align: center;
+  }
+
+  .section-heading--center .section-heading__lead {
+    margin-inline: auto;
+  }
+</style>

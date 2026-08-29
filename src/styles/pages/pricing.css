@@ -1,0 +1,7 @@
+.pricing-pilots {
+  padding-bottom: var(--ink-space-section);
+}
+
+.pricing-pilots .card-grid {
+  margin-top: 0;
+}

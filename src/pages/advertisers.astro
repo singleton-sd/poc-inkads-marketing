@@ -10,6 +10,7 @@ import PageHero from "../components/PageHero.astro";
 import SectionHeading from "../components/SectionHeading.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { withBase } from "../lib/nav";
+import "../styles/pages/advertisers.css";
 
 const page = await getEntry("pages", "advertisers");
 if (!page) throw new Error("The advertisers page content entry is missing.");

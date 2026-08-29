@@ -1,0 +1,7 @@
+.places-page__cards {
+  padding-bottom: var(--ink-space-section);
+}
+
+.places-page__cards .places-grid {
+  margin-top: 0;
+}

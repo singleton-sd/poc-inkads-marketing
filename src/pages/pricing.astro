@@ -6,6 +6,7 @@ import PageHero from "../components/PageHero.astro";
 import TextLink from "../components/TextLink.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { withBase } from "../lib/nav";
+import "../styles/pages/pricing.css";
 
 const pricing = await getEntry("pages", "pricing");
 if (!pricing) throw new Error("The pricing page content entry is missing.");
