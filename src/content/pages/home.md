@@ -1,5 +1,4 @@
 ---
-template: home
 title: InkAds | E-paper advertising for shared spaces
 description: An e-paper advertising network concept for pubs, shopping centres, bathrooms, waiting areas, cafés, gyms and other high-traffic indoor spaces — designed around low-power displays.
 headline: Useful messages. Placed thoughtfully.

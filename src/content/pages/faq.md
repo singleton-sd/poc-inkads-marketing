@@ -1,5 +1,4 @@
 ---
-template: faq
 title: FAQ | InkAds
 description: Common questions about the InkAds e-paper advertising concept for venues and advertisers, designed around low power use.
 headline: Common questions.

@@ -8,9 +8,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import { withBase } from "../lib/nav";
 
 const page = await getEntry("pages", "faq");
-if (!page || page.data.template !== "faq") {
-  throw new Error("The FAQ page content entry is missing.");
-}
+if (!page) throw new Error("The FAQ page content entry is missing.");
 
 const faqs = (await getCollection("faqs"))
   .filter((entry) => !entry.data.draft)

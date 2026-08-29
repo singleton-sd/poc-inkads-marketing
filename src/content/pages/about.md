@@ -1,5 +1,4 @@
 ---
-template: about
 title: About | InkAds
 description: >-
   InkAds is a proof of concept exploring e-paper advertising in shared spaces,

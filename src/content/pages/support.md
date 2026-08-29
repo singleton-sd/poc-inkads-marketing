@@ -1,5 +1,4 @@
 ---
-template: support
 title: Support | InkAds
 description: Get help with the InkAds proof of concept — contact paths for venues, advertisers, and device sign-in questions.
 headline: Support for the InkAds proof of concept

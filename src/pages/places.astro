@@ -11,9 +11,7 @@ import { withBase } from "../lib/nav";
 import "../styles/pages/places.css";
 
 const placesPage = await getEntry("pages", "places");
-if (!placesPage || placesPage.data.template !== "places") {
-  throw new Error("The places page content entry is missing.");
-}
+if (!placesPage) throw new Error("The places page content entry is missing.");
 
 const {
   title,
@@ -25,6 +23,10 @@ const {
   constraint,
   cta,
 } = placesPage.data;
+
+if (!places?.length || !constraint || !cta) {
+  throw new Error("The places page content is incomplete.");
+}
 
 const base = import.meta.env.BASE_URL;
 ---

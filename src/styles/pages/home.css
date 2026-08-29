@@ -1,7 +1,7 @@
 .audience-section,
 .system-section,
 .places-section {
-  padding-block: var(--ink-space-section);
+  padding-block: clamp(4rem, 8vw, 7rem);
 }
 
 .section-follow-link {

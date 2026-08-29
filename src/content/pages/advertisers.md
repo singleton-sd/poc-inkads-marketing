@@ -1,5 +1,4 @@
 ---
-template: advertisers
 title: Advertisers | InkAds
 description: Place messages in relevant contexts with InkAds e-paper advertising for shared indoor spaces.
 headline: Place messages in relevant contexts.

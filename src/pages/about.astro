@@ -12,9 +12,7 @@ import { withBase } from "../lib/nav";
 import "../styles/pages/about.css";
 
 const about = await getEntry("pages", "about");
-if (!about || about.data.template !== "about") {
-  throw new Error("The about page content entry is missing.");
-}
+if (!about) throw new Error("The about page content entry is missing.");
 
 const {
   title,
@@ -28,6 +26,16 @@ const {
   primaryCta,
   secondaryCta,
 } = about.data;
+
+if (
+  !columns?.length ||
+  !parentBrand ||
+  !ctaTitle ||
+  !primaryCta ||
+  !secondaryCta
+) {
+  throw new Error("The about page content entry is missing required sections.");
+}
 
 const base = import.meta.env.BASE_URL;
 ---

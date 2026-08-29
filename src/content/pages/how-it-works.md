@@ -1,5 +1,4 @@
 ---
-template: how-it-works
 title: How it works | InkAds
 description: How InkAds matches venues and messages, prepares creative for e-paper, and displays it in shared spaces.
 headline: From message to place, in three steps.

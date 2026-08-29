@@ -13,9 +13,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import { withBase } from "../lib/nav";
 
 const venues = await getEntry("pages", "venues");
-if (!venues || venues.data.template !== "venues") {
-  throw new Error("The venues page content entry is missing.");
-}
+if (!venues) throw new Error("The venues page content entry is missing.");
 
 const {
   title,
@@ -33,6 +31,21 @@ const {
   process,
   closingHeadline,
 } = venues.data;
+
+if (
+  !eyebrow ||
+  !ctaLabel ||
+  !ctaHref ||
+  !mediaLabel ||
+  !benefitsEyebrow ||
+  !benefits?.length ||
+  !processEyebrow ||
+  !processHeadline ||
+  !process?.length ||
+  !closingHeadline
+) {
+  throw new Error("The venues page content entry is missing required fields.");
+}
 
 const base = import.meta.env.BASE_URL;
 const contactHref = withBase(ctaHref, base);

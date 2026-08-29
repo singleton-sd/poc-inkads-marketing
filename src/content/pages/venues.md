@@ -1,5 +1,4 @@
 ---
-template: venues
 title: Venues | InkAds
 description: Explore a considered e-paper display format designed to fit the character and practical needs of your venue.
 headline: Give overlooked space a useful role.
