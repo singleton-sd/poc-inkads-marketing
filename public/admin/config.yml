@@ -62,13 +62,47 @@ collections:
             widget: object
             fields:
               - { label: Label, name: label, widget: string }
-              - { label: URL, name: href, widget: string }
+              - {
+                  label: URL,
+                  name: href,
+                  widget: select,
+                  options:
+                    [
+                      /,
+                      /how-it-works,
+                      /places,
+                      /venues,
+                      /advertisers,
+                      /pricing,
+                      /about,
+                      /faq,
+                      /support,
+                      /contact,
+                    ],
+                }
           - label: Secondary CTA
             name: secondaryCta
             widget: object
             fields:
               - { label: Label, name: label, widget: string }
-              - { label: URL, name: href, widget: string }
+              - {
+                  label: URL,
+                  name: href,
+                  widget: select,
+                  options:
+                    [
+                      /,
+                      /how-it-works,
+                      /places,
+                      /venues,
+                      /advertisers,
+                      /pricing,
+                      /about,
+                      /faq,
+                      /support,
+                      /contact,
+                    ],
+                }
           - label: Draft
             name: draft
             widget: boolean
@@ -236,8 +270,21 @@ collections:
             required: false
           - label: CTA URL
             name: ctaHref
-            widget: string
+            widget: select
             required: false
+            options:
+              [
+                /,
+                /how-it-works,
+                /places,
+                /venues,
+                /advertisers,
+                /pricing,
+                /about,
+                /faq,
+                /support,
+                /contact,
+              ]
           - label: Draft
             name: draft
             widget: boolean
@@ -330,13 +377,47 @@ collections:
             widget: object
             fields:
               - { label: Label, name: label, widget: string }
-              - { label: URL, name: href, widget: string }
+              - {
+                  label: URL,
+                  name: href,
+                  widget: select,
+                  options:
+                    [
+                      /,
+                      /how-it-works,
+                      /places,
+                      /venues,
+                      /advertisers,
+                      /pricing,
+                      /about,
+                      /faq,
+                      /support,
+                      /contact,
+                    ],
+                }
           - label: Secondary CTA
             name: secondaryCta
             widget: object
             fields:
               - { label: Label, name: label, widget: string }
-              - { label: URL, name: href, widget: string }
+              - {
+                  label: URL,
+                  name: href,
+                  widget: select,
+                  options:
+                    [
+                      /,
+                      /how-it-works,
+                      /places,
+                      /venues,
+                      /advertisers,
+                      /pricing,
+                      /about,
+                      /faq,
+                      /support,
+                      /contact,
+                    ],
+                }
           - label: Draft
             name: draft
             widget: boolean
@@ -543,7 +624,20 @@ collections:
             widget: string
           - label: CTA URL
             name: ctaHref
-            widget: string
+            widget: select
+            options:
+              [
+                /,
+                /how-it-works,
+                /places,
+                /venues,
+                /advertisers,
+                /pricing,
+                /about,
+                /faq,
+                /support,
+                /contact,
+              ]
           - label: Media placeholder label
             name: mediaLabel
             widget: string

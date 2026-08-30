@@ -1,3 +1,4 @@
+import { approvedInternalRoutes } from "../../lib/approved-internal-routes.ts";
 import {
   draftCmsField,
   featureItemCmsFields,
@@ -15,7 +16,12 @@ export const venuesPageCms = {
     ...seoCmsFields,
     { label: "Eyebrow", name: "eyebrow", widget: "string" },
     { label: "CTA label", name: "ctaLabel", widget: "string" },
-    { label: "CTA URL", name: "ctaHref", widget: "string" },
+    {
+      label: "CTA URL",
+      name: "ctaHref",
+      widget: "select",
+      options: approvedInternalRoutes,
+    },
     {
       label: "Media placeholder label",
       name: "mediaLabel",

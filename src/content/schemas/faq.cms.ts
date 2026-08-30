@@ -1,3 +1,4 @@
+import { approvedInternalRoutes } from "../../lib/approved-internal-routes.ts";
 import { draftCmsField, seoCmsFields, templateField } from "./cms.ts";
 
 export const faqPageCms = {
@@ -15,7 +16,13 @@ export const faqPageCms = {
       required: false,
     },
     { label: "CTA label", name: "ctaLabel", widget: "string", required: false },
-    { label: "CTA URL", name: "ctaHref", widget: "string", required: false },
+    {
+      label: "CTA URL",
+      name: "ctaHref",
+      widget: "select",
+      options: approvedInternalRoutes,
+      required: false,
+    },
     draftCmsField,
   ],
 };

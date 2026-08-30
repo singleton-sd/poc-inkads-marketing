@@ -1,3 +1,5 @@
+import { approvedInternalRoutes } from "../../lib/approved-internal-routes.ts";
+
 export type CmsField = {
   label: string;
   name: string;
@@ -56,7 +58,12 @@ export const draftCmsField: CmsField = {
 
 export const ctaLinkCmsFields: CmsField[] = [
   { label: "Label", name: "label", widget: "string" },
-  { label: "URL", name: "href", widget: "string" },
+  {
+    label: "URL",
+    name: "href",
+    widget: "select",
+    options: approvedInternalRoutes,
+  },
 ];
 
 export const featureItemCmsFields: CmsField[] = [
