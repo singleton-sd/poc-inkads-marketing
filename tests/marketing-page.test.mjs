@@ -50,7 +50,17 @@ test("dynamic marketing route builds from the marketing collection", async () =>
   assert.match(page, /isReservedPageSlug/);
   assert.match(page, /PageHero/);
   assert.match(page, /BaseLayout/);
-  assert.doesNotMatch(page, /\b(fetch\(|XMLHttpRequest)\b/);
+  assert.doesNotMatch(page, /\bfetch\s*\(|\bXMLHttpRequest\b/);
+});
+
+test("marketing schema requires ctaLabel and ctaHref together", async () => {
+  const schema = await readFile(
+    new URL("src/content/schemas/marketing.ts", root),
+    "utf8",
+  );
+
+  assert.match(schema, /Boolean\(ctaLabel\) === Boolean\(ctaHref\)/);
+  assert.match(schema, /ctaLabel and ctaHref must be provided together/);
 });
 
 test("content config registers the marketing collection", async () => {

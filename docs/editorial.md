@@ -29,7 +29,7 @@ Marketing-page frontmatter (Decap **Marketing pages** collection or
 - `description`
 - `headline`
 - `summary`
-- optional `eyebrow`, `ctaLabel`, and `ctaHref` (internal route select)
+- optional `eyebrow`, `ctaLabel`, and `ctaHref` (internal route select; both CTA fields required when either is set)
 - optional `draft` (defaults to `false`)
 
 The filename slug becomes the public URL (`partners.md` → `/partners/`). Slugs
