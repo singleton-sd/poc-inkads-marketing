@@ -19,7 +19,8 @@
     "test:seo": "node tests/seo.mjs",
     "test:a11y": "node tests/a11y.mjs",
     "test:visual": "node tests/visual.mjs",
-    "test:visual:gate": "node tests/visual-gate.mjs"
+    "test:visual:gate": "node tests/visual-gate.mjs",
+    "cms:config": "node --experimental-strip-types scripts/generate-cms-config.ts"
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.3.0",
