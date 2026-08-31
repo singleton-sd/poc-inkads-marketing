@@ -674,6 +674,66 @@ collections:
             name: body
             widget: markdown
 
+  - name: marketing
+    label: Marketing pages
+    label_singular: Marketing page
+    folder: src/content/marketing
+    create: true
+    delete: true
+    slug: "{{slug}}"
+    extension: md
+    format: frontmatter
+    fields:
+      - label: Title
+        name: title
+        widget: string
+        hint: Page title (browser tab / SEO).
+      - label: Description
+        name: description
+        widget: text
+        hint: Short meta description for SEO.
+      - label: Headline
+        name: headline
+        widget: string
+      - label: Summary
+        name: summary
+        widget: text
+        hint: Hero lead / supporting sentence.
+      - label: Eyebrow
+        name: eyebrow
+        widget: string
+        required: false
+        hint: Short label above the headline in the hero.
+      - label: CTA label
+        name: ctaLabel
+        widget: string
+        required: false
+      - label: CTA URL
+        name: ctaHref
+        widget: select
+        required: false
+        options:
+          [
+            /,
+            /how-it-works,
+            /places,
+            /venues,
+            /advertisers,
+            /pricing,
+            /about,
+            /faq,
+            /support,
+            /contact,
+          ]
+      - label: Draft
+        name: draft
+        widget: boolean
+        required: false
+        default: false
+      - label: Body
+        name: body
+        widget: markdown
+
   - name: faqs
     label: FAQ items
     label_singular: FAQ item

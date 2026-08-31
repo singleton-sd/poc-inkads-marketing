@@ -2,6 +2,7 @@ import { defineCollection } from "astro:content";
 import { glob } from "astro/loaders";
 import { z } from "astro/zod";
 
+import { marketingPageSchema } from "./content/schemas/marketing";
 import { footerNav, primaryNav } from "./lib/nav";
 
 /** Root-relative single-slash paths only, so a nav entry cannot widen the enum. */
@@ -158,4 +159,9 @@ const legal = defineCollection({
   }),
 });
 
-export const collections = { faqs, legal, pages };
+const marketing = defineCollection({
+  loader: glob({ base: "./src/content/marketing", pattern: "**/*.{md,mdx}" }),
+  schema: marketingPageSchema,
+});
+
+export const collections = { faqs, legal, marketing, pages };

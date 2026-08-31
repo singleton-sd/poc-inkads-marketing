@@ -1,0 +1,18 @@
+.marketing-section {
+  padding-block: clamp(3rem, 6vw, 5rem);
+}
+
+.marketing-section .page-copy {
+  max-width: 46rem;
+}
+
+.page-copy {
+  color: var(--ink-text-muted);
+  font-weight: 300;
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+
+.page-copy p + p {
+  margin-top: 1.25rem;
+}

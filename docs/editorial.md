@@ -1,10 +1,11 @@
 # Editorial workflow
 
-InkAds content is stored as Markdown in Git. Page copy lives in
-`src/content/pages`, FAQ answers live in `src/content/faqs`, and future legal
-pages live in `src/content/legal`. Astro validates these collections during
-`pnpm build`, so a pull request containing invalid or incomplete frontmatter
-will fail the build before it can be merged.
+InkAds content is stored as Markdown in Git. Fixed page copy lives in
+`src/content/pages`, editor-created marketing pages live in
+`src/content/marketing`, FAQ answers live in `src/content/faqs`, and future
+legal pages live in `src/content/legal`. Astro validates these collections
+during `pnpm build`, so a pull request containing invalid or incomplete
+frontmatter will fail the build before it can be merged.
 
 ## Editing through Git
 
@@ -20,6 +21,21 @@ Landing-page frontmatter requires:
 - `summary`
 - optional `eyebrow`, `note`, and `pilots` (used by pages such as Pricing)
 - optional `draft` (defaults to `false`)
+
+Marketing-page frontmatter (Decap **Marketing pages** collection or
+`src/content/marketing/<slug>.md`) requires:
+
+- `title`
+- `description`
+- `headline`
+- `summary`
+- optional `eyebrow`, `ctaLabel`, and `ctaHref` (internal route select; both CTA fields required when either is set)
+- optional `draft` (defaults to `false`)
+
+The filename slug becomes the public URL (`partners.md` → `/partners/`). Slugs
+must be lowercase kebab-case and cannot match fixed routes such as `about`,
+`contact`, or `pricing`. New marketing URLs are not added to site navigation
+automatically (see GitHub issue #67).
 
 FAQ item frontmatter requires:
 
@@ -49,7 +65,7 @@ pnpm build
 
 The production build includes a static Decap application at `/admin/`. Its
 configuration targets `singleton-sd/poc-inkads-marketing` and maps the same
-page, FAQ, and legal fields enforced by the Astro schemas.
+page, marketing, FAQ, and legal fields enforced by the Astro schemas.
 
 GitHub Pages can serve the static admin files, but it cannot execute the OAuth
 callback or safely hold the OAuth client secret. CMS login therefore uses the
