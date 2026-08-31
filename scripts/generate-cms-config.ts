@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 
 import type { CmsField } from "../src/content/schemas/cms.ts";
 import { pageCmsEntries } from "../src/content/schemas/cms-registry.ts";
+import { marketingCmsFields } from "../src/content/schemas/marketing.cms.ts";
 
 const rootDir = fileURLToPath(new URL("..", import.meta.url));
 const outPath = path.join(rootDir, "public/admin/config.yml");
@@ -80,6 +81,10 @@ function serializeInlineField(field: CmsField, indent: number): string {
   return `${pad}- { ${attrs.join(", ")} }`;
 }
 
+function serializeFolderFields(fields: CmsField[]): string {
+  return fields.map((field) => serializeField(field, 6)).join("\n");
+}
+
 function serializePageFiles(): string {
   const lines = pageCmsEntries.map((entry) => {
     const fieldBlock = entry.fields
@@ -121,6 +126,21 @@ collections:
     label: Pages
     files:
 ${serializePageFiles()}
+
+  - name: marketing
+    label: Marketing pages
+    label_singular: Marketing page
+    folder: src/content/marketing
+    create: true
+    delete: true
+    slug: "{{slug}}"
+    extension: md
+    format: frontmatter
+    fields:
+${serializeFolderFields(marketingCmsFields)}
+      - label: Body
+        name: body
+        widget: markdown
 
   - name: faqs
     label: FAQ items
