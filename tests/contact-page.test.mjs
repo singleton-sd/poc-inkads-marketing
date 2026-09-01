@@ -21,21 +21,22 @@ test("contact page uses shared chrome and a split MetaPair + form layout", async
   assert.match(content, /Let's talk about your space or campaign\./);
 });
 
-test("contact form remains client-side only with a success panel", async () => {
+test("contact form posts to PostKit with loading and error states", async () => {
   const form = await readFile(
     new URL("src/components/ContactForm.astro", root),
     "utf8",
   );
 
-  assert.match(form, /data-contact-form/);
+  assert.match(form, /PUBLIC_POSTKIT_API_BASE_URL/);
+  assert.match(form, /fetch\(`\$\{apiBase\}\/contact`/);
+  assert.match(form, /partnership/);
+  assert.match(form, /data-contact-form-error/);
   assert.match(form, /data-contact-form-success/);
-  assert.match(form, /Form preview complete\./);
-  assert.match(form, /Nothing was sent\./);
-  assert.doesNotMatch(form, /fetch\(|action=/);
+  assert.match(form, /withBase\("\/privacy"/);
+  assert.doesNotMatch(form, /Preview form|Nothing was sent/);
 });
 
-test("contact content uses transparent non-delivery messaging", async () => {
-  const page = await readFile(new URL("src/pages/contact.astro", root), "utf8");
+test("contact content describes live enquiry delivery", async () => {
   const content = await readFile(
     new URL("src/content/pages/contact.md", root),
     "utf8",
@@ -44,15 +45,11 @@ test("contact content uses transparent non-delivery messaging", async () => {
     new URL("src/components/ContactForm.astro", root),
     "utf8",
   );
-  const publicCopy = `${page}\n${content}\n${form}`;
+  const publicCopy = `${content}\n${form}`;
 
-  assert.match(publicCopy, /preview only/i);
-  assert.match(publicCopy, /Nothing was sent\./);
-  assert.match(publicCopy, /hello@inkads\.poc\.singletonsd\.com/);
-  assert.doesNotMatch(
-    publicCopy,
-    /Send request|request received|We'll be in touch/i,
-  );
+  assert.match(publicCopy, /Send message/);
+  assert.match(publicCopy, /Message sent/);
+  assert.doesNotMatch(publicCopy, /preview only/i);
   assert.doesNotMatch(
     publicCopy,
     /\b(guaranteed|proven roi|industry-leading|best-in-class|revenue lift)\b/i,

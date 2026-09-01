@@ -1004,6 +1004,20 @@ textarea.field-control {
   gap: 1rem;
 }
 
+.contact-form__privacy {
+  margin: 0;
+  color: var(--ink-text-muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.contact-form__error {
+  margin: 0;
+  color: var(--ink-status-error, #b42318);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
 .contact-form__success {
   border: 1px solid var(--ink-brand);
   border-radius: var(--ink-radius-card);
