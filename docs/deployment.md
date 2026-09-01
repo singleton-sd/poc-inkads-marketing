@@ -84,6 +84,18 @@ In the public `poc.singletonsd.com` hosted zone, create this record:
 Do not point the subdomain at the apex domain and do not create an alias to a
 private distribution. The record contains no secret.
 
+## Contact form (PostKit)
+
+The contact form posts to the shared PostKit Function App. Production and CI
+builds set:
+
+```text
+PUBLIC_POSTKIT_API_BASE_URL=https://ssd-postkit-api-prod-ae.azurewebsites.net
+```
+
+PostKit configuration for InkAds is documented in
+[`singleton-sd/post-kit`](https://github.com/singleton-sd/post-kit/blob/main/docs/integrations/inkads-marketing.md).
+
 ## Verification
 
 After merging the deployment PR, changing the Pages source, and creating the

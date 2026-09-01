@@ -62,8 +62,12 @@ jobs:
       - name: Build visual baseline
         working-directory: visual-base
         run: pnpm build
+        env:
+          PUBLIC_POSTKIT_API_BASE_URL: https://ssd-postkit-api-prod-ae.azurewebsites.net
       - name: Build PR site for visual compare
         run: pnpm build
+        env:
+          PUBLIC_POSTKIT_API_BASE_URL: https://ssd-postkit-api-prod-ae.azurewebsites.net
       - name: Install Playwright browsers
         run: pnpm playwright:install
       - name: Capture visual screenshots
@@ -76,6 +80,7 @@ jobs:
         run: pnpm build
         env:
           PREVIEW_BASE_PATH: /pr-preview/pr-${{ github.event.number }}/
+          PUBLIC_POSTKIT_API_BASE_URL: https://ssd-postkit-api-prod-ae.azurewebsites.net
       - name: Host visual report under preview
         run: |
           rm -rf dist/visual
