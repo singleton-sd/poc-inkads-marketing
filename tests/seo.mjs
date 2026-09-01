@@ -103,6 +103,31 @@ testMetadata("favicons included", () => {
   assert.match(indexHtml, /rel="icon"[^>]+href="\/favicon\.ico"/i);
 });
 
+testMetadata("sitemap lists primary public routes", () => {
+  assert.match(
+    sitemapXml,
+    new RegExp(`${SITE_DOMAIN.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&")}/`, "i"),
+  );
+  assert.match(
+    sitemapXml,
+    /<loc>https:\/\/inkads\.poc\.singletonsd\.com\/<\/loc>/i,
+  );
+  assert.match(
+    sitemapXml,
+    /<loc>https:\/\/inkads\.poc\.singletonsd\.com\/contact\/<\/loc>/i,
+  );
+  assert.match(
+    sitemapXml,
+    /<loc>https:\/\/inkads\.poc\.singletonsd\.com\/privacy\/<\/loc>/i,
+  );
+  assert.match(
+    sitemapXml,
+    /<loc>https:\/\/inkads\.poc\.singletonsd\.com\/terms\/<\/loc>/i,
+  );
+  assert.doesNotMatch(sitemapXml, /\/admin\//i);
+  assert.doesNotMatch(sitemapXml, /404\.html/i);
+});
+
 testMetadata("sitemap and robots reference production domain", () => {
   assert.match(
     sitemapXml,
