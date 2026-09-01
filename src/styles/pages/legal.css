@@ -1,0 +1,30 @@
+.legal-section {
+  padding-block: clamp(3rem, 6vw, 5rem);
+}
+
+.legal-section h1 {
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  line-height: 1.15;
+}
+
+.legal-effective {
+  margin-top: 0.75rem;
+  color: var(--ink-text-muted);
+  font-size: 0.95rem;
+}
+
+.legal-section .page-copy {
+  margin-top: 2rem;
+  max-width: 46rem;
+}
+
+.page-copy {
+  color: var(--ink-text-muted);
+  font-weight: 300;
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+
+.page-copy p + p {
+  margin-top: 1.25rem;
+}

@@ -360,6 +360,23 @@ main {
   color: var(--ink-text-dim);
 }
 
+.site-footer__policy-links {
+  display: flex;
+  gap: 1rem;
+}
+
+.site-footer__policy-links a {
+  color: var(--ink-text-grey);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.site-footer__policy-links a:hover {
+  color: var(--ink-brand);
+}
+
 .site-footer__credit {
   font-weight: 600;
   letter-spacing: 0.08em;
