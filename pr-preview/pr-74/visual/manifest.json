@@ -37,7 +37,7 @@
       "diffFile": "diff/404-desktop.png",
       "mismatched": 343,
       "prUrl": "/404",
-      "baseUrl": "http://127.0.0.1:38655/404",
+      "baseUrl": "http://127.0.0.1:32999/404",
       "status": "changed"
     },
     {
@@ -48,7 +48,7 @@
       "diffFile": "diff/404-mobile.png",
       "mismatched": 14045,
       "prUrl": "/404",
-      "baseUrl": "http://127.0.0.1:38655/404",
+      "baseUrl": "http://127.0.0.1:32999/404",
       "status": "changed"
     },
     {
@@ -59,7 +59,7 @@
       "diffFile": "diff/about-desktop.png",
       "mismatched": 343,
       "prUrl": "/about",
-      "baseUrl": "http://127.0.0.1:38655/about",
+      "baseUrl": "http://127.0.0.1:32999/about",
       "status": "changed"
     },
     {
@@ -70,7 +70,7 @@
       "diffFile": "diff/about-mobile.png",
       "mismatched": 14045,
       "prUrl": "/about",
-      "baseUrl": "http://127.0.0.1:38655/about",
+      "baseUrl": "http://127.0.0.1:32999/about",
       "status": "changed"
     },
     {
@@ -81,7 +81,7 @@
       "diffFile": "diff/advertisers-desktop.png",
       "mismatched": 343,
       "prUrl": "/advertisers",
-      "baseUrl": "http://127.0.0.1:38655/advertisers",
+      "baseUrl": "http://127.0.0.1:32999/advertisers",
       "status": "changed"
     },
     {
@@ -92,7 +92,7 @@
       "diffFile": "diff/advertisers-mobile.png",
       "mismatched": 14045,
       "prUrl": "/advertisers",
-      "baseUrl": "http://127.0.0.1:38655/advertisers",
+      "baseUrl": "http://127.0.0.1:32999/advertisers",
       "status": "changed"
     },
     {
@@ -103,7 +103,7 @@
       "diffFile": "diff/contact-desktop.png",
       "mismatched": 343,
       "prUrl": "/contact",
-      "baseUrl": "http://127.0.0.1:38655/contact",
+      "baseUrl": "http://127.0.0.1:32999/contact",
       "status": "changed"
     },
     {
@@ -114,7 +114,7 @@
       "diffFile": "diff/contact-mobile.png",
       "mismatched": 14045,
       "prUrl": "/contact",
-      "baseUrl": "http://127.0.0.1:38655/contact",
+      "baseUrl": "http://127.0.0.1:32999/contact",
       "status": "changed"
     },
     {
@@ -125,7 +125,7 @@
       "diffFile": "diff/faq-desktop.png",
       "mismatched": 343,
       "prUrl": "/faq",
-      "baseUrl": "http://127.0.0.1:38655/faq",
+      "baseUrl": "http://127.0.0.1:32999/faq",
       "status": "changed"
     },
     {
@@ -136,7 +136,7 @@
       "diffFile": "diff/faq-mobile.png",
       "mismatched": 14045,
       "prUrl": "/faq",
-      "baseUrl": "http://127.0.0.1:38655/faq",
+      "baseUrl": "http://127.0.0.1:32999/faq",
       "status": "changed"
     },
     {
@@ -147,7 +147,7 @@
       "diffFile": "diff/how-it-works-desktop.png",
       "mismatched": 343,
       "prUrl": "/how-it-works",
-      "baseUrl": "http://127.0.0.1:38655/how-it-works",
+      "baseUrl": "http://127.0.0.1:32999/how-it-works",
       "status": "changed"
     },
     {
@@ -158,7 +158,7 @@
       "diffFile": "diff/how-it-works-mobile.png",
       "mismatched": 14045,
       "prUrl": "/how-it-works",
-      "baseUrl": "http://127.0.0.1:38655/how-it-works",
+      "baseUrl": "http://127.0.0.1:32999/how-it-works",
       "status": "changed"
     },
     {
@@ -169,7 +169,7 @@
       "diffFile": "diff/home-desktop.png",
       "mismatched": 343,
       "prUrl": "/",
-      "baseUrl": "http://127.0.0.1:38655/",
+      "baseUrl": "http://127.0.0.1:32999/",
       "status": "changed"
     },
     {
@@ -180,7 +180,7 @@
       "diffFile": "diff/home-mobile.png",
       "mismatched": 14045,
       "prUrl": "/",
-      "baseUrl": "http://127.0.0.1:38655/",
+      "baseUrl": "http://127.0.0.1:32999/",
       "status": "changed"
     },
     {
@@ -191,7 +191,7 @@
       "diffFile": "diff/places-desktop.png",
       "mismatched": 343,
       "prUrl": "/places",
-      "baseUrl": "http://127.0.0.1:38655/places",
+      "baseUrl": "http://127.0.0.1:32999/places",
       "status": "changed"
     },
     {
@@ -202,7 +202,7 @@
       "diffFile": "diff/places-mobile.png",
       "mismatched": 14045,
       "prUrl": "/places",
-      "baseUrl": "http://127.0.0.1:38655/places",
+      "baseUrl": "http://127.0.0.1:32999/places",
       "status": "changed"
     },
     {
@@ -213,7 +213,7 @@
       "diffFile": "diff/pricing-desktop.png",
       "mismatched": 343,
       "prUrl": "/pricing",
-      "baseUrl": "http://127.0.0.1:38655/pricing",
+      "baseUrl": "http://127.0.0.1:32999/pricing",
       "status": "changed"
     },
     {
@@ -224,7 +224,7 @@
       "diffFile": "diff/pricing-mobile.png",
       "mismatched": 14045,
       "prUrl": "/pricing",
-      "baseUrl": "http://127.0.0.1:38655/pricing",
+      "baseUrl": "http://127.0.0.1:32999/pricing",
       "status": "changed"
     },
     {
@@ -233,9 +233,9 @@
       "prFile": "pr/privacy-desktop.png",
       "baseFile": "base/privacy-desktop.png",
       "diffFile": "diff/privacy-desktop.png",
-      "mismatched": 469898,
+      "mismatched": 386137,
       "prUrl": "/privacy",
-      "baseUrl": "http://127.0.0.1:38655/privacy",
+      "baseUrl": "http://127.0.0.1:32999/privacy",
       "status": "new"
     },
     {
@@ -244,9 +244,9 @@
       "prFile": "pr/privacy-mobile.png",
       "baseFile": "base/privacy-mobile.png",
       "diffFile": "diff/privacy-mobile.png",
-      "mismatched": 319823,
+      "mismatched": 297578,
       "prUrl": "/privacy",
-      "baseUrl": "http://127.0.0.1:38655/privacy",
+      "baseUrl": "http://127.0.0.1:32999/privacy",
       "status": "new"
     },
     {
@@ -257,7 +257,7 @@
       "diffFile": "diff/support-desktop.png",
       "mismatched": 343,
       "prUrl": "/support",
-      "baseUrl": "http://127.0.0.1:38655/support",
+      "baseUrl": "http://127.0.0.1:32999/support",
       "status": "changed"
     },
     {
@@ -268,7 +268,7 @@
       "diffFile": "diff/support-mobile.png",
       "mismatched": 14045,
       "prUrl": "/support",
-      "baseUrl": "http://127.0.0.1:38655/support",
+      "baseUrl": "http://127.0.0.1:32999/support",
       "status": "changed"
     },
     {
@@ -279,7 +279,7 @@
       "diffFile": "diff/terms-desktop.png",
       "mismatched": 437186,
       "prUrl": "/terms",
-      "baseUrl": "http://127.0.0.1:38655/terms",
+      "baseUrl": "http://127.0.0.1:32999/terms",
       "status": "new"
     },
     {
@@ -290,7 +290,7 @@
       "diffFile": "diff/terms-mobile.png",
       "mismatched": 301325,
       "prUrl": "/terms",
-      "baseUrl": "http://127.0.0.1:38655/terms",
+      "baseUrl": "http://127.0.0.1:32999/terms",
       "status": "new"
     },
     {
@@ -301,7 +301,7 @@
       "diffFile": "diff/venues-desktop.png",
       "mismatched": 343,
       "prUrl": "/venues",
-      "baseUrl": "http://127.0.0.1:38655/venues",
+      "baseUrl": "http://127.0.0.1:32999/venues",
       "status": "changed"
     },
     {
@@ -312,7 +312,7 @@
       "diffFile": "diff/venues-mobile.png",
       "mismatched": 14045,
       "prUrl": "/venues",
-      "baseUrl": "http://127.0.0.1:38655/venues",
+      "baseUrl": "http://127.0.0.1:32999/venues",
       "status": "changed"
     }
   ]
