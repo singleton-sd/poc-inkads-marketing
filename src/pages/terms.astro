@@ -1,0 +1,29 @@
+---
+import { getEntry, render } from "astro:content";
+import LegalLayout from "../layouts/LegalLayout.astro";
+import { formatLegalEffectiveDate } from "../lib/legal-date";
+
+const page = await getEntry("legal", "terms");
+if (!page) {
+  throw new Error(
+    "The terms legal entry is missing. Add src/content/legal/terms.md.",
+  );
+}
+if (page.data.draft) {
+  throw new Error(
+    "The terms page is marked draft. Set draft: false before publishing.",
+  );
+}
+
+const { Content } = await render(page);
+const effectiveDateLabel = formatLegalEffectiveDate(page.data.effectiveDate);
+---
+
+<LegalLayout
+  title={page.data.title}
+  description={page.data.description}
+  headingId="terms-title"
+  effectiveDateLabel={effectiveDateLabel}
+>
+  <Content />
+</LegalLayout>

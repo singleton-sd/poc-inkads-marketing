@@ -7,7 +7,9 @@ export const RESERVED_PAGE_SLUGS = [
   "how-it-works",
   "places",
   "pricing",
+  "privacy",
   "support",
+  "terms",
   "venues",
 ] as const;
 

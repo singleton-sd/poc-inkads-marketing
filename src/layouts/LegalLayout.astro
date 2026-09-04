@@ -1,0 +1,26 @@
+---
+import BaseLayout from "./BaseLayout.astro";
+import "../styles/pages/legal.css";
+
+interface Props {
+  title: string;
+  description: string;
+  headingId: string;
+  /** Calendar date already formatted for display (timezone-stable). */
+  effectiveDateLabel: string;
+}
+
+const { title, description, headingId, effectiveDateLabel } = Astro.props;
+---
+
+<BaseLayout title={title} description={description}>
+  <main id="main-content">
+    <section class="shell legal-section" aria-labelledby={headingId}>
+      <h1 id={headingId}>{title}</h1>
+      <p class="legal-effective">Effective {effectiveDateLabel}</p>
+      <div class="page-copy">
+        <slot />
+      </div>
+    </section>
+  </main>
+</BaseLayout>
