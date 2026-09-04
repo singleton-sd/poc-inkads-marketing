@@ -24,11 +24,11 @@ without your consent.
 
 ## How submissions are delivered
 
-Today the on-site contact form is a **preview only** — it does not transmit
-your details to our servers. To reach us, email
-[hello@inkads.poc.singletonsd.com](mailto:hello@inkads.poc.singletonsd.com)
-directly. When form delivery is enabled, this policy will be updated to
-describe that path before it goes live.
+Contact form messages are sent through Singleton SD's shared PostKit email
+service and delivered to the InkAds support inbox configured for this site. The
+form posts to PostKit's `/contact` endpoint from your browser; PostKit applies
+rate limiting and routes the message to our inbox. Email delivery uses Forward
+Email as configured for Singleton SD PoC domains.
 
 ## Hosting and processors
 
