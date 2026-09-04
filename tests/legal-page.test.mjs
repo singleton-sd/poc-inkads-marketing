@@ -10,11 +10,30 @@ test("privacy and terms pages load legal collection entries", async () => {
     "utf8",
   );
   const terms = await readFile(new URL("src/pages/terms.astro", root), "utf8");
+  const layout = await readFile(
+    new URL("src/layouts/LegalLayout.astro", root),
+    "utf8",
+  );
 
   assert.match(privacy, /getEntry\("legal", "privacy"\)/);
   assert.match(terms, /getEntry\("legal", "terms"\)/);
+  assert.match(privacy, /LegalLayout/);
+  assert.match(terms, /LegalLayout/);
+  assert.match(privacy, /formatLegalEffectiveDate/);
+  assert.match(terms, /formatLegalEffectiveDate/);
+  assert.match(layout, /legal-section/);
   assert.match(privacy, /page\.data\.draft/);
   assert.match(terms, /page\.data\.draft/);
+});
+
+test("privacy policy matches preview-only contact behaviour", async () => {
+  const privacy = await readFile(
+    new URL("src/content/legal/privacy.md", root),
+    "utf8",
+  );
+
+  assert.match(privacy, /preview only/i);
+  assert.doesNotMatch(privacy, /PostKit|rate limiting/i);
 });
 
 test("legal content files are published", async () => {

@@ -1,7 +1,7 @@
 ---
 import { getEntry, render } from "astro:content";
-import BaseLayout from "../layouts/BaseLayout.astro";
-import "../styles/pages/legal.css";
+import LegalLayout from "../layouts/LegalLayout.astro";
+import { formatLegalEffectiveDate } from "../lib/legal-date";
 
 const page = await getEntry("legal", "terms");
 if (!page) {
@@ -16,19 +16,14 @@ if (page.data.draft) {
 }
 
 const { Content } = await render(page);
-const effectiveDate = page.data.effectiveDate.toLocaleDateString("en-GB", {
-  dateStyle: "long",
-});
+const effectiveDateLabel = formatLegalEffectiveDate(page.data.effectiveDate);
 ---
 
-<BaseLayout title={page.data.title} description={page.data.description}>
-  <main id="main-content">
-    <section class="shell legal-section" aria-labelledby="terms-title">
-      <h1 id="terms-title">{page.data.title}</h1>
-      <p class="legal-effective">Effective {effectiveDate}</p>
-      <div class="page-copy">
-        <Content />
-      </div>
-    </section>
-  </main>
-</BaseLayout>
+<LegalLayout
+  title={page.data.title}
+  description={page.data.description}
+  headingId="terms-title"
+  effectiveDateLabel={effectiveDateLabel}
+>
+  <Content />
+</LegalLayout>
