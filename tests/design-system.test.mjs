@@ -14,6 +14,7 @@ test("design tokens match the approved Singleton SD direction", async () => {
   assert.match(styles, /--ink-brand-on-light:\s*#8a6500/);
   assert.match(styles, /--ink-text-dim:\s*#8b9199/);
   assert.match(styles, /--ink-audience-on-dark:\s*#b794ff/);
+  assert.match(styles, /--ink-audience-on-light:\s*#5a18b8/);
   assert.match(styles, /--ink-radius-control:\s*8px/);
   assert.match(styles, /--ink-radius-card:\s*16px/);
 });

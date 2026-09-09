@@ -23,6 +23,8 @@
   --ink-audience-hovered: #9b57ff;
   --ink-audience-on-dark: #b794ff;
   --ink-audience-on-dark-hovered: #c4b0ff;
+  /* Audience purple on white / inverse surfaces (AA). */
+  --ink-audience-on-light: #5a18b8;
   --ink-on-audience: #ffffff;
   --ink-on-inverse-muted: #444444;
   --ink-on-inverse-soft: #555555;
@@ -576,8 +578,7 @@ main {
 }
 
 .inverse-section .eyebrow--audience {
-  /* Audience purple on white needs a darker shade than on-dark. */
-  color: #5a18b8;
+  color: var(--ink-audience-on-light);
 }
 
 .sr-only {
