@@ -66,8 +66,27 @@ test("landing page composes Claude Design kit sections and e-paper preview", asy
   assert.match(page, /aria-labelledby="system-title"/);
   assert.match(page, /aria-labelledby="places-title"/);
   assert.match(preview, /Preview on display/);
-  assert.match(preview, /Drop your artwork \(480 × 800\)/);
+  assert.match(preview, /800 × 480/);
+  assert.match(preview, /simulation/);
+  assert.match(
+    preview,
+    /fromRgbaImageData|renderUploadPreview|inkads-epaper-renderer/,
+  );
   assert.match(preview, /data-epaper-tab="poster"/);
   assert.match(preview, /data-epaper-tab="advertiser"/);
   assert.match(preview, /data-epaper-tab="yours"/);
+  assert.match(preview, /data-epaper-mode/);
+});
+
+test("shared e-paper preview module consumes the renderer package", async () => {
+  const moduleSource = await readFile(
+    new URL("src/lib/epaper-preview.ts", root),
+    "utf8",
+  );
+  assert.match(moduleSource, /@singleton-sd\/inkads-epaper-renderer/);
+  assert.match(moduleSource, /fromRgbaImageData/);
+  assert.match(moduleSource, /normaliseToProfile/);
+  assert.match(moduleSource, /renderMono/);
+  assert.match(moduleSource, /packMonoBitmap/);
+  assert.match(moduleSource, /toPreviewImage/);
 });
