@@ -6,13 +6,15 @@ import {
   toPreviewImage,
   waveshare75BwProfile,
   type MonoRenderMode,
+  type SourceRect,
 } from "@singleton-sd/inkads-epaper-renderer";
+
+export type { SourceRect };
 
 export type PreviewControls = {
   readonly mode: MonoRenderMode;
-  /** Cover-fit pan, 0–1. */
-  readonly cropX: number;
-  readonly cropY: number;
+  /** Explicit region of the upload in source pixels (zoom + pan). */
+  readonly sourceRect: SourceRect;
 };
 
 export type PreviewResult = {
@@ -22,7 +24,62 @@ export type PreviewResult = {
   readonly dataUrl: string;
 };
 
+export type ImageSize = {
+  readonly width: number;
+  readonly height: number;
+};
+
+/** Framing state: zoom 1 = cover-fit; >1 zooms in; <1 zooms out / letterbox. */
+export type FramingState = {
+  readonly centerX: number;
+  readonly centerY: number;
+  readonly zoom: number;
+};
+
 const profile = waveshare75BwProfile;
+
+export const PANEL_WIDTH = profile.width;
+export const PANEL_HEIGHT = profile.height;
+
+/** Cover-fit window size in source pixels (zoom = 1). */
+export function coverWindowSize(image: ImageSize): {
+  width: number;
+  height: number;
+} {
+  const scale = Math.max(
+    PANEL_WIDTH / image.width,
+    PANEL_HEIGHT / image.height,
+  );
+  return {
+    width: PANEL_WIDTH / scale,
+    height: PANEL_HEIGHT / scale,
+  };
+}
+
+/** Centre the cover-fit window on the image. */
+export function defaultFraming(image: ImageSize): FramingState {
+  return {
+    centerX: image.width / 2,
+    centerY: image.height / 2,
+    zoom: 1,
+  };
+}
+
+export function sourceRectFromFraming(
+  image: ImageSize,
+  framing: FramingState,
+): SourceRect {
+  const cover = coverWindowSize(image);
+  const zoom = Math.max(framing.zoom, 0.05);
+  const width = cover.width / zoom;
+  const height = cover.height / zoom;
+  return {
+    x: framing.centerX - width / 2,
+    y: framing.centerY - height / 2,
+    width,
+    height,
+  };
+}
 
 /**
  * Decode an uploaded image in the browser and run the shared renderer pipeline
@@ -47,7 +104,7 @@ export async function renderUploadPreview(
     const decoded = fromRgbaImageData(imageData);
     const framed = normaliseToProfile(decoded, {
       profile,
-      crop: { x: controls.cropX, y: controls.cropY },
+      sourceRect: controls.sourceRect,
     });
     const mono = renderMono(framed, { mode: controls.mode });
     const packed = packMonoBitmap(mono, { profile });
@@ -75,6 +132,16 @@ export async function renderUploadPreview(
       height: preview.height,
       dataUrl: out.toDataURL("image/png"),
     };
+  } finally {
+    bitmap.close();
+  }
+}
+
+/** Read pixel dimensions without running the full pipeline. */
+export async function readImageSize(file: File): Promise<ImageSize> {
+  const bitmap = await createImageBitmap(file);
+  try {
+    return { width: bitmap.width, height: bitmap.height };
   } finally {
     bitmap.close();
   }
