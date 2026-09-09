@@ -9,15 +9,22 @@
   --ink-text: #ffffff;
   --ink-text-muted: #9da1a6;
   --ink-text-soft: #c9ccd1;
-  --ink-text-dim: #60656b;
+  /* Dim text must clear WCAG AA (4.5:1) on canvas/surface — #60656b failed axe. */
+  --ink-text-dim: #8b9199;
   --ink-text-grey: #7f848a;
   --ink-brand: #ffb300;
   --ink-brand-hovered: #ffd54f;
   --ink-brand-subtle: #ffe082;
-  --ink-brand-on-light: #c89200;
+  /* Gold on white: #c89200 was 2.77:1; darken for AA. */
+  --ink-brand-on-light: #8a6500;
   --ink-on-brand: #000000;
+  /* Solid audience fill (buttons) — keep saturated; text-on-dark uses the on-dark token. */
   --ink-audience: #8432ff;
   --ink-audience-hovered: #9b57ff;
+  --ink-audience-on-dark: #b794ff;
+  --ink-audience-on-dark-hovered: #c4b0ff;
+  /* Audience purple on white / inverse surfaces (AA). */
+  --ink-audience-on-light: #5a18b8;
   --ink-on-audience: #ffffff;
   --ink-on-inverse-muted: #444444;
   --ink-on-inverse-soft: #555555;
@@ -133,7 +140,7 @@ textarea {
 }
 
 .eyebrow--audience {
-  color: var(--ink-audience);
+  color: var(--ink-audience-on-dark);
 }
 
 .eyebrow--muted {
@@ -462,12 +469,12 @@ main {
 
 .button-link--audience-ghost {
   background: transparent;
-  border-color: var(--ink-audience);
-  color: var(--ink-audience);
+  border-color: var(--ink-audience-on-dark);
+  color: var(--ink-audience-on-dark);
 }
 
 .button-link--audience-ghost:hover {
-  background: rgb(132 50 255 / 10%);
+  background: rgb(183 148 255 / 12%);
 }
 
 .button-link--on-audience {
@@ -494,7 +501,11 @@ main {
 }
 
 .text-link--audience {
-  color: var(--ink-audience);
+  color: var(--ink-audience-on-dark);
+}
+
+.text-link--audience:hover {
+  color: var(--ink-audience-on-dark-hovered);
 }
 
 .text-link:hover {
@@ -567,7 +578,7 @@ main {
 }
 
 .inverse-section .eyebrow--audience {
-  color: var(--ink-audience);
+  color: var(--ink-audience-on-light);
 }
 
 .sr-only {

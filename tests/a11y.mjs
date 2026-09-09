@@ -1,7 +1,7 @@
 /* eslint-disable no-undef */
 import assert from "node:assert/strict";
 import http from "node:http";
-import { createReadStream, existsSync } from "node:fs";
+import { createReadStream, existsSync, statSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { chromium } from "playwright";
@@ -33,6 +33,21 @@ function normalizePathname(urlPath) {
   return cleaned.startsWith("/") ? cleaned : `/${cleaned}`;
 }
 
+/** Map a request path to a file under dist (directories → index.html). */
+function resolveFsPath(urlPath) {
+  const pathname = normalizePathname(urlPath);
+  let fsPath = `${distDir}${pathname}`;
+  if (existsSync(fsPath) && statSync(fsPath).isDirectory()) {
+    fsPath = `${fsPath.replace(/\/$/, "")}/index.html`;
+  }
+  return {
+    pathname: fsPath.startsWith(distDir)
+      ? fsPath.slice(distDir.length)
+      : pathname,
+    fsPath,
+  };
+}
+
 const server = http.createServer(async (req, res) => {
   try {
     if (!req.url) {
@@ -41,12 +56,10 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
-    const pathname = normalizePathname(req.url);
-    const filePath = `${distDir}${pathname === "/" ? "/index.html" : pathname}`;
-    const fsPath = filePath;
+    const { pathname, fsPath } = resolveFsPath(req.url);
 
     // For non-existent assets, return 404 (do not fall through to index).
-    if (!existsSync(fsPath)) {
+    if (!existsSync(fsPath) || statSync(fsPath).isDirectory()) {
       res.statusCode = 404;
       res.end("Not found");
       return;
@@ -154,23 +167,20 @@ try {
     ).join(", ")}, but reached ${Array.from(visited).join(", ")}.`,
   );
 
-  // Activate every element via Enter.
+  // Activate in-page anchors via Enter. Cross-page links are already proven
+  // focusable above; following them here would destroy the page context.
   for (const href of uniqueHrefs) {
+    if (!href.startsWith("#")) continue;
+
     await page.evaluate((targetHref) => {
       const el = document.querySelector(`a[href="${targetHref}"]`);
       if (el instanceof HTMLElement) el.focus();
     }, href);
 
     await page.keyboard.press("Enter");
-
-    if (href.startsWith("#")) {
-      await page.waitForFunction((h) => window.location.hash === h, href, {
-        timeout: 3000,
-      });
-    } else if (href === "/") {
-      // Brand/home may re-navigate; just ensure the main landmark is present.
-      await page.waitForSelector("#main-content", { timeout: 5000 });
-    }
+    await page.waitForFunction((h) => window.location.hash === h, href, {
+      timeout: 3000,
+    });
   }
 
   console.log("Accessibility checks passed");
