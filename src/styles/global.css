@@ -1075,7 +1075,7 @@ textarea.field-control {
 
 .epaper-preview__screen {
   position: relative;
-  aspect-ratio: 3 / 5;
+  aspect-ratio: 5 / 3;
   overflow: hidden;
   border-radius: 8px;
   background: var(--ink-epaper-surface);
