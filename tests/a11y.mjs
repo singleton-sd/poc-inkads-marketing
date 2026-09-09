@@ -40,7 +40,12 @@ function resolveFsPath(urlPath) {
   if (existsSync(fsPath) && statSync(fsPath).isDirectory()) {
     fsPath = `${fsPath.replace(/\/$/, "")}/index.html`;
   }
-  return { pathname: fsPath.startsWith(distDir) ? fsPath.slice(distDir.length) : pathname, fsPath };
+  return {
+    pathname: fsPath.startsWith(distDir)
+      ? fsPath.slice(distDir.length)
+      : pathname,
+    fsPath,
+  };
 }
 
 const server = http.createServer(async (req, res) => {
