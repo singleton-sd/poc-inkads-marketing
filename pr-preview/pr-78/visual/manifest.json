@@ -24,7 +24,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/404",
-      "baseUrl": "http://127.0.0.1:42179/404",
+      "baseUrl": "http://127.0.0.1:40615/404",
       "status": "unchanged"
     },
     {
@@ -35,7 +35,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/404",
-      "baseUrl": "http://127.0.0.1:42179/404",
+      "baseUrl": "http://127.0.0.1:40615/404",
       "status": "unchanged"
     },
     {
@@ -46,7 +46,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/about",
-      "baseUrl": "http://127.0.0.1:42179/about",
+      "baseUrl": "http://127.0.0.1:40615/about",
       "status": "unchanged"
     },
     {
@@ -57,7 +57,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/about",
-      "baseUrl": "http://127.0.0.1:42179/about",
+      "baseUrl": "http://127.0.0.1:40615/about",
       "status": "unchanged"
     },
     {
@@ -68,7 +68,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/advertisers",
-      "baseUrl": "http://127.0.0.1:42179/advertisers",
+      "baseUrl": "http://127.0.0.1:40615/advertisers",
       "status": "unchanged"
     },
     {
@@ -79,7 +79,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/advertisers",
-      "baseUrl": "http://127.0.0.1:42179/advertisers",
+      "baseUrl": "http://127.0.0.1:40615/advertisers",
       "status": "unchanged"
     },
     {
@@ -90,7 +90,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/contact",
-      "baseUrl": "http://127.0.0.1:42179/contact",
+      "baseUrl": "http://127.0.0.1:40615/contact",
       "status": "unchanged"
     },
     {
@@ -101,7 +101,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/contact",
-      "baseUrl": "http://127.0.0.1:42179/contact",
+      "baseUrl": "http://127.0.0.1:40615/contact",
       "status": "unchanged"
     },
     {
@@ -112,7 +112,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/faq",
-      "baseUrl": "http://127.0.0.1:42179/faq",
+      "baseUrl": "http://127.0.0.1:40615/faq",
       "status": "unchanged"
     },
     {
@@ -123,7 +123,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/faq",
-      "baseUrl": "http://127.0.0.1:42179/faq",
+      "baseUrl": "http://127.0.0.1:40615/faq",
       "status": "unchanged"
     },
     {
@@ -134,7 +134,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/how-it-works",
-      "baseUrl": "http://127.0.0.1:42179/how-it-works",
+      "baseUrl": "http://127.0.0.1:40615/how-it-works",
       "status": "unchanged"
     },
     {
@@ -145,7 +145,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/how-it-works",
-      "baseUrl": "http://127.0.0.1:42179/how-it-works",
+      "baseUrl": "http://127.0.0.1:40615/how-it-works",
       "status": "unchanged"
     },
     {
@@ -154,9 +154,9 @@
       "prFile": "pr/home-desktop.png",
       "baseFile": "base/home-desktop.png",
       "diffFile": "diff/home-desktop.png",
-      "mismatched": 743735,
+      "mismatched": 3126944,
       "prUrl": "/",
-      "baseUrl": "http://127.0.0.1:42179/",
+      "baseUrl": "http://127.0.0.1:40615/",
       "status": "changed"
     },
     {
@@ -165,9 +165,9 @@
       "prFile": "pr/home-mobile.png",
       "baseFile": "base/home-mobile.png",
       "diffFile": "diff/home-mobile.png",
-      "mismatched": 330889,
+      "mismatched": 650482,
       "prUrl": "/",
-      "baseUrl": "http://127.0.0.1:42179/",
+      "baseUrl": "http://127.0.0.1:40615/",
       "status": "changed"
     },
     {
@@ -178,7 +178,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/places",
-      "baseUrl": "http://127.0.0.1:42179/places",
+      "baseUrl": "http://127.0.0.1:40615/places",
       "status": "unchanged"
     },
     {
@@ -189,7 +189,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/places",
-      "baseUrl": "http://127.0.0.1:42179/places",
+      "baseUrl": "http://127.0.0.1:40615/places",
       "status": "unchanged"
     },
     {
@@ -200,7 +200,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/pricing",
-      "baseUrl": "http://127.0.0.1:42179/pricing",
+      "baseUrl": "http://127.0.0.1:40615/pricing",
       "status": "unchanged"
     },
     {
@@ -211,7 +211,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/pricing",
-      "baseUrl": "http://127.0.0.1:42179/pricing",
+      "baseUrl": "http://127.0.0.1:40615/pricing",
       "status": "unchanged"
     },
     {
@@ -222,7 +222,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/privacy",
-      "baseUrl": "http://127.0.0.1:42179/privacy",
+      "baseUrl": "http://127.0.0.1:40615/privacy",
       "status": "unchanged"
     },
     {
@@ -233,7 +233,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/privacy",
-      "baseUrl": "http://127.0.0.1:42179/privacy",
+      "baseUrl": "http://127.0.0.1:40615/privacy",
       "status": "unchanged"
     },
     {
@@ -244,7 +244,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/support",
-      "baseUrl": "http://127.0.0.1:42179/support",
+      "baseUrl": "http://127.0.0.1:40615/support",
       "status": "unchanged"
     },
     {
@@ -255,7 +255,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/support",
-      "baseUrl": "http://127.0.0.1:42179/support",
+      "baseUrl": "http://127.0.0.1:40615/support",
       "status": "unchanged"
     },
     {
@@ -266,7 +266,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/terms",
-      "baseUrl": "http://127.0.0.1:42179/terms",
+      "baseUrl": "http://127.0.0.1:40615/terms",
       "status": "unchanged"
     },
     {
@@ -277,7 +277,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/terms",
-      "baseUrl": "http://127.0.0.1:42179/terms",
+      "baseUrl": "http://127.0.0.1:40615/terms",
       "status": "unchanged"
     },
     {
@@ -288,7 +288,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/venues",
-      "baseUrl": "http://127.0.0.1:42179/venues",
+      "baseUrl": "http://127.0.0.1:40615/venues",
       "status": "unchanged"
     },
     {
@@ -299,7 +299,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/venues",
-      "baseUrl": "http://127.0.0.1:42179/venues",
+      "baseUrl": "http://127.0.0.1:40615/venues",
       "status": "unchanged"
     }
   ]
