@@ -98,7 +98,10 @@ const roleOptions = ["Venue owner / operator", "Advertiser / brand", "Other"];
 
   function setupContactForm() {
     const root = document.querySelector<HTMLElement>("[data-contact-form]");
-    if (!root) return;
+    // Guard: astro:page-load fires on first load and on client navigations.
+    if (!root || root.dataset.contactFormReady === "true") return;
+    root.dataset.contactFormReady = "true";
+
     const form = root.querySelector<HTMLFormElement>(
       "[data-contact-form-fields]",
     );
@@ -149,6 +152,7 @@ const roleOptions = ["Venue owner / operator", "Advertiser / brand", "Other"];
       ).value.trim();
       const subject = ROLE_TO_SUBJECT[role] ?? "general";
       const message = `Venue / company: ${company}\n\n${messageBody}`;
+      const isPreview = location.pathname.includes("/pr-preview/");
 
       submitButton.disabled = true;
       try {
@@ -157,6 +161,7 @@ const roleOptions = ["Venue owner / operator", "Advertiser / brand", "Other"];
           headers: {
             "Content-Type": "application/json",
             Accept: "application/json",
+            ...(isPreview ? { "X-PostKit-Contact-Preview": "true" } : {}),
           },
           credentials: "omit",
           body: JSON.stringify({ name, email, subject, message }),
@@ -193,6 +198,6 @@ const roleOptions = ["Venue owner / operator", "Advertiser / brand", "Other"];
     });
   }
 
-  setupContactForm();
+  // astro:page-load also fires on the initial page load.
   document.addEventListener("astro:page-load", setupContactForm);
 </script>

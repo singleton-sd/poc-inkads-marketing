@@ -87,14 +87,23 @@ private distribution. The record contains no secret.
 ## Contact form (PostKit)
 
 The contact form posts to the shared PostKit Function App. Production and CI
-builds set:
+builds set `PUBLIC_POSTKIT_API_BASE_URL` from the repository Actions variable of
+the same name, falling back to the shared Function App hostname:
 
 ```text
 PUBLIC_POSTKIT_API_BASE_URL=https://ssd-postkit-api-prod-ae.azurewebsites.net
 ```
 
-PostKit configuration for InkAds is documented in
-[`singleton-sd/post-kit`](https://github.com/singleton-sd/post-kit/blob/main/docs/integrations/inkads-marketing.md).
+To point builds at a different PostKit base URL without editing workflows, set
+the GitHub Actions variable `PUBLIC_POSTKIT_API_BASE_URL` (Settings → Secrets
+and variables → Actions → Variables).
+
+PostKit’s Azure App Configuration store owns server-side host→inbox routing and
+CORS origins — not this public client base URL. InkAds host profile details are
+in [`singleton-sd/post-kit`](https://github.com/singleton-sd/post-kit/blob/main/docs/integrations/inkads-marketing.md).
+
+PR preview pages send `X-PostKit-Contact-Preview: true` so PostKit uses the
+development email provider instead of the production InkAds inbox.
 
 ## Verification
 

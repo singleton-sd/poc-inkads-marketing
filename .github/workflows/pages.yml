@@ -38,7 +38,9 @@ jobs:
       - name: Build production site
         run: pnpm build
         env:
-          PUBLIC_POSTKIT_API_BASE_URL: https://ssd-postkit-api-prod-ae.azurewebsites.net
+          # Override via repo Actions variable PUBLIC_POSTKIT_API_BASE_URL.
+          # PostKit App Configuration owns host→inbox routing, not this public URL.
+          PUBLIC_POSTKIT_API_BASE_URL: ${{ vars.PUBLIC_POSTKIT_API_BASE_URL || 'https://ssd-postkit-api-prod-ae.azurewebsites.net' }}
 
       - name: Install Playwright browsers
         run: pnpm playwright:install

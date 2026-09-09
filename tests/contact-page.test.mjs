@@ -30,6 +30,8 @@ test("contact form posts to PostKit with loading and error states", async () => 
   assert.match(form, /PUBLIC_POSTKIT_API_BASE_URL/);
   assert.match(form, /fetch\(`\$\{apiBase\}\/contact`/);
   assert.match(form, /partnership/);
+  assert.match(form, /X-PostKit-Contact-Preview/);
+  assert.match(form, /contactFormReady/);
   assert.match(form, /data-contact-form-error/);
   assert.match(form, /data-contact-form-success/);
   assert.match(form, /withBase\("\/privacy"/);
