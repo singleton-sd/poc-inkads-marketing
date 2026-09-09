@@ -8,7 +8,7 @@ const { defaultTab = "poster" } = Astro.props;
 const captions = {
   poster: "Venue poster artwork · as the 1-bit panel renders it",
   advertiser: "Advertiser creative · matched by venue context",
-  yours: "Your artwork · drop an image to preview it",
+  yours: "Your artwork · rendered by the shared e-paper pipeline",
 } as const;
 ---
 
@@ -95,21 +95,54 @@ const captions = {
         data-epaper-panel="yours"
       >
         <label class="epaper-preview__drop" data-epaper-drop>
-          <span data-epaper-drop-label>Drop your artwork (480 × 800)</span>
+          <span data-epaper-drop-label
+            >Drop PNG or JPEG · 800 × 480 Waveshare B/W</span
+          >
           <img alt="" hidden data-epaper-preview-image />
-          <input type="file" accept="image/*" hidden data-epaper-file />
+          <input
+            type="file"
+            accept="image/png,image/jpeg"
+            hidden
+            data-epaper-file
+          />
         </label>
       </div>
     </div>
   </figure>
   <div class="epaper-preview__meta">
     <p data-epaper-caption>{captions[defaultTab]}</p>
-    <p>480 × 800 e-paper</p>
+    <p>800 × 480 · 1-bit e-paper</p>
   </div>
+  <div class="epaper-preview__controls" data-epaper-controls hidden>
+    <label>
+      Render mode
+      <select data-epaper-mode>
+        <option value="atkinson" selected>Atkinson</option>
+        <option value="threshold">Threshold</option>
+        <option value="floyd-steinberg">Floyd–Steinberg</option>
+      </select>
+    </label>
+    <label>
+      Pan horizontal
+      <input type="range" min="0" max="100" value="50" data-epaper-crop-x />
+    </label>
+    <label>
+      Pan vertical
+      <input type="range" min="0" max="100" value="50" data-epaper-crop-y />
+    </label>
+  </div>
+  <p
+    class="epaper-preview__status"
+    data-epaper-status
+    role="status"
+    aria-live="polite"
+  >
+  </p>
   <div class="epaper-preview__upload">
     <p>
       <strong>Try your own creative</strong>
-      Drop an image into the panel to see how it renders on real hardware.
+      Colour and greyscale become 1-bit on the panel. This is a browser simulation
+      using the same renderer as the device pipeline — not a live display.
     </p>
     <button
       class="button-link button-link--secondary"
@@ -122,10 +155,16 @@ const captions = {
 </div>
 
 <script>
+  import {
+    renderUploadPreview,
+    type PreviewControls,
+  } from "../lib/epaper-preview.ts";
+  import type { MonoRenderMode } from "@singleton-sd/inkads-epaper-renderer";
+
   const captions = {
     poster: "Venue poster artwork · as the 1-bit panel renders it",
     advertiser: "Advertiser creative · matched by venue context",
-    yours: "Your artwork · drop an image to preview it",
+    yours: "Your artwork · rendered by the shared e-paper pipeline",
   };
 
   function activateTab(root: HTMLElement, tab: string) {
@@ -149,11 +188,29 @@ const captions = {
     }
   }
 
+  function readControls(root: HTMLElement): PreviewControls {
+    const mode =
+      (root.querySelector<HTMLSelectElement>("[data-epaper-mode]")?.value as
+        MonoRenderMode | undefined) ?? "atkinson";
+    const cropX =
+      Number(
+        root.querySelector<HTMLInputElement>("[data-epaper-crop-x]")?.value ??
+          "50",
+      ) / 100;
+    const cropY =
+      Number(
+        root.querySelector<HTMLInputElement>("[data-epaper-crop-y]")?.value ??
+          "50",
+      ) / 100;
+    return { mode, cropX, cropY };
+  }
+
   function setupEpaperPreview() {
     const maybeRoot = document.querySelector<HTMLElement>(
       "[data-epaper-preview]",
     );
-    if (!maybeRoot) return;
+    if (!maybeRoot || maybeRoot.dataset.bound === "true") return;
+    maybeRoot.dataset.bound = "true";
     const previewRoot: HTMLElement = maybeRoot;
 
     const fileInput =
@@ -168,6 +225,15 @@ const captions = {
     const uploadButton = previewRoot.querySelector<HTMLButtonElement>(
       "[data-epaper-upload]",
     );
+    const controls = previewRoot.querySelector<HTMLElement>(
+      "[data-epaper-controls]",
+    );
+    const status = previewRoot.querySelector<HTMLElement>(
+      "[data-epaper-status]",
+    );
+
+    let currentFile: File | undefined;
+    let renderToken = 0;
 
     previewRoot
       .querySelectorAll<HTMLButtonElement>("[data-epaper-tab]")
@@ -178,20 +244,43 @@ const captions = {
         });
       });
 
+    async function rerender() {
+      if (!currentFile || !previewImage || !dropLabel) return;
+      const token = ++renderToken;
+      if (status) status.textContent = "Rendering…";
+      try {
+        const result = await renderUploadPreview(
+          currentFile,
+          readControls(previewRoot),
+        );
+        if (token !== renderToken) return;
+        previewImage.src = result.dataUrl;
+        previewImage.hidden = false;
+        dropLabel.hidden = true;
+        controls && (controls.hidden = false);
+        activateTab(previewRoot, "yours");
+        if (status) {
+          status.textContent = `Rendered ${result.width} × ${result.height} · simulation only`;
+        }
+      } catch (error) {
+        if (token !== renderToken) return;
+        if (status) {
+          status.textContent =
+            error instanceof Error
+              ? error.message
+              : "Could not render this image";
+        }
+      }
+    }
+
     function loadFile(file: File | undefined) {
-      if (
-        !file ||
-        !file.type.startsWith("image/") ||
-        !previewImage ||
-        !dropLabel
-      ) {
+      if (!file) return;
+      if (file.type !== "image/png" && file.type !== "image/jpeg") {
+        if (status) status.textContent = "Only PNG and JPEG are supported";
         return;
       }
-      const url = URL.createObjectURL(file);
-      previewImage.src = url;
-      previewImage.hidden = false;
-      dropLabel.hidden = true;
-      activateTab(previewRoot, "yours");
+      currentFile = file;
+      void rerender();
     }
 
     uploadButton?.addEventListener("click", () => fileInput?.click());
@@ -205,6 +294,19 @@ const captions = {
       event.preventDefault();
       loadFile(event.dataTransfer?.files?.[0]);
     });
+
+    previewRoot
+      .querySelectorAll<HTMLElement>(
+        "[data-epaper-mode], [data-epaper-crop-x], [data-epaper-crop-y]",
+      )
+      .forEach((control) => {
+        control.addEventListener("change", () => {
+          void rerender();
+        });
+        control.addEventListener("input", () => {
+          void rerender();
+        });
+      });
   }
 
   setupEpaperPreview();

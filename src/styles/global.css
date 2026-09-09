@@ -1075,7 +1075,7 @@ textarea.field-control {
 
 .epaper-preview__screen {
   position: relative;
-  aspect-ratio: 3 / 5;
+  aspect-ratio: 5 / 3;
   overflow: hidden;
   border-radius: 8px;
   background: var(--ink-epaper-surface);
@@ -1148,7 +1148,40 @@ textarea.field-control {
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
-  filter: grayscale(1) contrast(2.6);
+  /* Already 1-bit from the shared renderer — do not re-filter. */
+  image-rendering: pixelated;
+}
+
+.epaper-preview__controls {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--ink-border, #d6d3cd);
+  border-radius: 8px;
+}
+
+.epaper-preview__controls[hidden] {
+  display: none;
+}
+
+.epaper-preview__controls label {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  color: var(--ink-text-muted);
+}
+
+.epaper-preview__controls select,
+.epaper-preview__controls input[type="range"] {
+  width: 100%;
+}
+
+.epaper-preview__status {
+  min-height: 1.25rem;
+  margin-top: 0.75rem;
+  font-size: 0.8rem;
+  color: var(--ink-text-muted);
 }
 
 .epaper-preview__meta {
