@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://inkads.poc.singletonsd.com/sitemap.xml
+
