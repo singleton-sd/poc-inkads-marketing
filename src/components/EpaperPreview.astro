@@ -436,16 +436,13 @@ const captions = {
         clearTimeout(debounceTimer);
         debounceTimer = undefined;
       }
-<<<<<<< HEAD
       if (file.type !== "image/png" && file.type !== "image/jpeg") {
         currentFile = undefined;
         clearPreviewUi();
         if (status) status.textContent = "Only PNG and JPEG are supported";
         return;
       }
-=======
       syncMountUi();
->>>>>>> 26f694e (feat: #80 Add image and screen orientation to preview)
       try {
         const size = await readImageSize(file);
         if (token !== loadToken || currentFile !== file) return;
