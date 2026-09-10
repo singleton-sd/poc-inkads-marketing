@@ -213,6 +213,7 @@ const captions = {
 <script>
   import {
     NEXT_ROTATION,
+    clampFraming,
     defaultFraming,
     panelSizeLabel,
     readImageSize,
@@ -414,11 +415,11 @@ const captions = {
       const focalY = before.y + before.height * focalNormY;
       const zoom = clampZoom(nextZoom);
       const after = sourceRectFromFraming(imageSize, { ...framing, zoom });
-      framing = {
+      framing = clampFraming(imageSize, {
         zoom,
         centerX: focalX - (focalNormX - 0.5) * after.width,
         centerY: focalY - (focalNormY - 0.5) * after.height,
-      };
+      });
       scheduleRerender();
     }
 
@@ -581,11 +582,11 @@ const captions = {
               : direction === "n"
                 ? -rect.height * PAN_STEP
                 : 0;
-          framing = {
+          framing = clampFraming(imageSize, {
             ...framing,
             centerX: framing.centerX + dx,
             centerY: framing.centerY + dy,
-          };
+          });
           void rerender();
         });
       });

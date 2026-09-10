@@ -126,6 +126,35 @@ export function sourceRectFromFraming(
   };
 }
 
+/**
+ * Keep the framing window inside the artwork when possible. If the window is
+ * larger than the image (zoomed out), pin the centre to the image mid-point.
+ */
+export function clampFraming(
+  image: ImageSize,
+  framing: FramingState,
+): FramingState {
+  const rect = sourceRectFromFraming(image, framing);
+  let centerX = framing.centerX;
+  let centerY = framing.centerY;
+
+  if (rect.width >= image.width) {
+    centerX = image.width / 2;
+  } else {
+    const half = rect.width / 2;
+    centerX = Math.min(Math.max(centerX, half), image.width - half);
+  }
+
+  if (rect.height >= image.height) {
+    centerY = image.height / 2;
+  } else {
+    const half = rect.height / 2;
+    centerY = Math.min(Math.max(centerY, half), image.height - half);
+  }
+
+  return { zoom: framing.zoom, centerX, centerY };
+}
+
 export function panelSizeLabel(mount: ScreenMount): string {
   if (mount === "portrait") {
     return `${PANEL_HEIGHT} × ${PANEL_WIDTH} · 1-bit e-paper (portrait)`;
