@@ -13,7 +13,18 @@ pnpm install
 pnpm dev
 ```
 
+Brand marks load live from pinned
+[`poc-inkads-assets`](https://github.com/singleton-sd/poc-inkads-assets) CDN
+URLs — see [`docs/brand-assets.md`](docs/brand-assets.md) and
+`src/lib/brand-assets.ts`.
+
 Run the full local quality gate with:
+
+```sh
+pnpm verify
+```
+
+Or step-by-step:
 
 ```sh
 pnpm format:check

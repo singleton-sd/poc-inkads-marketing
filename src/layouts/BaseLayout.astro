@@ -5,6 +5,7 @@ import "@fontsource-variable/manrope";
 import "@fontsource/ibm-plex-mono/500.css";
 import SiteFooter from "../components/SiteFooter.astro";
 import SiteHeader from "../components/SiteHeader.astro";
+import { brandIconUrl } from "../lib/brand-assets";
 
 interface Props {
   title: string;
@@ -35,7 +36,7 @@ function absoluteAsset(assetPath: string): string {
 
 const canonicalUrl = new URL(Astro.url.pathname, siteRoot).toString();
 const ogImageUrl = absoluteAsset("og-image.png");
-const logoUrl = absoluteAsset("brand/icon-dark.svg");
+const logoUrl = brandIconUrl("dark");
 const websiteId = `${new URL(base, siteRoot).href.replace(/\/?$/, "/")}#website`;
 const organizationId = `${new URL(base, siteRoot).href.replace(/\/?$/, "/")}#organization`;
 
