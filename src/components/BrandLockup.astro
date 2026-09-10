@@ -1,4 +1,6 @@
 ---
+import { brandIconUrl } from "../lib/brand-assets";
+
 interface Props {
   href?: string;
   variant?: "header" | "footer" | "light";
@@ -11,11 +13,8 @@ const {
   showByline = variant === "header",
 } = Astro.props;
 
-const base = import.meta.env.BASE_URL;
 const iconSrc =
-  variant === "light"
-    ? `${base}brand/icon-light.svg`
-    : `${base}brand/icon-dark.svg`;
+  variant === "light" ? brandIconUrl("light") : brandIconUrl("dark");
 ---
 
 <a
