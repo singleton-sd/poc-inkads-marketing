@@ -156,13 +156,13 @@ const captions = {
           type="button"
           class="epaper-preview__pan-btn"
           data-epaper-pan="n"
-          aria-label="Pan up">↑</button
+          aria-label="Move image up">↑</button
         >
         <button
           type="button"
           class="epaper-preview__pan-btn"
           data-epaper-pan="w"
-          aria-label="Pan left">←</button
+          aria-label="Move image left">←</button
         >
         <button
           type="button"
@@ -174,17 +174,17 @@ const captions = {
           type="button"
           class="epaper-preview__pan-btn"
           data-epaper-pan="e"
-          aria-label="Pan right">→</button
+          aria-label="Move image right">→</button
         >
         <button
           type="button"
           class="epaper-preview__pan-btn"
           data-epaper-pan="s"
-          aria-label="Pan down">↓</button
+          aria-label="Move image down">↓</button
         >
       </div>
       <p class="epaper-preview__hint">
-        Scroll or pinch to zoom · arrows move the image in the frame
+        Drag to move · scroll or pinch to zoom
       </p>
     </div>
   </div>
@@ -215,6 +215,7 @@ const captions = {
   import {
     clampFraming,
     defaultFraming,
+    framingNudgeFromPointerDrag,
     framingPanRoom,
     nextSourceRotation,
     panFraming,
@@ -326,6 +327,9 @@ const captions = {
     let debounceTimer: ReturnType<typeof setTimeout> | undefined;
     let pinchStartDistance = 0;
     let pinchStartZoom = 1;
+    let pointerPanId: number | undefined;
+    let lastPointerX = 0;
+    let lastPointerY = 0;
 
     function framingImageSize(): ImageSize | undefined {
       if (!rawImageSize) return undefined;
@@ -337,11 +341,12 @@ const captions = {
       const room = imageSize
         ? framingPanRoom(imageSize, framing, framingProfile)
         : { west: 0, east: 0, north: 0, south: 0 };
+      // Arrows move the artwork; that consumes the opposite centre room.
       const enabled: Record<string, boolean> = {
-        n: room.north > PAN_ROOM_EPS,
-        s: room.south > PAN_ROOM_EPS,
-        e: room.east > PAN_ROOM_EPS,
-        w: room.west > PAN_ROOM_EPS,
+        n: room.south > PAN_ROOM_EPS,
+        s: room.north > PAN_ROOM_EPS,
+        e: room.west > PAN_ROOM_EPS,
+        w: room.east > PAN_ROOM_EPS,
         reset: Boolean(imageSize),
       };
       previewRoot
@@ -503,7 +508,16 @@ const captions = {
     }
 
     uploadButton?.addEventListener("click", () => fileInput?.click());
-    drop?.addEventListener("click", () => fileInput?.click());
+    drop?.addEventListener("click", (event) => {
+      // Nested file input would open on every label click — only allow that
+      // when there is no artwork yet. Drag-pans must not re-open the picker.
+      if (currentFile) {
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+      }
+      fileInput?.click();
+    });
     fileInput?.addEventListener("change", () => loadFile(fileInput.files?.[0]));
 
     drop?.addEventListener("dragover", (event) => {
@@ -530,15 +544,74 @@ const captions = {
       { passive: false },
     );
 
+    drop?.addEventListener("pointerdown", (event) => {
+      if (!rawImageSize || !currentFile) return;
+      if (event.pointerType === "mouse" && event.button !== 0) return;
+      if (pointerPanId !== undefined) return;
+      pointerPanId = event.pointerId;
+      lastPointerX = event.clientX;
+      lastPointerY = event.clientY;
+      drop.classList.add("is-panning");
+      drop.setPointerCapture(event.pointerId);
+    });
+
+    drop?.addEventListener(
+      "pointermove",
+      (event) => {
+        if (pointerPanId !== event.pointerId) return;
+        if (!rawImageSize || !currentFile) return;
+        // Two-finger pinch owns the gesture — ignore stray move.
+        if (pinchStartDistance > 0) return;
+        const imageSize = framingImageSize();
+        if (!imageSize) return;
+        const display = drop.getBoundingClientRect();
+        const clientDx = event.clientX - lastPointerX;
+        const clientDy = event.clientY - lastPointerY;
+        if (clientDx === 0 && clientDy === 0) return;
+        lastPointerX = event.clientX;
+        lastPointerY = event.clientY;
+        framing = framingNudgeFromPointerDrag(
+          imageSize,
+          framing,
+          framingProfile,
+          clientDx,
+          clientDy,
+          display.width,
+          display.height,
+        );
+        syncPanButtons();
+        scheduleRerender();
+      },
+      { passive: true },
+    );
+
+    function endPointerPan(event: PointerEvent) {
+      if (pointerPanId !== event.pointerId) return;
+      pointerPanId = undefined;
+      drop?.classList.remove("is-panning");
+      try {
+        drop?.releasePointerCapture(event.pointerId);
+      } catch {
+        // already released
+      }
+    }
+
+    drop?.addEventListener("pointerup", endPointerPan);
+    drop?.addEventListener("pointercancel", endPointerPan);
+
     drop?.addEventListener(
       "touchstart",
       (event) => {
-        if (!rawImageSize || !currentFile || event.touches.length !== 2) return;
-        pinchStartDistance = touchDistance(
-          event.touches[0]!,
-          event.touches[1]!,
-        );
-        pinchStartZoom = framing.zoom;
+        if (!rawImageSize || !currentFile) return;
+        if (event.touches.length === 2) {
+          pointerPanId = undefined;
+          drop?.classList.remove("is-panning");
+          pinchStartDistance = touchDistance(
+            event.touches[0]!,
+            event.touches[1]!,
+          );
+          pinchStartZoom = framing.zoom;
+        }
       },
       { passive: true },
     );
@@ -557,8 +630,10 @@ const captions = {
 
     drop?.addEventListener(
       "touchend",
-      () => {
-        pinchStartDistance = 0;
+      (event) => {
+        if (event.touches.length < 2) {
+          pinchStartDistance = 0;
+        }
       },
       { passive: true },
     );

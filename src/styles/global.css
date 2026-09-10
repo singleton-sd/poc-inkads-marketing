@@ -1166,6 +1166,11 @@ textarea.field-control {
 
 .epaper-preview__drop.has-preview {
   touch-action: none;
+  cursor: grab;
+}
+
+.epaper-preview__drop.has-preview.is-panning {
+  cursor: grabbing;
 }
 
 .epaper-preview__drop {

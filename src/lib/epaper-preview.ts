@@ -97,9 +97,8 @@ export type PanFramingOptions = {
 };
 
 /**
- * Shift framing by one pan step. Works for crop overflow and for letterboxed
- * (zoomed-out) images sitting inside the panel. No-ops when that axis is at
- * its clamp limit — callers disable those arrows via `framingPanRoom`.
+ * Shift framing so the artwork moves in the named direction on screen
+ * (arrow / drag semantics), not so the crop window crawls that way.
  */
 export function panFraming(
   image: ImageSize,
@@ -111,27 +110,65 @@ export function panFraming(
   const step = options.step ?? 0.25;
   const base = clampFraming(image, framing, profile);
   const rect = sourceRectFromFraming(image, base, profile);
+  // Positive screen move (image east/south) decreases the window centre.
   const dx =
     direction === "e"
-      ? rect.width * step
+      ? -rect.width * step
       : direction === "w"
-        ? -rect.width * step
+        ? rect.width * step
         : 0;
   const dy =
     direction === "s"
-      ? rect.height * step
+      ? -rect.height * step
       : direction === "n"
-        ? -rect.height * step
+        ? rect.height * step
         : 0;
+  return nudgeFraming(image, base, profile, dx, dy);
+}
+
+/**
+ * Apply a source-pixel centre delta (after clamp). Positive dx moves the
+ * crop window east (artwork appears to slide west).
+ */
+export function nudgeFraming(
+  image: ImageSize,
+  framing: FramingState,
+  profile: FramingProfileSize,
+  deltaCenterX: number,
+  deltaCenterY: number,
+): FramingState {
+  const base = clampFraming(image, framing, profile);
   return clampFraming(
     image,
     {
       ...base,
-      centerX: base.centerX + dx,
-      centerY: base.centerY + dy,
+      centerX: base.centerX + deltaCenterX,
+      centerY: base.centerY + deltaCenterY,
     },
     profile,
   );
+}
+
+/**
+ * Map a screen-pixel drag (image follows the pointer) into a framing nudge.
+ * `displayWidth` / `displayHeight` are the on-screen preview box size.
+ */
+export function framingNudgeFromPointerDrag(
+  image: ImageSize,
+  framing: FramingState,
+  profile: FramingProfileSize,
+  clientDx: number,
+  clientDy: number,
+  displayWidth: number,
+  displayHeight: number,
+): FramingState {
+  const base = clampFraming(image, framing, profile);
+  const rect = sourceRectFromFraming(image, base, profile);
+  if (displayWidth <= 0 || displayHeight <= 0) return base;
+  // Image follows the pointer: drag right → artwork moves right → centre −X.
+  const deltaCenterX = -(clientDx / displayWidth) * rect.width;
+  const deltaCenterY = -(clientDy / displayHeight) * rect.height;
+  return nudgeFraming(image, base, profile, deltaCenterX, deltaCenterY);
 }
 
 /** How the physical panel is mounted. */

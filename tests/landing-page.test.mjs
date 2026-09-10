@@ -103,9 +103,10 @@ test("landing preview UI uses gesture zoom and button pan", async () => {
   assert.match(preview, /data-epaper-pan/);
   assert.match(preview, /data-epaper-rotate-image/);
   assert.match(preview, /data-epaper-mount="portrait"/);
-  assert.match(preview, /Scroll or pinch to zoom/);
+  assert.match(preview, /Scroll or pinch to zoom|Drag to move/);
   assert.match(preview, /syncPanButtons/);
   assert.match(preview, /panFraming/);
+  assert.match(preview, /framingNudgeFromPointerDrag|pointerdown/);
   assert.doesNotMatch(preview, /Pan horizontal/);
   assert.doesNotMatch(preview, /data-epaper-crop-x/);
 });
