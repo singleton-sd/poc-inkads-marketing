@@ -48,19 +48,129 @@ test("dynamic marketing route builds from the marketing collection", async () =>
   assert.match(page, /getCollection\("marketing"/);
   assert.match(page, /getStaticPaths/);
   assert.match(page, /isReservedPageSlug/);
-  assert.match(page, /PageHero/);
+  assert.match(page, /ProseLayout/);
+  assert.match(page, /CtaHeavyLayout/);
+  assert.match(page, /LandingBandLayout/);
+  assert.match(page, /AudienceLandingLayout/);
   assert.match(page, /BaseLayout/);
   assert.doesNotMatch(page, /\bfetch\s*\(|\bXMLHttpRequest\b/);
 });
 
-test("marketing schema requires ctaLabel and ctaHref together", async () => {
+test("marketing schema uses a template discriminatedUnion", async () => {
   const schema = await readFile(
     new URL("src/content/schemas/marketing.ts", root),
     "utf8",
   );
 
-  assert.match(schema, /Boolean\(ctaLabel\) === Boolean\(ctaHref\)/);
+  assert.match(schema, /discriminatedUnion\("template"/);
+  assert.match(schema, /z\.literal\("prose"\)/);
+  assert.match(schema, /z\.literal\("cta-heavy"\)/);
+  assert.match(schema, /z\.literal\("landing-band"\)/);
+  assert.match(schema, /z\.literal\("audience-landing"\)/);
   assert.match(schema, /ctaLabel and ctaHref must be provided together/);
+});
+
+test("marketing schema accepts each template and rejects cross-template fields", async () => {
+  const { marketingPageSchema } = await import(
+    pathToFileURL(new URL("src/content/schemas/marketing.ts", root).pathname)
+      .href
+  );
+
+  const base = {
+    title: "T",
+    description: "D",
+    headline: "H",
+    summary: "S",
+  };
+
+  assert.equal(
+    marketingPageSchema.safeParse({ ...base, template: "prose" }).success,
+    true,
+  );
+  assert.equal(
+    marketingPageSchema.safeParse({
+      ...base,
+      template: "prose",
+      ctaLabel: "Go",
+    }).success,
+    false,
+  );
+  assert.equal(
+    marketingPageSchema.safeParse({
+      ...base,
+      template: "cta-heavy",
+      primaryCta: { label: "Go", href: "/contact" },
+      ctaTitle: "Next",
+    }).success,
+    true,
+  );
+  assert.equal(
+    marketingPageSchema.safeParse({
+      ...base,
+      template: "landing-band",
+      columns: [{ title: "A", body: "B" }],
+      statement: "Statement",
+      ctaTitle: "Next",
+      primaryCta: { label: "Go", href: "/contact" },
+      secondaryCta: { label: "FAQ", href: "/faq" },
+    }).success,
+    true,
+  );
+  assert.equal(
+    marketingPageSchema.safeParse({
+      ...base,
+      template: "audience-landing",
+      ctaLabel: "Go",
+      ctaHref: "/contact",
+      mediaLabel: "Media",
+      benefitsEyebrow: "Benefits",
+      benefits: [{ title: "One", description: "Desc" }],
+      processEyebrow: "Process",
+      processHeadline: "Steps",
+      process: [{ label: "Setup", detail: "Detail" }],
+      closingHeadline: "Close",
+    }).success,
+    true,
+  );
+  assert.equal(
+    marketingPageSchema.safeParse({
+      ...base,
+      template: "prose",
+      columns: [{ title: "A", body: "B" }],
+    }).success,
+    false,
+  );
+});
+
+test("marketing CMS exposes a template select", async () => {
+  const cms = await readFile(
+    new URL("src/content/schemas/marketing.cms.ts", root),
+    "utf8",
+  );
+
+  assert.match(cms, /name: "template"/);
+  assert.match(cms, /widget: "select"/);
+  assert.match(cms, /default: "prose"/);
+  assert.match(cms, /audience-landing/);
+});
+
+test("layout fixtures cover every marketing template", async () => {
+  const fixtures = [
+    "layout-prose.md",
+    "layout-cta-heavy.md",
+    "layout-landing-band.md",
+    "layout-audience.md",
+  ];
+
+  for (const name of fixtures) {
+    const source = await readFile(
+      new URL(`src/content/marketing/${name}`, root),
+      "utf8",
+    );
+    assert.match(source, /^template:\s/m);
+    assert.match(source, /Layout fixture:/);
+    assert.match(source, /draft:\s*false/);
+  }
 });
 
 test("content config registers the marketing collection", async () => {

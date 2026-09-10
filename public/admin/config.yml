@@ -684,6 +684,12 @@ collections:
     extension: md
     format: frontmatter
     fields:
+      - label: Template
+        name: template
+        widget: select
+        hint: Chooses the page layout. Only fill fields for the selected template — the build validates the rest.
+        default: prose
+        options: [prose, cta-heavy, landing-band, audience-landing]
       - label: Title
         name: title
         widget: string
@@ -708,10 +714,12 @@ collections:
         name: ctaLabel
         widget: string
         required: false
+        hint: "prose / audience-landing: button label."
       - label: CTA URL
         name: ctaHref
         widget: select
         required: false
+        hint: "prose / audience-landing: must pair with CTA label."
         options:
           [
             /,
@@ -725,6 +733,120 @@ collections:
             /support,
             /contact,
           ]
+      - label: Closing title
+        name: closingTitle
+        widget: string
+        required: false
+        hint: "prose: optional CtaBand title (defaults to headline)."
+      - label: CTA title
+        name: ctaTitle
+        widget: string
+        required: false
+        hint: "cta-heavy / landing-band: closing band title."
+      - label: Primary CTA
+        name: primaryCta
+        widget: object
+        required: false
+        hint: "cta-heavy / landing-band: required for those templates."
+        fields:
+          - { label: Label, name: label, widget: string }
+          - {
+              label: URL,
+              name: href,
+              widget: select,
+              options:
+                [
+                  /,
+                  /how-it-works,
+                  /places,
+                  /venues,
+                  /advertisers,
+                  /pricing,
+                  /about,
+                  /faq,
+                  /support,
+                  /contact,
+                ],
+            }
+      - label: Secondary CTA
+        name: secondaryCta
+        widget: object
+        required: false
+        hint: "cta-heavy: optional. landing-band: required."
+        fields:
+          - { label: Label, name: label, widget: string }
+          - {
+              label: URL,
+              name: href,
+              widget: select,
+              options:
+                [
+                  /,
+                  /how-it-works,
+                  /places,
+                  /venues,
+                  /advertisers,
+                  /pricing,
+                  /about,
+                  /faq,
+                  /support,
+                  /contact,
+                ],
+            }
+      - label: Columns
+        name: columns
+        widget: list
+        required: false
+        hint: "landing-band: feature columns under the hero."
+        fields:
+          - { label: Title, name: title, widget: string }
+          - { label: Body, name: body, widget: text }
+      - label: Statement
+        name: statement
+        widget: text
+        required: false
+        hint: "landing-band: centered inverse-section copy."
+      - label: Media placeholder label
+        name: mediaLabel
+        widget: string
+        required: false
+        hint: "audience-landing: split-hero media label."
+      - label: Benefits eyebrow
+        name: benefitsEyebrow
+        widget: string
+        required: false
+        hint: "audience-landing: inverse section eyebrow."
+      - label: Benefits
+        name: benefits
+        widget: list
+        required: false
+        hint: "audience-landing: benefit feature items."
+        fields:
+          - { label: Title, name: title, widget: string }
+          - { label: Description, name: description, widget: text }
+      - label: Process eyebrow
+        name: processEyebrow
+        widget: string
+        required: false
+        hint: "audience-landing: process section eyebrow."
+      - label: Process headline
+        name: processHeadline
+        widget: string
+        required: false
+        hint: "audience-landing: process section title."
+      - label: Process steps
+        name: process
+        widget: list
+        required: false
+        hint: "audience-landing: process rows."
+        fields:
+          - { label: Label, name: label, widget: string }
+          - { label: Detail, name: detail, widget: text }
+      - label: Closing headline
+        name: closingHeadline
+        widget: string
+        required: false
+        hint: "audience-landing: CtaBand title."
       - label: Draft
         name: draft
         widget: boolean

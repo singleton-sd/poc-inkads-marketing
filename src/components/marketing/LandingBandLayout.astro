@@ -1,0 +1,57 @@
+---
+import type { CollectionEntry } from "astro:content";
+import ButtonLink from "../ButtonLink.astro";
+import CtaBand from "../CtaBand.astro";
+import FeatureGrid from "../FeatureGrid.astro";
+import FeatureItem from "../FeatureItem.astro";
+import InverseSection from "../InverseSection.astro";
+import PageHero from "../PageHero.astro";
+import { withBase } from "../../lib/nav";
+
+interface Props {
+  entry: CollectionEntry<"marketing">;
+}
+
+const { entry } = Astro.props;
+const data = entry.data;
+if (data.template !== "landing-band") {
+  throw new Error(`LandingBandLayout received template "${data.template}"`);
+}
+
+const {
+  eyebrow,
+  headline,
+  summary,
+  columns,
+  statement,
+  ctaTitle,
+  primaryCta,
+  secondaryCta,
+} = data;
+const base = import.meta.env.BASE_URL;
+---
+
+<PageHero eyebrow={eyebrow ?? "InkAds"} title={headline} lead={summary} />
+
+<section class="shell marketing-columns" aria-label="Highlights">
+  <FeatureGrid>
+    {
+      columns.map((column) => (
+        <FeatureItem title={column.title} description={column.body} />
+      ))
+    }
+  </FeatureGrid>
+</section>
+
+<InverseSection centered labelledBy="marketing-statement">
+  <p id="marketing-statement" class="marketing-statement">{statement}</p>
+</InverseSection>
+
+<CtaBand title={ctaTitle} titleId="marketing-landing-cta-title">
+  <ButtonLink href={withBase(primaryCta.href, base)} label={primaryCta.label} />
+  <ButtonLink
+    href={withBase(secondaryCta.href, base)}
+    label={secondaryCta.label}
+    variant="secondary"
+  />
+</CtaBand>

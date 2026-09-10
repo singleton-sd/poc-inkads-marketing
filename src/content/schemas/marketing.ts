@@ -1,15 +1,97 @@
 import { z } from "astro/zod";
 
-import { draftField, internalRoute, pageSeo } from "./shared";
+import {
+  ctaLink,
+  draftField,
+  featureItem,
+  internalRoute,
+  pageSeo,
+  processStep,
+} from "./shared.ts";
 
-export const marketingPageSchema = pageSeo
+const marketingShared = {
+  eyebrow: z.string().trim().min(1).optional(),
+  draft: draftField,
+};
+
+export const proseMarketingSchema = pageSeo
   .extend({
-    eyebrow: z.string().trim().min(1).optional(),
+    template: z.literal("prose"),
+    ...marketingShared,
     ctaLabel: z.string().trim().min(1).optional(),
     ctaHref: internalRoute.optional(),
-    draft: draftField,
+    /** Optional CtaBand title; falls back to headline when omitted. */
+    closingTitle: z.string().trim().min(1).optional(),
   })
-  .refine(({ ctaLabel, ctaHref }) => Boolean(ctaLabel) === Boolean(ctaHref), {
-    message: "ctaLabel and ctaHref must be provided together",
-    path: ["ctaHref"],
+  .strict();
+
+export const ctaHeavyMarketingSchema = pageSeo
+  .extend({
+    template: z.literal("cta-heavy"),
+    ...marketingShared,
+    primaryCta: ctaLink,
+    secondaryCta: ctaLink.optional(),
+    ctaTitle: z.string().trim().min(1),
+  })
+  .strict();
+
+export const landingBandMarketingSchema = pageSeo
+  .extend({
+    template: z.literal("landing-band"),
+    ...marketingShared,
+    columns: z
+      .array(
+        z.object({
+          title: z.string().trim().min(1),
+          body: z.string().trim().min(1),
+        }),
+      )
+      .min(1),
+    statement: z.string().trim().min(1),
+    ctaTitle: z.string().trim().min(1),
+    primaryCta: ctaLink,
+    secondaryCta: ctaLink,
+  })
+  .strict();
+
+export const audienceLandingMarketingSchema = pageSeo
+  .extend({
+    template: z.literal("audience-landing"),
+    ...marketingShared,
+    ctaLabel: z.string().trim().min(1),
+    ctaHref: internalRoute,
+    mediaLabel: z.string().trim().min(1),
+    benefitsEyebrow: z.string().trim().min(1),
+    benefits: z.array(featureItem).min(1),
+    processEyebrow: z.string().trim().min(1),
+    processHeadline: z.string().trim().min(1),
+    process: z.array(processStep).min(1),
+    closingHeadline: z.string().trim().min(1),
+  })
+  .strict();
+
+export const marketingTemplates = [
+  "prose",
+  "cta-heavy",
+  "landing-band",
+  "audience-landing",
+] as const;
+
+export type MarketingTemplate = (typeof marketingTemplates)[number];
+
+export const marketingPageSchema = z
+  .discriminatedUnion("template", [
+    proseMarketingSchema,
+    ctaHeavyMarketingSchema,
+    landingBandMarketingSchema,
+    audienceLandingMarketingSchema,
+  ])
+  .superRefine((data, ctx) => {
+    if (data.template !== "prose") return;
+    if (Boolean(data.ctaLabel) === Boolean(data.ctaHref)) return;
+    ctx.addIssue({
+      code: "custom",
+      message: "ctaLabel and ctaHref must be provided together",
+      path: ["ctaHref"],
+    });
   });

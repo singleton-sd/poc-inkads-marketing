@@ -1,10 +1,10 @@
 ---
 import { getCollection, render, type CollectionEntry } from "astro:content";
-import ButtonLink from "../components/ButtonLink.astro";
-import CtaBand from "../components/CtaBand.astro";
-import PageHero from "../components/PageHero.astro";
+import AudienceLandingLayout from "../components/marketing/AudienceLandingLayout.astro";
+import CtaHeavyLayout from "../components/marketing/CtaHeavyLayout.astro";
+import LandingBandLayout from "../components/marketing/LandingBandLayout.astro";
+import ProseLayout from "../components/marketing/ProseLayout.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { withBase } from "../lib/nav";
 import {
   isReservedPageSlug,
   isValidMarketingSlug,
@@ -39,31 +39,24 @@ interface Props {
 
 const { entry } = Astro.props;
 const { Content } = await render(entry);
-const { title, description, eyebrow, headline, summary, ctaLabel, ctaHref } =
-  entry.data;
-const base = import.meta.env.BASE_URL;
-const hasCta = Boolean(ctaLabel && ctaHref);
+const { title, description, template } = entry.data;
 ---
 
 <BaseLayout title={title} description={description}>
   <main id="main-content">
-    <PageHero eyebrow={eyebrow ?? "InkAds"} title={headline} lead={summary} />
-
-    <section class="shell marketing-section" aria-label="Page content">
-      <div class="page-copy">
-        <Content />
-      </div>
-    </section>
-
     {
-      hasCta && (
-        <CtaBand title={headline} tone="brand">
-          <ButtonLink
-            href={withBase(ctaHref!, base)}
-            label={ctaLabel!}
-            variant="inverse"
-          />
-        </CtaBand>
+      template === "prose" ? (
+        <ProseLayout entry={entry}>
+          <Content />
+        </ProseLayout>
+      ) : template === "cta-heavy" ? (
+        <CtaHeavyLayout entry={entry}>
+          <Content />
+        </CtaHeavyLayout>
+      ) : template === "landing-band" ? (
+        <LandingBandLayout entry={entry} />
+      ) : (
+        <AudienceLandingLayout entry={entry} />
       )
     }
   </main>
