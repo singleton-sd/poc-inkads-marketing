@@ -104,7 +104,7 @@ const captions = {
           <span data-epaper-drop-label
             >Drop PNG or JPEG · 800 × 480 Waveshare B/W</span
           >
-          <img alt="" hidden data-epaper-preview-image />
+          <img alt="" hidden draggable="false" data-epaper-preview-image />
           <input
             type="file"
             accept="image/png,image/jpeg"
@@ -584,8 +584,8 @@ const captions = {
       if (!rawImageSize || !currentFile) return;
       if (event.pointerType === "mouse" && event.button !== 0) return;
       if (pointerPanId !== undefined) return;
-      // Don't start a pan from the hidden file input.
       if (event.target === fileInput) return;
+      event.preventDefault();
       pointerPanId = event.pointerId;
       lastPointerX = event.clientX;
       lastPointerY = event.clientY;
@@ -600,6 +600,7 @@ const captions = {
         if (pointerPanId !== event.pointerId) return;
         if (!rawImageSize || !currentFile) return;
         if (pinchStartDistance > 0) return;
+        event.preventDefault();
         const imageSize = framingImageSize();
         if (!imageSize) return;
         const display = drop.getBoundingClientRect();
@@ -609,7 +610,7 @@ const captions = {
         lastPointerX = event.clientX;
         lastPointerY = event.clientY;
         pointerPanDistance += Math.hypot(clientDx, clientDy);
-        framing = framingNudgeFromPointerDrag(
+        const next = framingNudgeFromPointerDrag(
           imageSize,
           framing,
           framingProfile,
@@ -618,10 +619,17 @@ const captions = {
           display.width,
           display.height,
         );
+        if (
+          next.centerX === framing.centerX &&
+          next.centerY === framing.centerY
+        ) {
+          return;
+        }
+        framing = next;
         syncPanButtons();
         scheduleRerender();
       },
-      { passive: true },
+      { passive: false },
     );
 
     function endPointerPan(event: PointerEvent) {
@@ -637,6 +645,9 @@ const captions = {
 
     drop?.addEventListener("pointerup", endPointerPan);
     drop?.addEventListener("pointercancel", endPointerPan);
+    drop?.addEventListener("dragstart", (event) => {
+      event.preventDefault();
+    });
 
     drop?.addEventListener(
       "touchstart",

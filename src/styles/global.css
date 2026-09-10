@@ -1167,6 +1167,7 @@ textarea.field-control {
 .epaper-preview__drop.has-preview {
   touch-action: none;
   cursor: grab;
+  user-select: none;
 }
 
 .epaper-preview__drop.has-preview.is-panning {
@@ -1190,6 +1191,10 @@ textarea.field-control {
   object-fit: contain;
   /* Already 1-bit from the shared renderer — do not re-filter. */
   image-rendering: pixelated;
+  /* Events hit the drop surface; avoid native image-drag stealing pans. */
+  pointer-events: none;
+  -webkit-user-drag: none;
+  user-select: none;
 }
 
 .epaper-preview__controls {
