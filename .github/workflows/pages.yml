@@ -11,6 +11,7 @@ concurrency:
 
 permissions:
   contents: write
+  id-token: write
 
 jobs:
   build-and-deploy:
@@ -29,6 +30,27 @@ jobs:
           cache: pnpm
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+      - name: Require PostKit URL source
+        if: ${{ vars.PUBLIC_POSTKIT_API_BASE_URL == '' && (vars.AZURE_CLIENT_ID == '' || vars.AZURE_TENANT_ID == '' || vars.AZURE_SUBSCRIPTION_ID == '') }}
+        run: |
+          echo "::error::Configure AZURE_CLIENT_ID, AZURE_TENANT_ID, and AZURE_SUBSCRIPTION_ID so CI can read PostKit App Configuration key app:api:publicBaseUrl, or set emergency override PUBLIC_POSTKIT_API_BASE_URL."
+          exit 1
+      - name: Azure login (OIDC) for PostKit App Config
+        if: ${{ vars.PUBLIC_POSTKIT_API_BASE_URL == '' }}
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      - name: Resolve PostKit API base URL
+        env:
+          PUBLIC_POSTKIT_API_BASE_URL: ${{ vars.PUBLIC_POSTKIT_API_BASE_URL }}
+        run: |
+          set -euo pipefail
+          chmod +x scripts/resolve-postkit-api-base-url.sh
+          url="$(./scripts/resolve-postkit-api-base-url.sh)"
+          echo "PUBLIC_POSTKIT_API_BASE_URL=$url" >> "$GITHUB_ENV"
+          echo "Resolved PostKit API base URL: $url"
       - name: Check formatting
         run: pnpm format:check
       - name: Lint and type-check
@@ -37,6 +59,7 @@ jobs:
         run: pnpm test
       - name: Build production site
         run: pnpm build
+        # PUBLIC_POSTKIT_API_BASE_URL comes from GITHUB_ENV (App Config or override).
 
       - name: Install Playwright browsers
         run: pnpm playwright:install
