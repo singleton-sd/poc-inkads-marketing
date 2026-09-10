@@ -101,11 +101,11 @@ The browser never talks to App Configuration.
 
 ### Required GitHub Actions variables (OIDC)
 
-| Variable | Purpose |
-| --- | --- |
-| `AZURE_CLIENT_ID` | App registration client id for this repo’s federated credential |
-| `AZURE_TENANT_ID` | Entra tenant |
-| `AZURE_SUBSCRIPTION_ID` | Subscription that holds the App Config store |
+| Variable                | Purpose                                                         |
+| ----------------------- | --------------------------------------------------------------- |
+| `AZURE_CLIENT_ID`       | App registration client id for this repo’s federated credential |
+| `AZURE_TENANT_ID`       | Entra tenant                                                    |
+| `AZURE_SUBSCRIPTION_ID` | Subscription that holds the App Config store                    |
 
 Grant that identity **App Configuration Data Reader** on
 `ssd-postkit-appcs-prod-ae`. Add federated credentials for this repository
