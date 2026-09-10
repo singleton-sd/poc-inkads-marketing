@@ -268,6 +268,7 @@ const captions = {
     let imageSize: ImageSize | undefined;
     let framing: FramingState = { centerX: 0, centerY: 0, zoom: 1 };
     let renderToken = 0;
+    let loadToken = 0;
     let debounceTimer: ReturnType<typeof setTimeout> | undefined;
     let pinchStartDistance = 0;
     let pinchStartZoom = 1;
