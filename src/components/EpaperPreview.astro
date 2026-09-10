@@ -94,7 +94,13 @@ const captions = {
         ]}
         data-epaper-panel="yours"
       >
-        <label class="epaper-preview__drop" data-epaper-drop>
+        <div
+          class="epaper-preview__drop"
+          data-epaper-drop
+          role="button"
+          tabindex="0"
+          aria-label="Drop PNG or JPEG artwork, or press to upload"
+        >
           <span data-epaper-drop-label
             >Drop PNG or JPEG · 800 × 480 Waveshare B/W</span
           >
@@ -105,7 +111,7 @@ const captions = {
             hidden
             data-epaper-file
           />
-        </label>
+        </div>
       </div>
     </div>
   </figure>
@@ -330,6 +336,8 @@ const captions = {
     let pointerPanId: number | undefined;
     let lastPointerX = 0;
     let lastPointerY = 0;
+    /** Screen distance moved while a pointer is down — skips upload-on-click. */
+    let pointerPanDistance = 0;
 
     function framingImageSize(): ImageSize | undefined {
       if (!rawImageSize) return undefined;
@@ -370,6 +378,19 @@ const captions = {
         });
       if (rotateImageButton) {
         rotateImageButton.textContent = `Rotate image (${rotation}°)`;
+      }
+      if (drop) {
+        drop.setAttribute(
+          "aria-label",
+          currentFile
+            ? "Preview artwork. Drag to move, scroll or pinch to zoom. Use Upload artwork to replace."
+            : "Drop PNG or JPEG artwork, or press to upload",
+        );
+      }
+      if (uploadButton) {
+        uploadButton.textContent = currentFile
+          ? "Replace artwork"
+          : "Upload artwork";
       }
       syncPanButtons();
     }
@@ -507,17 +528,34 @@ const captions = {
       }
     }
 
-    uploadButton?.addEventListener("click", () => fileInput?.click());
+    function openFilePicker() {
+      // Allow re-selecting the same file after a cancel / replace.
+      if (fileInput) fileInput.value = "";
+      fileInput?.click();
+    }
+
+    uploadButton?.addEventListener("click", () => openFilePicker());
+
+    // Not a <label>: empty surface opens the picker; with artwork, only the
+    // Upload button / file-drop replaces — pan gestures never open the picker.
     drop?.addEventListener("click", (event) => {
-      // Nested file input would open on every label click — only allow that
-      // when there is no artwork yet. Drag-pans must not re-open the picker.
-      if (currentFile) {
+      if (event.target === fileInput) return;
+      if (currentFile || pointerPanDistance > 6) {
         event.preventDefault();
         event.stopPropagation();
+        pointerPanDistance = 0;
         return;
       }
-      fileInput?.click();
+      openFilePicker();
     });
+
+    drop?.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      if (currentFile) return;
+      event.preventDefault();
+      openFilePicker();
+    });
+
     fileInput?.addEventListener("change", () => loadFile(fileInput.files?.[0]));
 
     drop?.addEventListener("dragover", (event) => {
@@ -548,9 +586,12 @@ const captions = {
       if (!rawImageSize || !currentFile) return;
       if (event.pointerType === "mouse" && event.button !== 0) return;
       if (pointerPanId !== undefined) return;
+      // Don't start a pan from the hidden file input.
+      if (event.target === fileInput) return;
       pointerPanId = event.pointerId;
       lastPointerX = event.clientX;
       lastPointerY = event.clientY;
+      pointerPanDistance = 0;
       drop.classList.add("is-panning");
       drop.setPointerCapture(event.pointerId);
     });
@@ -560,7 +601,6 @@ const captions = {
       (event) => {
         if (pointerPanId !== event.pointerId) return;
         if (!rawImageSize || !currentFile) return;
-        // Two-finger pinch owns the gesture — ignore stray move.
         if (pinchStartDistance > 0) return;
         const imageSize = framingImageSize();
         if (!imageSize) return;
@@ -570,6 +610,7 @@ const captions = {
         if (clientDx === 0 && clientDy === 0) return;
         lastPointerX = event.clientX;
         lastPointerY = event.clientY;
+        pointerPanDistance += Math.hypot(clientDx, clientDy);
         framing = framingNudgeFromPointerDrag(
           imageSize,
           framing,
