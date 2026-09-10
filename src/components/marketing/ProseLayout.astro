@@ -1,0 +1,47 @@
+---
+import type { CollectionEntry } from "astro:content";
+import ButtonLink from "../ButtonLink.astro";
+import CtaBand from "../CtaBand.astro";
+import PageHero from "../PageHero.astro";
+import { withBase } from "../../lib/nav";
+
+interface Props {
+  entry: CollectionEntry<"marketing">;
+}
+
+const { entry } = Astro.props;
+const data = entry.data;
+if (data.template !== "prose") {
+  throw new Error(`ProseLayout received template "${data.template}"`);
+}
+
+const { eyebrow, headline, summary, ctaLabel, ctaHref, closingTitle } = data;
+const base = import.meta.env.BASE_URL;
+const hasCta = Boolean(ctaLabel && ctaHref);
+const bandTitle = closingTitle ?? headline;
+const hasBody = Boolean(entry.body?.trim());
+---
+
+<PageHero eyebrow={eyebrow ?? "InkAds"} title={headline} lead={summary} />
+
+{
+  hasBody && (
+    <section class="shell marketing-section" aria-label="Page content">
+      <div class="page-copy">
+        <slot />
+      </div>
+    </section>
+  )
+}
+
+{
+  hasCta && (
+    <CtaBand title={bandTitle} tone="brand">
+      <ButtonLink
+        href={withBase(ctaHref!, base)}
+        label={ctaLabel!}
+        variant="inverse"
+      />
+    </CtaBand>
+  )
+}

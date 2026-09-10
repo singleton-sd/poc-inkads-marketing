@@ -1,6 +1,6 @@
 import { z } from "astro/zod";
 
-import { approvedInternalRoutes } from "../../lib/approved-internal-routes";
+import { approvedInternalRoutes } from "../../lib/approved-internal-routes.ts";
 
 export { approvedInternalRoutes };
 

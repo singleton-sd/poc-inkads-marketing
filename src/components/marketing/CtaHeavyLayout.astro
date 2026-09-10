@@ -1,0 +1,66 @@
+---
+import type { CollectionEntry } from "astro:content";
+import ButtonLink from "../ButtonLink.astro";
+import CtaBand from "../CtaBand.astro";
+import PageHero from "../PageHero.astro";
+import { withBase } from "../../lib/nav";
+
+interface Props {
+  entry: CollectionEntry<"marketing">;
+}
+
+const { entry } = Astro.props;
+const data = entry.data;
+if (data.template !== "cta-heavy") {
+  throw new Error(`CtaHeavyLayout received template "${data.template}"`);
+}
+
+const { eyebrow, headline, summary, primaryCta, secondaryCta, ctaTitle } = data;
+const base = import.meta.env.BASE_URL;
+const hasBody = Boolean(entry.body?.trim());
+---
+
+<PageHero eyebrow={eyebrow ?? "InkAds"} title={headline} lead={summary}>
+  <ButtonLink
+    slot="actions"
+    href={withBase(primaryCta.href, base)}
+    label={primaryCta.label}
+  />
+  {
+    secondaryCta && (
+      <ButtonLink
+        slot="actions"
+        href={withBase(secondaryCta.href, base)}
+        label={secondaryCta.label}
+        variant="secondary"
+      />
+    )
+  }
+</PageHero>
+
+{
+  hasBody && (
+    <section class="shell marketing-section" aria-label="Page content">
+      <div class="page-copy">
+        <slot />
+      </div>
+    </section>
+  )
+}
+
+<CtaBand title={ctaTitle} tone="brand" titleId="marketing-cta-title">
+  <ButtonLink
+    href={withBase(primaryCta.href, base)}
+    label={primaryCta.label}
+    variant="inverse"
+  />
+  {
+    secondaryCta && (
+      <ButtonLink
+        href={withBase(secondaryCta.href, base)}
+        label={secondaryCta.label}
+        variant="ghost-inverse"
+      />
+    )
+  }
+</CtaBand>
