@@ -1,18 +1,189 @@
 import {
+  coverWindowSize,
+  defaultFraming,
+  defineDisplayProfile,
   fromRgbaImageData,
+  nextSourceRotation,
   normaliseToProfile,
   packMonoBitmap,
   renderMono,
+  rotatedImageSize,
+  sourceRectFromFraming,
   toPreviewImage,
   waveshare75BwProfile,
+  type FramingState,
+  type ImageSize,
   type MonoRenderMode,
+  type SourceRotation,
 } from "@singleton-sd/inkads-epaper-renderer";
+
+export type { FramingState, ImageSize, SourceRotation };
+export {
+  coverWindowSize,
+  defaultFraming,
+  nextSourceRotation,
+  rotatedImageSize,
+  sourceRectFromFraming,
+};
+
+export type FramingProfileSize = Pick<
+  typeof waveshare75BwProfile,
+  "width" | "height"
+>;
+
+export type FramingPanRoom = {
+  readonly west: number;
+  readonly east: number;
+  readonly north: number;
+  readonly south: number;
+};
+
+/**
+ * Mirror of `@singleton-sd/inkads-epaper-renderer` framing clamp from #42
+ * (letterbox pan). Drop this local copy once the package is ≥ the release that
+ * exports `framingPanRoom` and the updated `clampFraming`, and pass zoom /
+ * centre into `normaliseToProfile` again instead of `sourceRect`.
+ */
+function centreBounds(
+  imageExtent: number,
+  windowExtent: number,
+): { min: number; max: number } {
+  const half = windowExtent / 2;
+  const a = half;
+  const b = imageExtent - half;
+  return { min: Math.min(a, b), max: Math.max(a, b) };
+}
+
+/** Keep crop windows inside the image; allow offset letterboxing when zoomed out. */
+export function clampFraming(
+  image: ImageSize,
+  framing: FramingState,
+  profile: FramingProfileSize,
+): FramingState {
+  const zoom = Math.max(framing.zoom, 0.05);
+  const rect = sourceRectFromFraming(image, { ...framing, zoom }, profile);
+  const x = centreBounds(image.width, rect.width);
+  const y = centreBounds(image.height, rect.height);
+  return {
+    zoom,
+    centerX: Math.min(Math.max(framing.centerX, x.min), x.max),
+    centerY: Math.min(Math.max(framing.centerY, y.min), y.max),
+  };
+}
+
+/** Remaining pan travel per axis (0 → disable that arrow). */
+export function framingPanRoom(
+  image: ImageSize,
+  framing: FramingState,
+  profile: FramingProfileSize,
+): FramingPanRoom {
+  const clamped = clampFraming(image, framing, profile);
+  const rect = sourceRectFromFraming(image, clamped, profile);
+  const x = centreBounds(image.width, rect.width);
+  const y = centreBounds(image.height, rect.height);
+  return {
+    west: clamped.centerX - x.min,
+    east: x.max - clamped.centerX,
+    north: clamped.centerY - y.min,
+    south: y.max - clamped.centerY,
+  };
+}
+
+export type PanDirection = "n" | "s" | "e" | "w";
+
+export type PanFramingOptions = {
+  /** Fraction of the current window to shift (default 0.25). */
+  readonly step?: number;
+};
+
+/**
+ * Shift framing so the artwork moves in the named direction on screen
+ * (arrow / drag semantics), not so the crop window crawls that way.
+ */
+export function panFraming(
+  image: ImageSize,
+  framing: FramingState,
+  profile: FramingProfileSize,
+  direction: PanDirection,
+  options: PanFramingOptions = {},
+): FramingState {
+  const step = options.step ?? 0.25;
+  const base = clampFraming(image, framing, profile);
+  const rect = sourceRectFromFraming(image, base, profile);
+  // Positive screen move (image east/south) decreases the window centre.
+  const dx =
+    direction === "e"
+      ? -rect.width * step
+      : direction === "w"
+        ? rect.width * step
+        : 0;
+  const dy =
+    direction === "s"
+      ? -rect.height * step
+      : direction === "n"
+        ? rect.height * step
+        : 0;
+  return nudgeFraming(image, base, profile, dx, dy);
+}
+
+/**
+ * Apply a source-pixel centre delta (after clamp). Positive dx moves the
+ * crop window east (artwork appears to slide west).
+ */
+export function nudgeFraming(
+  image: ImageSize,
+  framing: FramingState,
+  profile: FramingProfileSize,
+  deltaCenterX: number,
+  deltaCenterY: number,
+): FramingState {
+  const base = clampFraming(image, framing, profile);
+  return clampFraming(
+    image,
+    {
+      ...base,
+      centerX: base.centerX + deltaCenterX,
+      centerY: base.centerY + deltaCenterY,
+    },
+    profile,
+  );
+}
+
+/**
+ * Map a screen-pixel drag (image follows the pointer) into a framing nudge.
+ * `displayWidth` / `displayHeight` are the on-screen preview box size.
+ */
+export function framingNudgeFromPointerDrag(
+  image: ImageSize,
+  framing: FramingState,
+  profile: FramingProfileSize,
+  clientDx: number,
+  clientDy: number,
+  displayWidth: number,
+  displayHeight: number,
+): FramingState {
+  const base = clampFraming(image, framing, profile);
+  const rect = sourceRectFromFraming(image, base, profile);
+  if (displayWidth <= 0 || displayHeight <= 0) return base;
+  // Image follows the pointer: drag right → artwork moves right → centre −X.
+  const deltaCenterX = -(clientDx / displayWidth) * rect.width;
+  const deltaCenterY = -(clientDy / displayHeight) * rect.height;
+  return nudgeFraming(image, base, profile, deltaCenterX, deltaCenterY);
+}
+
+/** How the physical panel is mounted. */
+export type ScreenMount = "landscape" | "portrait";
 
 export type PreviewControls = {
   readonly mode: MonoRenderMode;
-  /** Cover-fit pan, 0–1. */
-  readonly cropX: number;
-  readonly cropY: number;
+  /** Cover-fit-relative zoom (`1` = fill). */
+  readonly zoom: number;
+  /** Pan centre in source pixels after `rotation`. */
+  readonly centerX: number;
+  readonly centerY: number;
+  /** Clockwise artwork rotation before framing. */
+  readonly rotation: SourceRotation;
+  readonly screenMount: ScreenMount;
 };
 
 export type PreviewResult = {
@@ -22,16 +193,47 @@ export type PreviewResult = {
   readonly dataUrl: string;
 };
 
-const profile = waveshare75BwProfile;
+const landscapeProfile = waveshare75BwProfile;
+
+/** Same panel contract with rotate-90 packing for a portrait mount. */
+const portraitProfile = defineDisplayProfile({
+  id: waveshare75BwProfile.id,
+  label: `${waveshare75BwProfile.label} (portrait mount)`,
+  width: waveshare75BwProfile.width,
+  height: waveshare75BwProfile.height,
+  aspectRatio: waveshare75BwProfile.aspectRatio,
+  bitsPerPixel: waveshare75BwProfile.bitsPerPixel,
+  pixelPacking: waveshare75BwProfile.pixelPacking,
+  packedByteLength: waveshare75BwProfile.packedByteLength,
+  orientation: "rotate-90",
+  polarity: waveshare75BwProfile.polarity,
+});
+
+export function profileForMount(mount: ScreenMount) {
+  return mount === "portrait" ? portraitProfile : landscapeProfile;
+}
+
+/** Logical panel size used for labels (native profile W×H). */
+export const PANEL_WIDTH = landscapeProfile.width;
+export const PANEL_HEIGHT = landscapeProfile.height;
+
+export function panelSizeLabel(mount: ScreenMount): string {
+  if (mount === "portrait") {
+    return `${PANEL_HEIGHT} × ${PANEL_WIDTH} · 1-bit e-paper (portrait)`;
+  }
+  return `${PANEL_WIDTH} × ${PANEL_HEIGHT} · 1-bit e-paper`;
+}
 
 /**
- * Decode an uploaded image in the browser and run the shared renderer pipeline
- * through to a preview data URL. Matches device output for the same options.
+ * Decode an uploaded image and run the shared renderer pipeline to a preview
+ * data URL. Framing uses the letterbox-aware clamp, then passes `sourceRect`
+ * so pan offsets are honoured even before the package ships the same clamp.
  */
 export async function renderUploadPreview(
   file: File,
   controls: PreviewControls,
 ): Promise<PreviewResult> {
+  const profile = profileForMount(controls.screenMount);
   const bitmap = await createImageBitmap(file);
   try {
     const canvas = document.createElement("canvas");
@@ -45,9 +247,24 @@ export async function renderUploadPreview(
     const imageData = context.getImageData(0, 0, bitmap.width, bitmap.height);
 
     const decoded = fromRgbaImageData(imageData);
+    const size = rotatedImageSize(
+      { width: decoded.width, height: decoded.height },
+      controls.rotation,
+    );
+    const framing = clampFraming(
+      size,
+      {
+        zoom: controls.zoom,
+        centerX: controls.centerX,
+        centerY: controls.centerY,
+      },
+      landscapeProfile,
+    );
+    const sourceRect = sourceRectFromFraming(size, framing, landscapeProfile);
     const framed = normaliseToProfile(decoded, {
       profile,
-      crop: { x: controls.cropX, y: controls.cropY },
+      rotation: controls.rotation,
+      sourceRect,
     });
     const mono = renderMono(framed, { mode: controls.mode });
     const packed = packMonoBitmap(mono, { profile });
@@ -80,6 +297,16 @@ export async function renderUploadPreview(
   }
 }
 
+/** Read pixel dimensions without running the full pipeline. */
+export async function readImageSize(file: File): Promise<ImageSize> {
+  const bitmap = await createImageBitmap(file);
+  try {
+    return { width: bitmap.width, height: bitmap.height };
+  } finally {
+    bitmap.close();
+  }
+}
+
 export const PREVIEW_MODES: readonly {
   value: MonoRenderMode;
   label: string;
@@ -89,4 +316,4 @@ export const PREVIEW_MODES: readonly {
   { value: "floyd-steinberg", label: "Floyd–Steinberg" },
 ];
 
-export const PANEL_SIZE_LABEL = `${profile.width} × ${profile.height}`;
+export const PANEL_SIZE_LABEL = panelSizeLabel("landscape");

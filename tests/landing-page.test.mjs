@@ -86,7 +86,28 @@ test("shared e-paper preview module consumes the renderer package", async () => 
   assert.match(moduleSource, /@singleton-sd\/inkads-epaper-renderer/);
   assert.match(moduleSource, /fromRgbaImageData/);
   assert.match(moduleSource, /normaliseToProfile/);
+  assert.match(moduleSource, /sourceRect/);
+  assert.match(moduleSource, /framingPanRoom/);
+  assert.match(moduleSource, /rotation:\s*controls\.rotation/);
   assert.match(moduleSource, /renderMono/);
   assert.match(moduleSource, /packMonoBitmap/);
   assert.match(moduleSource, /toPreviewImage/);
+  assert.doesNotMatch(moduleSource, /crop:\s*\{/);
+});
+
+test("landing preview UI uses gesture zoom and button pan", async () => {
+  const preview = await readFile(
+    new URL("src/components/EpaperPreview.astro", root),
+    "utf8",
+  );
+  assert.match(preview, /data-epaper-pan/);
+  assert.match(preview, /data-epaper-rotate-image/);
+  assert.match(preview, /data-epaper-mount="portrait"/);
+  assert.match(preview, /data-epaper-drop/);
+  assert.match(preview, /role="button"/);
+  assert.match(preview, /openFilePicker|Replace artwork/);
+  assert.doesNotMatch(preview, /<label class="epaper-preview__drop"/);
+  assert.match(preview, /framingNudgeFromPointerDrag|pointerdown/);
+  assert.doesNotMatch(preview, /Pan horizontal/);
+  assert.doesNotMatch(preview, /data-epaper-crop-x/);
 });
