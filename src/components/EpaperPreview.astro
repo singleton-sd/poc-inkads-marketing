@@ -401,6 +401,7 @@ const captions = {
       if (controls) controls.hidden = true;
       drop?.classList.remove("has-preview");
       framing = { centerX: 0, centerY: 0, zoom: 1 };
+      syncMountUi();
     }
 
     function applyZoomAt(
