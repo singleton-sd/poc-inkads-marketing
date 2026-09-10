@@ -324,6 +324,17 @@ const captions = {
       }, DEBOUNCE_MS);
     }
 
+    function clearPreviewUi() {
+      if (previewImage) {
+        previewImage.removeAttribute("src");
+        previewImage.hidden = true;
+      }
+      if (dropLabel) dropLabel.hidden = false;
+      if (controls) controls.hidden = true;
+      drop?.classList.remove("has-preview");
+      framing = { centerX: 0, centerY: 0, zoom: 1 };
+    }
+
     function applyZoomAt(
       nextZoom: number,
       focalNormX: number,
@@ -356,6 +367,8 @@ const captions = {
         debounceTimer = undefined;
       }
       if (file.type !== "image/png" && file.type !== "image/jpeg") {
+        currentFile = undefined;
+        clearPreviewUi();
         if (status) status.textContent = "Only PNG and JPEG are supported";
         return;
       }
@@ -367,6 +380,8 @@ const captions = {
         await rerender();
       } catch (error) {
         if (token !== loadToken || currentFile !== file) return;
+        currentFile = undefined;
+        clearPreviewUi();
         if (status) {
           status.textContent =
             error instanceof Error
