@@ -25,6 +25,22 @@
     <changefreq>monthly</changefreq>
   </url>
   <url>
+    <loc>https://inkads.poc.singletonsd.com/layout-audience/</loc>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://inkads.poc.singletonsd.com/layout-cta-heavy/</loc>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://inkads.poc.singletonsd.com/layout-landing-band/</loc>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://inkads.poc.singletonsd.com/layout-prose/</loc>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
     <loc>https://inkads.poc.singletonsd.com/places/</loc>
     <changefreq>monthly</changefreq>
   </url>
