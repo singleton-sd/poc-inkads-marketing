@@ -7,8 +7,10 @@ const repoRoot = new URL("..", import.meta.url);
 const distDir = new URL("dist/", repoRoot);
 
 const indexHtmlPath = new URL("index.html", distDir);
+const notFoundHtmlPath = new URL("404.html", distDir);
 const robotsTxtPath = new URL("robots.txt", distDir);
 const sitemapXmlPath = new URL("sitemap.xml", distDir);
+const ogImagePath = new URL("og-image.png", distDir);
 
 const homeMdPath = new URL("src/content/pages/home.md", repoRoot);
 
@@ -30,14 +32,20 @@ const homeFrontmatterDescription = getTextBetween(
   /\nheadline:/i,
 ).trim();
 
+assert.ok(
+  homeFrontmatterDescription.length <= 160,
+  `Home meta description should be ≤160 chars (got ${homeFrontmatterDescription.length})`,
+);
+
 if (!existsSync(fileURLToPath(indexHtmlPath))) {
   throw new Error(
     `Missing ${indexHtmlPath.pathname}. Run pnpm build before pnpm test:seo.`,
   );
 }
 
-const [indexHtml, robotsTxt, sitemapXml] = await Promise.all([
+const [indexHtml, notFoundHtml, robotsTxt, sitemapXml] = await Promise.all([
   readFile(indexHtmlPath, "utf8"),
+  readFile(notFoundHtmlPath, "utf8"),
   readFile(robotsTxtPath, "utf8"),
   readFile(sitemapXmlPath, "utf8"),
 ]);
@@ -64,6 +72,13 @@ testMetadata("canonical + robots meta", () => {
   assert.match(indexHtml, /<meta name="robots" content="index,follow"\s*\/?>/i);
 });
 
+testMetadata("404 is noindex", () => {
+  assert.match(
+    notFoundHtml,
+    /<meta name="robots" content="noindex,follow"\s*\/?>/i,
+  );
+});
+
 testMetadata("Open Graph and Twitter cards reference production domain", () => {
   assert.match(indexHtml, /property="og:title" content="[^"]*InkAds/i);
   assert.match(
@@ -72,13 +87,20 @@ testMetadata("Open Graph and Twitter cards reference production domain", () => {
   );
   assert.match(
     indexHtml,
-    new RegExp(`property="og:image" content="${SITE_DOMAIN}[^"]*"`, "i"),
+    new RegExp(
+      `property="og:image" content="${SITE_DOMAIN}/og-image\\.png"`,
+      "i",
+    ),
+  );
+  assert.ok(
+    existsSync(fileURLToPath(ogImagePath)),
+    "Missing dist/og-image.png",
   );
 
   assert.match(indexHtml, /name="twitter:card" content="summary_large_image"/i);
   assert.match(
     indexHtml,
-    new RegExp(`name="twitter:image" content="${SITE_DOMAIN}[^"]*"`, "i"),
+    new RegExp(`name="twitter:image" content="${SITE_DOMAIN}/og-image\\.png"`, "i"),
   );
 });
 
@@ -94,13 +116,21 @@ testMetadata("structured data present", () => {
   const parsed = JSON.parse(jsonText);
 
   assert.equal(parsed["@context"], "https://schema.org");
-  assert.equal(parsed["@type"], "WebSite");
-  assert.equal(parsed.name, "InkAds");
+  assert.ok(Array.isArray(parsed["@graph"]), "Expected @graph array");
+  const types = parsed["@graph"].map((n) => n["@type"]);
+  assert.ok(types.includes("WebSite"), "Missing WebSite in @graph");
+  assert.ok(types.includes("WebPage"), "Missing WebPage in @graph");
+  assert.ok(types.includes("Organization"), "Missing Organization in @graph");
+  const website = parsed["@graph"].find((n) => n["@type"] === "WebSite");
+  assert.equal(website.name, "InkAds");
+  assert.match(website.url, new RegExp(`^${SITE_DOMAIN.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&")}/?$`));
 });
 
 testMetadata("favicons included", () => {
   assert.match(indexHtml, /rel="icon"[^>]+href="\/favicon\.svg"/i);
   assert.match(indexHtml, /rel="icon"[^>]+href="\/favicon\.ico"/i);
+  assert.match(indexHtml, /rel="icon"[^>]+href="\/favicon-32\.png"/i);
+  assert.match(indexHtml, /rel="apple-touch-icon"[^>]+href="\/apple-touch-icon\.png"/i);
 });
 
 testMetadata("sitemap lists primary public routes", () => {
@@ -139,6 +169,7 @@ testMetadata("sitemap and robots reference production domain", () => {
   );
 
   assert.match(robotsTxt, /User-agent:\s*\*/i);
+  assert.match(robotsTxt, /Disallow:\s*\/admin\//i);
   assert.match(
     robotsTxt,
     new RegExp(
