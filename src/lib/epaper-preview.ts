@@ -28,6 +28,74 @@ export {
   sourceRectFromFraming,
 };
 
+export type PanDirection = "n" | "s" | "e" | "w";
+
+export type PanFramingOptions = {
+  /** Fraction of the current window to shift (default 0.25). */
+  readonly step?: number;
+  readonly minZoom?: number;
+  readonly maxZoom?: number;
+};
+
+/**
+ * Shift framing by one pan step. At cover-fit (`zoom` = 1) one or both axes
+ * can be locked (no crop slack) — e.g. an 800×480 upload matching the panel.
+ * When the requested pan would be a no-op, zoom in just enough for the step to
+ * move the centre, then pan, so arrow controls always change the preview.
+ */
+export function panFraming(
+  image: ImageSize,
+  framing: FramingState,
+  profile: Pick<typeof waveshare75BwProfile, "width" | "height">,
+  direction: PanDirection,
+  options: PanFramingOptions = {},
+): FramingState {
+  const step = options.step ?? 0.25;
+  const minZoom = options.minZoom ?? 0.25;
+  const maxZoom = options.maxZoom ?? 8;
+  const clampZoom = (zoom: number) =>
+    Math.min(maxZoom, Math.max(minZoom, zoom));
+
+  let zoom = framing.zoom;
+  for (let attempt = 0; attempt < 12; attempt += 1) {
+    const base = clampFraming(image, { ...framing, zoom }, profile);
+    const rect = sourceRectFromFraming(image, base, profile);
+    const dx =
+      direction === "e"
+        ? rect.width * step
+        : direction === "w"
+          ? -rect.width * step
+          : 0;
+    const dy =
+      direction === "s"
+        ? rect.height * step
+        : direction === "n"
+          ? -rect.height * step
+          : 0;
+    const candidate = clampFraming(
+      image,
+      {
+        ...base,
+        centerX: base.centerX + dx,
+        centerY: base.centerY + dy,
+      },
+      profile,
+    );
+    if (
+      candidate.centerX !== base.centerX ||
+      candidate.centerY !== base.centerY
+    ) {
+      return candidate;
+    }
+    const nextZoom = clampZoom(zoom * (1 / (1 - step)));
+    if (nextZoom <= zoom + 1e-9) {
+      return base;
+    }
+    zoom = nextZoom;
+  }
+  return clampFraming(image, { ...framing, zoom }, profile);
+}
+
 /** How the physical panel is mounted. */
 export type ScreenMount = "landscape" | "portrait";
 
