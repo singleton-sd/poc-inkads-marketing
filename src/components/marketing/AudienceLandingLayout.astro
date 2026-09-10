@@ -1,0 +1,79 @@
+---
+import type { CollectionEntry } from "astro:content";
+import ButtonLink from "../ButtonLink.astro";
+import CtaBand from "../CtaBand.astro";
+import FeatureGrid from "../FeatureGrid.astro";
+import FeatureItem from "../FeatureItem.astro";
+import InverseSection from "../InverseSection.astro";
+import MediaPlaceholder from "../MediaPlaceholder.astro";
+import PageHero from "../PageHero.astro";
+import ProcessRow from "../ProcessRow.astro";
+import SectionHeading from "../SectionHeading.astro";
+import { withBase } from "../../lib/nav";
+
+interface Props {
+  entry: CollectionEntry<"marketing">;
+}
+
+const { entry } = Astro.props;
+const data = entry.data;
+if (data.template !== "audience-landing") {
+  throw new Error(`AudienceLandingLayout received template "${data.template}"`);
+}
+
+const {
+  eyebrow,
+  headline,
+  summary,
+  ctaLabel,
+  ctaHref,
+  mediaLabel,
+  benefitsEyebrow,
+  benefits,
+  processEyebrow,
+  processHeadline,
+  process,
+  closingHeadline,
+} = data;
+const base = import.meta.env.BASE_URL;
+const contactHref = withBase(ctaHref, base);
+---
+
+<PageHero eyebrow={eyebrow ?? "InkAds"} title={headline} lead={summary} split>
+  <ButtonLink slot="actions" href={contactHref} label={ctaLabel} />
+  <MediaPlaceholder label={mediaLabel} minHeight="340px" />
+</PageHero>
+
+<InverseSection labelledBy="marketing-benefits-title">
+  <p class="eyebrow" id="marketing-benefits-title">{benefitsEyebrow}</p>
+  <FeatureGrid>
+    {
+      benefits.map((benefit) => (
+        <FeatureItem title={benefit.title} description={benefit.description} />
+      ))
+    }
+  </FeatureGrid>
+</InverseSection>
+
+<section class="shell band" aria-labelledby="marketing-process-title">
+  <SectionHeading
+    eyebrow={processEyebrow}
+    title={processHeadline}
+    titleId="marketing-process-title"
+  />
+  <ul class="process-list">
+    {
+      process.map((step) => (
+        <ProcessRow label={step.label} detail={step.detail} />
+      ))
+    }
+  </ul>
+</section>
+
+<CtaBand
+  title={closingHeadline}
+  tone="brand"
+  titleId="marketing-audience-cta-title"
+>
+  <ButtonLink href={contactHref} label={ctaLabel} variant="inverse" />
+</CtaBand>

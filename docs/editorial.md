@@ -23,14 +23,27 @@ Landing-page frontmatter requires:
 - optional `draft` (defaults to `false`)
 
 Marketing-page frontmatter (Decap **Marketing pages** collection or
-`src/content/marketing/<slug>.md`) requires:
+`src/content/marketing/<slug>.md`) requires a `template` select plus shared SEO
+fields. Zod validates a **discriminatedUnion** on `template`, so each layout only
+requires its own fields:
 
-- `title`
-- `description`
-- `headline`
-- `summary`
-- optional `eyebrow`, `ctaLabel`, and `ctaHref` (internal route select; both CTA fields required when either is set)
+| Template           | Layout shape                                                        | Distinct fields                                                                                                                       |
+| ------------------ | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `prose` (default)  | PageHero → markdown → optional CtaBand                              | optional `ctaLabel` + `ctaHref` (paired), optional `closingTitle` (band title; falls back to `headline`)                              |
+| `cta-heavy`        | PageHero with actions → markdown → CtaBand                          | `primaryCta`, optional `secondaryCta`, `ctaTitle`                                                                                     |
+| `landing-band`     | PageHero → FeatureGrid columns → InverseSection statement → CtaBand | `columns`, `statement`, `ctaTitle`, `primaryCta`, `secondaryCta` (markdown optional / usually omitted)                                |
+| `audience-landing` | split PageHero + media + CTA → benefits → process → CtaBand         | `ctaLabel`, `ctaHref`, `mediaLabel`, `benefitsEyebrow`, `benefits`, `processEyebrow`, `processHeadline`, `process`, `closingHeadline` |
+
+Shared on every marketing page:
+
+- `template`
+- `title`, `description`, `headline`, `summary`
+- optional `eyebrow`
 - optional `draft` (defaults to `false`)
+
+Layout fixtures for visual review live at `/layout-prose/`, `/layout-cta-heavy/`,
+`/layout-landing-band/`, and `/layout-audience/` (`draft: false`, titles prefixed
+with “Layout fixture:”).
 
 The filename slug becomes the public URL (`partners.md` → `/partners/`). Slugs
 must be lowercase kebab-case and cannot match fixed routes such as `about`,
