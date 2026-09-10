@@ -96,15 +96,18 @@ test("header and footer expose the Claude Design IA", async () => {
     new URL("src/layouts/BaseLayout.astro", root),
     "utf8",
   );
-  const { isActivePath, primaryNav, footerNav } = await import(
+  const { isActivePath, primaryNav, footerNav, mergePrimaryNav } = await import(
     pathToFileURL(new URL("src/lib/nav.ts", root).pathname).href
   );
 
   assert.match(header, /Request a demo/);
   assert.match(header, /aria-current=\{/);
   assert.match(header, /isActivePath\(currentPath, item\.href, base\)/);
+  assert.match(header, /mergePrimaryNav/);
+  assert.match(header, /getCollection/);
   assert.match(layout, /SiteHeader currentPath=\{currentPath\}/);
   assert.match(footer, /aria-label="Footer"/);
+  assert.match(footer, /mergeFooterNav/);
   assert.match(footer, /© 2026 InkAds/);
 
   assert.equal(primaryNav.length, 6);
@@ -118,6 +121,10 @@ test("header and footer expose the Claude Design IA", async () => {
       "/pricing",
       "/about",
     ],
+  );
+  assert.deepEqual(
+    mergePrimaryNav(primaryNav, []).map((item) => item.href),
+    primaryNav.map((item) => item.href),
   );
   assert.deepEqual(Object.keys(footerNav), ["Product", "Audiences", "Company"]);
   assert.ok(

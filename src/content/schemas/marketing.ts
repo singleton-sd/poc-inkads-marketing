@@ -11,6 +11,12 @@ import {
 
 const marketingShared = {
   eyebrow: z.string().trim().min(1).optional(),
+  /** Optional nav chrome label; required when showInHeader or showInFooter. */
+  navLabel: z.string().trim().min(1).optional(),
+  /** Opt-in: append to primary header nav (default hidden). */
+  showInHeader: z.boolean().default(false),
+  /** Opt-in: append to footer Company column (default hidden). */
+  showInFooter: z.boolean().default(false),
   draft: draftField,
 };
 
@@ -87,11 +93,23 @@ export const marketingPageSchema = z
     audienceLandingMarketingSchema,
   ])
   .superRefine((data, ctx) => {
-    if (data.template !== "prose") return;
-    if (Boolean(data.ctaLabel) === Boolean(data.ctaHref)) return;
-    ctx.addIssue({
-      code: "custom",
-      message: "ctaLabel and ctaHref must be provided together",
-      path: ["ctaHref"],
-    });
+    if (
+      data.template === "prose" &&
+      Boolean(data.ctaLabel) !== Boolean(data.ctaHref)
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        message: "ctaLabel and ctaHref must be provided together",
+        path: ["ctaHref"],
+      });
+    }
+
+    if ((data.showInHeader || data.showInFooter) && !data.navLabel) {
+      ctx.addIssue({
+        code: "custom",
+        message:
+          "navLabel is required when showInHeader or showInFooter is enabled",
+        path: ["navLabel"],
+      });
+    }
   });

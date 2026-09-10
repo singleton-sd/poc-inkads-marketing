@@ -1,7 +1,13 @@
 ---
+import { getCollection } from "astro:content";
 import BrandLockup from "./BrandLockup.astro";
 import ButtonLink from "./ButtonLink.astro";
-import { isActivePath, primaryNav, withBase } from "../lib/nav";
+import {
+  isActivePath,
+  mergePrimaryNav,
+  primaryNav,
+  withBase,
+} from "../lib/nav";
 
 interface Props {
   currentPath?: string;
@@ -9,6 +15,11 @@ interface Props {
 
 const { currentPath = "/" } = Astro.props;
 const base = import.meta.env.BASE_URL;
+const marketingEntries = await getCollection(
+  "marketing",
+  ({ data }) => !data.draft,
+);
+const navItems = mergePrimaryNav(primaryNav, marketingEntries);
 ---
 
 <header class="site-header">
@@ -32,7 +43,7 @@ const base = import.meta.env.BASE_URL;
     >
       <div class="site-header__links">
         {
-          primaryNav.map((item) => (
+          navItems.map((item) => (
             <a
               href={withBase(item.href, base)}
               aria-current={

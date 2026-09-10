@@ -1,8 +1,14 @@
 ---
+import { getCollection } from "astro:content";
 import BrandLockup from "./BrandLockup.astro";
-import { footerNav, withBase } from "../lib/nav";
+import { footerNav, mergeFooterNav, withBase } from "../lib/nav";
 
 const base = import.meta.env.BASE_URL;
+const marketingEntries = await getCollection(
+  "marketing",
+  ({ data }) => !data.draft,
+);
+const navColumns = mergeFooterNav(footerNav, marketingEntries);
 ---
 
 <footer class="site-footer">
@@ -17,7 +23,7 @@ const base = import.meta.env.BASE_URL;
       </div>
       <nav class="site-footer__columns" aria-label="Footer">
         {
-          Object.entries(footerNav).map(([heading, links]) => (
+          Object.entries(navColumns).map(([heading, links]) => (
             <div class="site-footer__column">
               <h2>{heading}</h2>
               <ul>

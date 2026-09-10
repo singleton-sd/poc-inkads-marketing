@@ -78,6 +78,10 @@ collections:
                       /faq,
                       /support,
                       /contact,
+                      /layout-audience,
+                      /layout-cta-heavy,
+                      /layout-landing-band,
+                      /layout-prose,
                     ],
                 }
           - label: Secondary CTA
@@ -101,6 +105,10 @@ collections:
                       /faq,
                       /support,
                       /contact,
+                      /layout-audience,
+                      /layout-cta-heavy,
+                      /layout-landing-band,
+                      /layout-prose,
                     ],
                 }
           - label: Draft
@@ -284,6 +292,10 @@ collections:
                 /faq,
                 /support,
                 /contact,
+                /layout-audience,
+                /layout-cta-heavy,
+                /layout-landing-band,
+                /layout-prose,
               ]
           - label: Draft
             name: draft
@@ -393,6 +405,10 @@ collections:
                       /faq,
                       /support,
                       /contact,
+                      /layout-audience,
+                      /layout-cta-heavy,
+                      /layout-landing-band,
+                      /layout-prose,
                     ],
                 }
           - label: Secondary CTA
@@ -416,6 +432,10 @@ collections:
                       /faq,
                       /support,
                       /contact,
+                      /layout-audience,
+                      /layout-cta-heavy,
+                      /layout-landing-band,
+                      /layout-prose,
                     ],
                 }
           - label: Draft
@@ -545,6 +565,10 @@ collections:
                       /faq,
                       /support,
                       /contact,
+                      /layout-audience,
+                      /layout-cta-heavy,
+                      /layout-landing-band,
+                      /layout-prose,
                     ],
                 }
               - {
@@ -637,6 +661,10 @@ collections:
                 /faq,
                 /support,
                 /contact,
+                /layout-audience,
+                /layout-cta-heavy,
+                /layout-landing-band,
+                /layout-prose,
               ]
           - label: Media placeholder label
             name: mediaLabel
@@ -732,6 +760,10 @@ collections:
             /faq,
             /support,
             /contact,
+            /layout-audience,
+            /layout-cta-heavy,
+            /layout-landing-band,
+            /layout-prose,
           ]
       - label: Closing title
         name: closingTitle
@@ -766,6 +798,10 @@ collections:
                   /faq,
                   /support,
                   /contact,
+                  /layout-audience,
+                  /layout-cta-heavy,
+                  /layout-landing-band,
+                  /layout-prose,
                 ],
             }
       - label: Secondary CTA
@@ -791,6 +827,10 @@ collections:
                   /faq,
                   /support,
                   /contact,
+                  /layout-audience,
+                  /layout-cta-heavy,
+                  /layout-landing-band,
+                  /layout-prose,
                 ],
             }
       - label: Columns
@@ -847,6 +887,23 @@ collections:
         widget: string
         required: false
         hint: "audience-landing: CtaBand title."
+      - label: Nav label
+        name: navLabel
+        widget: string
+        required: false
+        hint: Label in header/footer when navigation opt-in is enabled. Required if either show flag is on.
+      - label: Show in header
+        name: showInHeader
+        widget: boolean
+        required: false
+        hint: When true, appends this page to the primary header nav at build time.
+        default: false
+      - label: Show in footer
+        name: showInFooter
+        widget: boolean
+        required: false
+        hint: When true, appends this page to the footer Company column at build time.
+        default: false
       - label: Draft
         name: draft
         widget: boolean

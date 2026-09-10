@@ -162,6 +162,32 @@ const audienceLandingFields: CmsField[] = [
   },
 ];
 
+const navFields: CmsField[] = [
+  {
+    label: "Nav label",
+    name: "navLabel",
+    widget: "string",
+    required: false,
+    hint: "Label in header/footer when navigation opt-in is enabled. Required if either show flag is on.",
+  },
+  {
+    label: "Show in header",
+    name: "showInHeader",
+    widget: "boolean",
+    required: false,
+    default: false,
+    hint: "When true, appends this page to the primary header nav at build time.",
+  },
+  {
+    label: "Show in footer",
+    name: "showInFooter",
+    widget: "boolean",
+    required: false,
+    default: false,
+    hint: "When true, appends this page to the footer Company column at build time.",
+  },
+];
+
 export const marketingCmsFields: CmsField[] = [
   templateSelectField,
   ...seoCmsFields,
@@ -170,5 +196,6 @@ export const marketingCmsFields: CmsField[] = [
   ...pairedCtaFields,
   ...landingBandFields,
   ...audienceLandingFields,
+  ...navFields,
   draftCmsField,
 ];
