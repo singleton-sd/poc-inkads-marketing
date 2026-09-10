@@ -1,4 +1,5 @@
 ---
+template: places
 title: Use cases | InkAds
 description: Bathrooms are the initial focus. Explore how InkAds could fit pubs, shopping centres, and other high-traffic shared spaces.
 headline: Start specific. Think beyond one setting.

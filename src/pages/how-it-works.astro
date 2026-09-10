@@ -10,9 +10,7 @@ import SystemList from "../components/SystemList.astro";
 import SystemStep from "../components/SystemStep.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { withBase } from "../lib/nav";
-
-const page = await getEntry("pages", "how-it-works");
-if (!page) throw new Error("The how-it-works page content entry is missing.");
+import { requirePageData } from "../lib/require-page-data";
 
 const {
   title,
@@ -27,20 +25,7 @@ const {
   ctaTitle,
   primaryCta,
   secondaryCta,
-} = page.data;
-
-if (
-  !eyebrow ||
-  !steps?.length ||
-  !featuresEyebrow ||
-  !featuresHeadline ||
-  !features?.length ||
-  !ctaTitle ||
-  !primaryCta ||
-  !secondaryCta
-) {
-  throw new Error("The how-it-works page content is incomplete.");
-}
+} = requirePageData(await getEntry("pages", "how-it-works"), "how-it-works");
 
 const base = import.meta.env.BASE_URL;
 ---

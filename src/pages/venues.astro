@@ -11,9 +11,7 @@ import ProcessRow from "../components/ProcessRow.astro";
 import SectionHeading from "../components/SectionHeading.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { withBase } from "../lib/nav";
-
-const venues = await getEntry("pages", "venues");
-if (!venues) throw new Error("The venues page content entry is missing.");
+import { requirePageData } from "../lib/require-page-data";
 
 const {
   title,
@@ -30,22 +28,7 @@ const {
   processHeadline,
   process,
   closingHeadline,
-} = venues.data;
-
-if (
-  !eyebrow ||
-  !ctaLabel ||
-  !ctaHref ||
-  !mediaLabel ||
-  !benefitsEyebrow ||
-  !benefits?.length ||
-  !processEyebrow ||
-  !processHeadline ||
-  !process?.length ||
-  !closingHeadline
-) {
-  throw new Error("The venues page content entry is missing required fields.");
-}
+} = requirePageData(await getEntry("pages", "venues"), "venues");
 
 const base = import.meta.env.BASE_URL;
 const contactHref = withBase(ctaHref, base);

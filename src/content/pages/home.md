@@ -1,4 +1,5 @@
 ---
+template: home
 title: InkAds | E-paper advertising for shared spaces
 description: E-paper ads for pubs, centres, waiting areas and more — calm, low-power displays instead of another bright screen.
 headline: Useful messages. Placed thoughtfully.

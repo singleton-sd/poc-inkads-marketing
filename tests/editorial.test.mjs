@@ -67,6 +67,9 @@ test("Astro schemas validate landing and future legal frontmatter", async () => 
   assert.match(schema, /base: "\.\/src\/content\/faqs"/);
   assert.match(schema, /base: "\.\/src\/content\/legal"/);
   assert.match(schema, /effectiveDate: z\.coerce\.date\(\)/);
+  assert.match(schema, /z\.discriminatedUnion\("template"/);
+  assert.match(schema, /homePageSchema/);
+  assert.match(schema, /venuesPageSchema/);
   assert.match(
     schema,
     /export const collections = \{ faqs, legal, marketing, pages \}/,

@@ -6,16 +6,16 @@ import PageHero from "../components/PageHero.astro";
 import TextLink from "../components/TextLink.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { withBase } from "../lib/nav";
+import { requirePageData } from "../lib/require-page-data";
 import "../styles/pages/pricing.css";
 
-const pricing = await getEntry("pages", "pricing");
-if (!pricing) throw new Error("The pricing page content entry is missing.");
-
-const { eyebrow, headline, summary, note, pilots } = pricing.data;
+const pricing = requirePageData(await getEntry("pages", "pricing"), "pricing");
+const { title, description, eyebrow, headline, summary, note, pilots } =
+  pricing;
 const base = import.meta.env.BASE_URL;
 ---
 
-<BaseLayout title={pricing.data.title} description={pricing.data.description}>
+<BaseLayout title={title} description={description}>
   <main id="main-content">
     <PageHero eyebrow={eyebrow} title={headline} lead={summary} />
 
