@@ -68,8 +68,29 @@ test("Astro schemas validate landing and future legal frontmatter", async () => 
   assert.match(schema, /base: "\.\/src\/content\/legal"/);
   assert.match(schema, /effectiveDate: z\.coerce\.date\(\)/);
   assert.match(schema, /z\.discriminatedUnion\("template"/);
-  assert.match(schema, /homePageSchema/);
-  assert.match(schema, /venuesPageSchema/);
+  const pagesUnionMatch = schema.match(
+    /z\.discriminatedUnion\("template",\s*\[([\s\S]*?)\]\s*\)/,
+  );
+  assert.ok(
+    pagesUnionMatch,
+    "pages collection uses a template discriminatedUnion",
+  );
+  const pagesUnionBody = pagesUnionMatch[1];
+  for (const name of [
+    "homePageSchema",
+    "aboutPageSchema",
+    "advertisersPageSchema",
+    "contactPageSchema",
+    "faqPageSchema",
+    "howItWorksPageSchema",
+    "placesPageSchema",
+    "pricingPageSchema",
+    "supportPageSchema",
+    "venuesPageSchema",
+  ]) {
+    assert.match(pagesUnionBody, new RegExp(`\\b${name}\\b`));
+  }
+  assert.doesNotMatch(pagesUnionBody, /\bmarketingPageSchema\b/);
   assert.match(
     schema,
     /export const collections = \{ faqs, legal, marketing, pages \}/,
