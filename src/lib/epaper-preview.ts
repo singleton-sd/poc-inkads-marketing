@@ -1,18 +1,46 @@
 import {
+  clampFraming,
+  coverWindowSize,
+  defaultFraming,
+  defineDisplayProfile,
   fromRgbaImageData,
+  nextSourceRotation,
   normaliseToProfile,
   packMonoBitmap,
   renderMono,
+  rotatedImageSize,
+  sourceRectFromFraming,
   toPreviewImage,
   waveshare75BwProfile,
+  type FramingState,
+  type ImageSize,
   type MonoRenderMode,
+  type SourceRotation,
 } from "@singleton-sd/inkads-epaper-renderer";
+
+export type { FramingState, ImageSize, SourceRotation };
+export {
+  clampFraming,
+  coverWindowSize,
+  defaultFraming,
+  nextSourceRotation,
+  rotatedImageSize,
+  sourceRectFromFraming,
+};
+
+/** How the physical panel is mounted. */
+export type ScreenMount = "landscape" | "portrait";
 
 export type PreviewControls = {
   readonly mode: MonoRenderMode;
-  /** Cover-fit pan, 0–1. */
-  readonly cropX: number;
-  readonly cropY: number;
+  /** Cover-fit-relative zoom (`1` = fill). Renderer builds sourceRect. */
+  readonly zoom: number;
+  /** Pan centre in source pixels after `rotation`. */
+  readonly centerX: number;
+  readonly centerY: number;
+  /** Clockwise artwork rotation before framing. */
+  readonly rotation: SourceRotation;
+  readonly screenMount: ScreenMount;
 };
 
 export type PreviewResult = {
@@ -22,16 +50,47 @@ export type PreviewResult = {
   readonly dataUrl: string;
 };
 
-const profile = waveshare75BwProfile;
+const landscapeProfile = waveshare75BwProfile;
+
+/** Same panel contract with rotate-90 packing for a portrait mount. */
+const portraitProfile = defineDisplayProfile({
+  id: waveshare75BwProfile.id,
+  label: `${waveshare75BwProfile.label} (portrait mount)`,
+  width: waveshare75BwProfile.width,
+  height: waveshare75BwProfile.height,
+  aspectRatio: waveshare75BwProfile.aspectRatio,
+  bitsPerPixel: waveshare75BwProfile.bitsPerPixel,
+  pixelPacking: waveshare75BwProfile.pixelPacking,
+  packedByteLength: waveshare75BwProfile.packedByteLength,
+  orientation: "rotate-90",
+  polarity: waveshare75BwProfile.polarity,
+});
+
+export function profileForMount(mount: ScreenMount) {
+  return mount === "portrait" ? portraitProfile : landscapeProfile;
+}
+
+/** Logical panel size used for labels (native profile W×H). */
+export const PANEL_WIDTH = landscapeProfile.width;
+export const PANEL_HEIGHT = landscapeProfile.height;
+
+export function panelSizeLabel(mount: ScreenMount): string {
+  if (mount === "portrait") {
+    return `${PANEL_HEIGHT} × ${PANEL_WIDTH} · 1-bit e-paper (portrait)`;
+  }
+  return `${PANEL_WIDTH} × ${PANEL_HEIGHT} · 1-bit e-paper`;
+}
 
 /**
  * Decode an uploaded image in the browser and run the shared renderer pipeline
- * through to a preview data URL. Matches device output for the same options.
+ * through to a preview data URL. Framing is zoom/centre/rotation only — the
+ * package owns sourceRect math.
  */
 export async function renderUploadPreview(
   file: File,
   controls: PreviewControls,
 ): Promise<PreviewResult> {
+  const profile = profileForMount(controls.screenMount);
   const bitmap = await createImageBitmap(file);
   try {
     const canvas = document.createElement("canvas");
@@ -47,7 +106,10 @@ export async function renderUploadPreview(
     const decoded = fromRgbaImageData(imageData);
     const framed = normaliseToProfile(decoded, {
       profile,
-      crop: { x: controls.cropX, y: controls.cropY },
+      rotation: controls.rotation,
+      zoom: controls.zoom,
+      centerX: controls.centerX,
+      centerY: controls.centerY,
     });
     const mono = renderMono(framed, { mode: controls.mode });
     const packed = packMonoBitmap(mono, { profile });
@@ -80,6 +142,16 @@ export async function renderUploadPreview(
   }
 }
 
+/** Read pixel dimensions without running the full pipeline. */
+export async function readImageSize(file: File): Promise<ImageSize> {
+  const bitmap = await createImageBitmap(file);
+  try {
+    return { width: bitmap.width, height: bitmap.height };
+  } finally {
+    bitmap.close();
+  }
+}
+
 export const PREVIEW_MODES: readonly {
   value: MonoRenderMode;
   label: string;
@@ -89,4 +161,4 @@ export const PREVIEW_MODES: readonly {
   { value: "floyd-steinberg", label: "Floyd–Steinberg" },
 ];
 
-export const PANEL_SIZE_LABEL = `${profile.width} × ${profile.height}`;
+export const PANEL_SIZE_LABEL = panelSizeLabel("landscape");

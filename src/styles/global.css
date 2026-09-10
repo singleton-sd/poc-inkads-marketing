@@ -1107,6 +1107,12 @@ textarea.field-control {
   color: var(--ink-epaper-ink);
 }
 
+.epaper-preview__device.is-portrait .epaper-preview__screen {
+  aspect-ratio: 3 / 5;
+  max-width: min(100%, 22rem);
+  margin-inline: auto;
+}
+
 .epaper-preview__panel {
   display: none;
   height: 100%;
@@ -1158,6 +1164,10 @@ textarea.field-control {
   text-transform: uppercase;
 }
 
+.epaper-preview__drop.has-preview {
+  touch-action: none;
+}
+
 .epaper-preview__drop {
   display: grid;
   place-items: center;
@@ -1197,9 +1207,105 @@ textarea.field-control {
   color: var(--ink-text-muted);
 }
 
-.epaper-preview__controls select,
-.epaper-preview__controls input[type="range"] {
+.epaper-preview__controls select {
   width: 100%;
+}
+
+.epaper-preview__orient {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.epaper-preview__mount {
+  display: inline-flex;
+  gap: 0.35rem;
+}
+
+.epaper-preview__orient-btn {
+  min-height: 36px;
+  border: 1px solid var(--ink-border);
+  border-radius: var(--ink-radius-control);
+  background: transparent;
+  color: var(--ink-text-soft);
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.epaper-preview__orient-btn:hover,
+.epaper-preview__orient-btn.is-active {
+  border-color: var(--ink-brand);
+  color: var(--ink-brand);
+}
+
+.epaper-preview__pan {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.epaper-preview__pan-label {
+  font-size: 0.8rem;
+  color: var(--ink-text-muted);
+}
+
+.epaper-preview__pan-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-areas:
+    ". n ."
+    "w reset e"
+    ". s .";
+  gap: 0.35rem;
+  max-width: 14rem;
+}
+
+.epaper-preview__pan-btn {
+  padding: 0.4rem 0.5rem;
+  border: 1px solid var(--ink-border, #d6d3cd);
+  border-radius: 6px;
+  background: var(--ink-surface, #fff);
+  color: var(--ink-text, #1a1a1a);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.epaper-preview__pan-btn:hover {
+  background: var(--ink-surface-muted, #f5f4f1);
+}
+
+.epaper-preview__pan-btn:focus-visible {
+  outline: 2px solid var(--ink-accent, #2f5d50);
+  outline-offset: 2px;
+}
+
+.epaper-preview__pan-btn[data-epaper-pan="n"] {
+  grid-area: n;
+}
+
+.epaper-preview__pan-btn[data-epaper-pan="w"] {
+  grid-area: w;
+}
+
+.epaper-preview__pan-btn[data-epaper-pan="reset"] {
+  grid-area: reset;
+}
+
+.epaper-preview__pan-btn[data-epaper-pan="e"] {
+  grid-area: e;
+}
+
+.epaper-preview__pan-btn[data-epaper-pan="s"] {
+  grid-area: s;
+}
+
+.epaper-preview__hint {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--ink-text-muted);
 }
 
 .epaper-preview__status {

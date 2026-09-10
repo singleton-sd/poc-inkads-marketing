@@ -111,7 +111,7 @@ const captions = {
   </figure>
   <div class="epaper-preview__meta">
     <p data-epaper-caption>{captions[defaultTab]}</p>
-    <p>800 × 480 · 1-bit e-paper</p>
+    <p data-epaper-size>800 × 480 · 1-bit e-paper</p>
   </div>
   <div class="epaper-preview__controls" data-epaper-controls hidden>
     <label>
@@ -122,14 +122,70 @@ const captions = {
         <option value="floyd-steinberg">Floyd–Steinberg</option>
       </select>
     </label>
-    <label>
-      Pan horizontal
-      <input type="range" min="0" max="100" value="50" data-epaper-crop-x />
-    </label>
-    <label>
-      Pan vertical
-      <input type="range" min="0" max="100" value="50" data-epaper-crop-y />
-    </label>
+    <div class="epaper-preview__orient" role="group" aria-label="Orientation">
+      <button
+        type="button"
+        class="epaper-preview__orient-btn"
+        data-epaper-rotate-image
+        aria-label="Rotate image 90 degrees clockwise"
+      >
+        Rotate image
+      </button>
+      <div class="epaper-preview__mount" role="group" aria-label="Screen mount">
+        <button
+          type="button"
+          class="epaper-preview__orient-btn is-active"
+          data-epaper-mount="landscape"
+          aria-pressed="true"
+        >
+          Landscape
+        </button>
+        <button
+          type="button"
+          class="epaper-preview__orient-btn"
+          data-epaper-mount="portrait"
+          aria-pressed="false"
+        >
+          Portrait
+        </button>
+      </div>
+    </div>
+    <div class="epaper-preview__pan" role="group" aria-label="Pan framing">
+      <span class="epaper-preview__pan-label">Pan</span>
+      <div class="epaper-preview__pan-grid">
+        <button
+          type="button"
+          class="epaper-preview__pan-btn"
+          data-epaper-pan="n"
+          aria-label="Pan up">↑</button
+        >
+        <button
+          type="button"
+          class="epaper-preview__pan-btn"
+          data-epaper-pan="w"
+          aria-label="Pan left">←</button
+        >
+        <button
+          type="button"
+          class="epaper-preview__pan-btn"
+          data-epaper-pan="reset"
+          aria-label="Reset framing to cover fit">Reset</button
+        >
+        <button
+          type="button"
+          class="epaper-preview__pan-btn"
+          data-epaper-pan="e"
+          aria-label="Pan right">→</button
+        >
+        <button
+          type="button"
+          class="epaper-preview__pan-btn"
+          data-epaper-pan="s"
+          aria-label="Pan down">↓</button
+        >
+      </div>
+      <p class="epaper-preview__hint">Scroll or pinch to zoom</p>
+    </div>
   </div>
   <p
     class="epaper-preview__status"
@@ -156,16 +212,36 @@ const captions = {
 
 <script>
   import {
+    clampFraming,
+    defaultFraming,
+    nextSourceRotation,
+    panelSizeLabel,
+    readImageSize,
     renderUploadPreview,
-    type PreviewControls,
+    rotatedImageSize,
+    sourceRectFromFraming,
+    type FramingState,
+    type ImageSize,
+    type ScreenMount,
+    type SourceRotation,
   } from "../lib/epaper-preview.ts";
-  import type { MonoRenderMode } from "@singleton-sd/inkads-epaper-renderer";
+  import {
+    waveshare75BwProfile,
+    type MonoRenderMode,
+  } from "@singleton-sd/inkads-epaper-renderer";
 
   const captions = {
     poster: "Venue poster artwork · as the 1-bit panel renders it",
     advertiser: "Advertiser creative · matched by venue context",
     yours: "Your artwork · rendered by the shared e-paper pipeline",
   };
+
+  /** Cover-fit framing uses the logical landscape panel size. */
+  const framingProfile = waveshare75BwProfile;
+  const MIN_ZOOM = 0.25;
+  const MAX_ZOOM = 8;
+  const PAN_STEP = 0.2;
+  const DEBOUNCE_MS = 80;
 
   function activateTab(root: HTMLElement, tab: string) {
     root.dataset.active = tab;
@@ -188,21 +264,14 @@ const captions = {
     }
   }
 
-  function readControls(root: HTMLElement): PreviewControls {
-    const mode =
-      (root.querySelector<HTMLSelectElement>("[data-epaper-mode]")?.value as
-        MonoRenderMode | undefined) ?? "atkinson";
-    const cropX =
-      Number(
-        root.querySelector<HTMLInputElement>("[data-epaper-crop-x]")?.value ??
-          "50",
-      ) / 100;
-    const cropY =
-      Number(
-        root.querySelector<HTMLInputElement>("[data-epaper-crop-y]")?.value ??
-          "50",
-      ) / 100;
-    return { mode, cropX, cropY };
+  function clampZoom(zoom: number): number {
+    return Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, zoom));
+  }
+
+  function touchDistance(a: Touch, b: Touch): number {
+    const dx = a.clientX - b.clientX;
+    const dy = a.clientY - b.clientY;
+    return Math.hypot(dx, dy);
   }
 
   function setupEpaperPreview() {
@@ -231,9 +300,59 @@ const captions = {
     const status = previewRoot.querySelector<HTMLElement>(
       "[data-epaper-status]",
     );
+    const sizeLabel =
+      previewRoot.querySelector<HTMLElement>("[data-epaper-size]");
+    const device = previewRoot.querySelector<HTMLElement>(
+      ".epaper-preview__device",
+    );
+    const modeSelect =
+      previewRoot.querySelector<HTMLSelectElement>("[data-epaper-mode]");
+    const rotateImageButton = previewRoot.querySelector<HTMLButtonElement>(
+      "[data-epaper-rotate-image]",
+    );
 
     let currentFile: File | undefined;
+    let rawImageSize: ImageSize | undefined;
+    let rotation: SourceRotation = 0;
+    let screenMount: ScreenMount = "landscape";
+    let framing: FramingState = { centerX: 0, centerY: 0, zoom: 1 };
     let renderToken = 0;
+    let loadToken = 0;
+    let debounceTimer: ReturnType<typeof setTimeout> | undefined;
+    let pinchStartDistance = 0;
+    let pinchStartZoom = 1;
+
+    function framingImageSize(): ImageSize | undefined {
+      if (!rawImageSize) return undefined;
+      return rotatedImageSize(rawImageSize, rotation);
+    }
+
+    function syncMountUi() {
+      device?.classList.toggle("is-portrait", screenMount === "portrait");
+      if (sizeLabel) sizeLabel.textContent = panelSizeLabel(screenMount);
+      previewRoot
+        .querySelectorAll<HTMLButtonElement>("[data-epaper-mount]")
+        .forEach((button) => {
+          const active = button.dataset.epaperMount === screenMount;
+          button.classList.toggle("is-active", active);
+          button.setAttribute("aria-pressed", active ? "true" : "false");
+        });
+      if (rotateImageButton) {
+        rotateImageButton.textContent = `Rotate image (${rotation}°)`;
+      }
+    }
+
+    function clearPreviewUi() {
+      if (previewImage) {
+        previewImage.removeAttribute("src");
+        previewImage.hidden = true;
+      }
+      if (dropLabel) dropLabel.hidden = false;
+      if (controls) controls.hidden = true;
+      drop?.classList.remove("has-preview");
+      framing = { centerX: 0, centerY: 0, zoom: 1 };
+      syncMountUi();
+    }
 
     previewRoot
       .querySelectorAll<HTMLButtonElement>("[data-epaper-tab]")
@@ -244,20 +363,29 @@ const captions = {
         });
       });
 
+    function readMode(): MonoRenderMode {
+      return (modeSelect?.value as MonoRenderMode | undefined) ?? "atkinson";
+    }
+
     async function rerender() {
-      if (!currentFile || !previewImage || !dropLabel) return;
+      if (!currentFile || !previewImage || !dropLabel || !rawImageSize) return;
       const token = ++renderToken;
       if (status) status.textContent = "Rendering…";
       try {
-        const result = await renderUploadPreview(
-          currentFile,
-          readControls(previewRoot),
-        );
+        const result = await renderUploadPreview(currentFile, {
+          mode: readMode(),
+          zoom: framing.zoom,
+          centerX: framing.centerX,
+          centerY: framing.centerY,
+          rotation,
+          screenMount,
+        });
         if (token !== renderToken) return;
         previewImage.src = result.dataUrl;
         previewImage.hidden = false;
         dropLabel.hidden = true;
         controls && (controls.hidden = false);
+        drop?.classList.add("has-preview");
         activateTab(previewRoot, "yours");
         if (status) {
           status.textContent = `Rendered ${result.width} × ${result.height} · simulation only`;
@@ -273,14 +401,77 @@ const captions = {
       }
     }
 
-    function loadFile(file: File | undefined) {
+    function scheduleRerender() {
+      if (debounceTimer !== undefined) clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        debounceTimer = undefined;
+        void rerender();
+      }, DEBOUNCE_MS);
+    }
+
+    function applyZoomAt(
+      nextZoom: number,
+      focalNormX: number,
+      focalNormY: number,
+    ) {
+      const imageSize = framingImageSize();
+      if (!imageSize) return;
+      const before = sourceRectFromFraming(imageSize, framing, framingProfile);
+      const focalX = before.x + before.width * focalNormX;
+      const focalY = before.y + before.height * focalNormY;
+      const zoom = clampZoom(nextZoom);
+      const after = sourceRectFromFraming(
+        imageSize,
+        { ...framing, zoom },
+        framingProfile,
+      );
+      framing = clampFraming(
+        imageSize,
+        {
+          zoom,
+          centerX: focalX - (focalNormX - 0.5) * after.width,
+          centerY: focalY - (focalNormY - 0.5) * after.height,
+        },
+        framingProfile,
+      );
+      scheduleRerender();
+    }
+
+    async function loadFile(file: File | undefined) {
       if (!file) return;
+      currentFile = file;
+      const token = ++loadToken;
+      renderToken += 1;
+      rawImageSize = undefined;
+      rotation = 0;
+      if (debounceTimer !== undefined) {
+        clearTimeout(debounceTimer);
+        debounceTimer = undefined;
+      }
       if (file.type !== "image/png" && file.type !== "image/jpeg") {
+        currentFile = undefined;
+        clearPreviewUi();
         if (status) status.textContent = "Only PNG and JPEG are supported";
         return;
       }
-      currentFile = file;
-      void rerender();
+      syncMountUi();
+      try {
+        const size = await readImageSize(file);
+        if (token !== loadToken || currentFile !== file) return;
+        rawImageSize = size;
+        framing = defaultFraming(rotatedImageSize(size, rotation));
+        await rerender();
+      } catch (error) {
+        if (token !== loadToken || currentFile !== file) return;
+        currentFile = undefined;
+        clearPreviewUi();
+        if (status) {
+          status.textContent =
+            error instanceof Error
+              ? error.message
+              : "Could not read this image";
+        }
+      }
     }
 
     uploadButton?.addEventListener("click", () => fileInput?.click());
@@ -295,18 +486,128 @@ const captions = {
       loadFile(event.dataTransfer?.files?.[0]);
     });
 
+    drop?.addEventListener(
+      "wheel",
+      (event) => {
+        if (!rawImageSize || !currentFile) return;
+        event.preventDefault();
+        const rect = drop.getBoundingClientRect();
+        const focalNormX =
+          rect.width > 0 ? (event.clientX - rect.left) / rect.width : 0.5;
+        const focalNormY =
+          rect.height > 0 ? (event.clientY - rect.top) / rect.height : 0.5;
+        const factor = event.deltaY < 0 ? 1.1 : 1 / 1.1;
+        applyZoomAt(framing.zoom * factor, focalNormX, focalNormY);
+      },
+      { passive: false },
+    );
+
+    drop?.addEventListener(
+      "touchstart",
+      (event) => {
+        if (!rawImageSize || !currentFile || event.touches.length !== 2) return;
+        pinchStartDistance = touchDistance(
+          event.touches[0]!,
+          event.touches[1]!,
+        );
+        pinchStartZoom = framing.zoom;
+      },
+      { passive: true },
+    );
+
+    drop?.addEventListener(
+      "touchmove",
+      (event) => {
+        if (!rawImageSize || !currentFile || event.touches.length !== 2) return;
+        if (pinchStartDistance <= 0) return;
+        event.preventDefault();
+        const distance = touchDistance(event.touches[0]!, event.touches[1]!);
+        applyZoomAt(pinchStartZoom * (distance / pinchStartDistance), 0.5, 0.5);
+      },
+      { passive: false },
+    );
+
+    drop?.addEventListener(
+      "touchend",
+      () => {
+        pinchStartDistance = 0;
+      },
+      { passive: true },
+    );
+
+    modeSelect?.addEventListener("change", () => {
+      void rerender();
+    });
+
+    rotateImageButton?.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      if (!rawImageSize) return;
+      rotation = nextSourceRotation(rotation);
+      framing = defaultFraming(rotatedImageSize(rawImageSize, rotation));
+      syncMountUi();
+      void rerender();
+    });
+
     previewRoot
-      .querySelectorAll<HTMLElement>(
-        "[data-epaper-mode], [data-epaper-crop-x], [data-epaper-crop-y]",
-      )
-      .forEach((control) => {
-        control.addEventListener("change", () => {
-          void rerender();
-        });
-        control.addEventListener("input", () => {
+      .querySelectorAll<HTMLButtonElement>("[data-epaper-mount]")
+      .forEach((button) => {
+        button.addEventListener("click", (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          const mount = button.dataset.epaperMount;
+          if (mount !== "landscape" && mount !== "portrait") return;
+          screenMount = mount;
+          syncMountUi();
           void rerender();
         });
       });
+
+    previewRoot
+      .querySelectorAll<HTMLButtonElement>("[data-epaper-pan]")
+      .forEach((button) => {
+        button.addEventListener("click", (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          const imageSize = framingImageSize();
+          if (!imageSize) return;
+          const direction = button.dataset.epaperPan;
+          if (direction === "reset") {
+            framing = defaultFraming(imageSize);
+            void rerender();
+            return;
+          }
+          const rect = sourceRectFromFraming(
+            imageSize,
+            framing,
+            framingProfile,
+          );
+          const dx =
+            direction === "e"
+              ? rect.width * PAN_STEP
+              : direction === "w"
+                ? -rect.width * PAN_STEP
+                : 0;
+          const dy =
+            direction === "s"
+              ? rect.height * PAN_STEP
+              : direction === "n"
+                ? -rect.height * PAN_STEP
+                : 0;
+          framing = clampFraming(
+            imageSize,
+            {
+              ...framing,
+              centerX: framing.centerX + dx,
+              centerY: framing.centerY + dy,
+            },
+            framingProfile,
+          );
+          void rerender();
+        });
+      });
+
+    syncMountUi();
   }
 
   setupEpaperPreview();
