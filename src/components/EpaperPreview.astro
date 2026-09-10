@@ -345,18 +345,19 @@ const captions = {
 
     async function loadFile(file: File | undefined) {
       if (!file) return;
-      if (file.type !== "image/png" && file.type !== "image/jpeg") {
-        if (status) status.textContent = "Only PNG and JPEG are supported";
-        return;
-      }
       currentFile = file;
-      // Invalidate in-flight size reads and renders from a previous upload.
+      // Invalidate in-flight size reads and renders before MIME checks so a
+      // rejected upload cannot be overwritten by a still-pending previous load.
       const token = ++loadToken;
       renderToken += 1;
       imageSize = undefined;
       if (debounceTimer !== undefined) {
         clearTimeout(debounceTimer);
         debounceTimer = undefined;
+      }
+      if (file.type !== "image/png" && file.type !== "image/jpeg") {
+        if (status) status.textContent = "Only PNG and JPEG are supported";
+        return;
       }
       try {
         const size = await readImageSize(file);
