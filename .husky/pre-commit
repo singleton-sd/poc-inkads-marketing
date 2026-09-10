@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+. "$(dirname "$0")/husky-use-node.sh"
+
+# Fast gate: catch Prettier/ESLint before the commit lands.
+pnpm format:check
+pnpm lint

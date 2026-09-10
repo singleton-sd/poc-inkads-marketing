@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+. "$(dirname "$0")/husky-use-node.sh"
+
+# Match the core CI quality gate (pages.yml) before the push leaves the machine.
+# Skip with: HUSKY=0 git push   (or --no-verify) when you must.
+pnpm verify

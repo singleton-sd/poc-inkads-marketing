@@ -29,7 +29,8 @@ sensitive ClickUp content.
 - Astro SSG, strict TypeScript, Tailwind CSS, and Markdown content collections.
 - Use semantic CSS variables from `src/styles/global.css`; do not copy private
   package contents into this repository.
-- Run `pnpm format:check`, `pnpm lint`, `pnpm test`, and `pnpm build` before
-  pushing.
+- Husky runs `pnpm format:check` + `pnpm lint` on **pre-commit**, and
+  `pnpm verify` (`format:check`, `lint`, `test`, `build`, `test:seo`) on
+  **pre-push**. Run `pnpm verify` yourself before opening a PR.
 - Keep the site fully static unless a later issue explicitly introduces an
   external service.

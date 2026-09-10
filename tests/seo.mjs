@@ -100,7 +100,10 @@ testMetadata("Open Graph and Twitter cards reference production domain", () => {
   assert.match(indexHtml, /name="twitter:card" content="summary_large_image"/i);
   assert.match(
     indexHtml,
-    new RegExp(`name="twitter:image" content="${SITE_DOMAIN}/og-image\\.png"`, "i"),
+    new RegExp(
+      `name="twitter:image" content="${SITE_DOMAIN}/og-image\\.png"`,
+      "i",
+    ),
   );
 });
 
@@ -123,14 +126,20 @@ testMetadata("structured data present", () => {
   assert.ok(types.includes("Organization"), "Missing Organization in @graph");
   const website = parsed["@graph"].find((n) => n["@type"] === "WebSite");
   assert.equal(website.name, "InkAds");
-  assert.match(website.url, new RegExp(`^${SITE_DOMAIN.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&")}/?$`));
+  assert.match(
+    website.url,
+    new RegExp(`^${SITE_DOMAIN.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&")}/?$`),
+  );
 });
 
 testMetadata("favicons included", () => {
   assert.match(indexHtml, /rel="icon"[^>]+href="\/favicon\.svg"/i);
   assert.match(indexHtml, /rel="icon"[^>]+href="\/favicon\.ico"/i);
   assert.match(indexHtml, /rel="icon"[^>]+href="\/favicon-32\.png"/i);
-  assert.match(indexHtml, /rel="apple-touch-icon"[^>]+href="\/apple-touch-icon\.png"/i);
+  assert.match(
+    indexHtml,
+    /rel="apple-touch-icon"[^>]+href="\/apple-touch-icon\.png"/i,
+  );
 });
 
 testMetadata("sitemap lists primary public routes", () => {
