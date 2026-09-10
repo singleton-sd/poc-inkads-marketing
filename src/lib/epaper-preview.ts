@@ -1,4 +1,5 @@
 import {
+  defineDisplayProfile,
   fromRgbaImageData,
   normaliseToProfile,
   packMonoBitmap,
@@ -7,14 +8,21 @@ import {
   waveshare75BwProfile,
   type MonoRenderMode,
   type SourceRect,
+  type SourceRotation,
 } from "@singleton-sd/inkads-epaper-renderer";
 
-export type { SourceRect };
+export type { SourceRect, SourceRotation };
+
+/** How the physical panel is mounted. */
+export type ScreenMount = "landscape" | "portrait";
 
 export type PreviewControls = {
   readonly mode: MonoRenderMode;
-  /** Explicit region of the upload in source pixels (zoom + pan). */
+  /** Explicit region of the (post-rotation) upload in source pixels. */
   readonly sourceRect: SourceRect;
+  /** Clockwise artwork rotation before framing. */
+  readonly rotation: SourceRotation;
+  readonly screenMount: ScreenMount;
 };
 
 export type PreviewResult = {
@@ -36,12 +44,49 @@ export type FramingState = {
   readonly zoom: number;
 };
 
-const profile = waveshare75BwProfile;
+const landscapeProfile = waveshare75BwProfile;
 
-export const PANEL_WIDTH = profile.width;
-export const PANEL_HEIGHT = profile.height;
+/** Same panel contract with rotate-90 packing for a portrait mount. */
+const portraitProfile = defineDisplayProfile({
+  id: waveshare75BwProfile.id,
+  label: `${waveshare75BwProfile.label} (portrait mount)`,
+  width: waveshare75BwProfile.width,
+  height: waveshare75BwProfile.height,
+  aspectRatio: waveshare75BwProfile.aspectRatio,
+  bitsPerPixel: waveshare75BwProfile.bitsPerPixel,
+  pixelPacking: waveshare75BwProfile.pixelPacking,
+  packedByteLength: waveshare75BwProfile.packedByteLength,
+  orientation: "rotate-90",
+  polarity: waveshare75BwProfile.polarity,
+});
 
-/** Cover-fit window size in source pixels (zoom = 1). */
+export function profileForMount(mount: ScreenMount) {
+  return mount === "portrait" ? portraitProfile : landscapeProfile;
+}
+
+/** Logical panel size used for cover-fit (always native profile W×H). */
+export const PANEL_WIDTH = landscapeProfile.width;
+export const PANEL_HEIGHT = landscapeProfile.height;
+
+export const NEXT_ROTATION: Record<SourceRotation, SourceRotation> = {
+  0: 90,
+  90: 180,
+  180: 270,
+  270: 0,
+};
+
+/** Source dimensions after clockwise rotation (framing space). */
+export function rotatedImageSize(
+  image: ImageSize,
+  rotation: SourceRotation,
+): ImageSize {
+  if (rotation === 90 || rotation === 270) {
+    return { width: image.height, height: image.width };
+  }
+  return image;
+}
+
+/** Cover-fit window size in rotated-source pixels (zoom = 1). */
 export function coverWindowSize(image: ImageSize): {
   width: number;
   height: number;
@@ -81,6 +126,13 @@ export function sourceRectFromFraming(
   };
 }
 
+export function panelSizeLabel(mount: ScreenMount): string {
+  if (mount === "portrait") {
+    return `${PANEL_HEIGHT} × ${PANEL_WIDTH} · 1-bit e-paper (portrait)`;
+  }
+  return `${PANEL_WIDTH} × ${PANEL_HEIGHT} · 1-bit e-paper`;
+}
+
 /**
  * Decode an uploaded image in the browser and run the shared renderer pipeline
  * through to a preview data URL. Matches device output for the same options.
@@ -89,6 +141,7 @@ export async function renderUploadPreview(
   file: File,
   controls: PreviewControls,
 ): Promise<PreviewResult> {
+  const profile = profileForMount(controls.screenMount);
   const bitmap = await createImageBitmap(file);
   try {
     const canvas = document.createElement("canvas");
@@ -104,6 +157,7 @@ export async function renderUploadPreview(
     const decoded = fromRgbaImageData(imageData);
     const framed = normaliseToProfile(decoded, {
       profile,
+      rotation: controls.rotation,
       sourceRect: controls.sourceRect,
     });
     const mono = renderMono(framed, { mode: controls.mode });
@@ -156,4 +210,4 @@ export const PREVIEW_MODES: readonly {
   { value: "floyd-steinberg", label: "Floyd–Steinberg" },
 ];
 
-export const PANEL_SIZE_LABEL = `${profile.width} × ${profile.height}`;
+export const PANEL_SIZE_LABEL = panelSizeLabel("landscape");

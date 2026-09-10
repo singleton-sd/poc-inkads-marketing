@@ -1093,6 +1093,12 @@ textarea.field-control {
   color: var(--ink-epaper-ink);
 }
 
+.epaper-preview__device.is-portrait .epaper-preview__screen {
+  aspect-ratio: 3 / 5;
+  max-width: min(100%, 22rem);
+  margin-inline: auto;
+}
+
 .epaper-preview__panel {
   display: none;
   height: 100%;
@@ -1189,6 +1195,36 @@ textarea.field-control {
 
 .epaper-preview__controls select {
   width: 100%;
+}
+
+.epaper-preview__orient {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.epaper-preview__mount {
+  display: inline-flex;
+  gap: 0.35rem;
+}
+
+.epaper-preview__orient-btn {
+  min-height: 36px;
+  border: 1px solid var(--ink-border);
+  border-radius: var(--ink-radius-control);
+  background: transparent;
+  color: var(--ink-text-soft);
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.epaper-preview__orient-btn:hover,
+.epaper-preview__orient-btn.is-active {
+  border-color: var(--ink-brand);
+  color: var(--ink-brand);
 }
 
 .epaper-preview__pan {

@@ -18,8 +18,8 @@ importers:
         specifier: ^5.3.0
         version: 5.3.0
       '@singleton-sd/inkads-epaper-renderer':
-        specifier: 1.1.1
-        version: 1.1.1
+        specifier: 1.3.0
+        version: 1.3.0
       astro:
         specifier: ^7.2.3
         version: 7.2.3(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.3)(@types/node@26.2.0)(jiti@2.7.0)(yaml@2.9.0)
@@ -898,8 +898,8 @@ packages:
   '@shikijs/vscode-textmate@10.0.2':
     resolution: {integrity: sha512-83yeghZ2xxin3Nj8z1NMd/NCuca+gsYXswywDy5bHvwlWL8tpTQmzGeUuHd9FC3E/SBEMvzJRwWEOz5gGes9Qg==}
 
-  '@singleton-sd/inkads-epaper-renderer@1.1.1':
-    resolution: {integrity: sha512-tgwpOnp51JdBNN8fjrTmit6Fo1aCk97bN6b6wpyhK84hTov3oP4YoTzpexEwBQE46I9sfZxlUYRpLj6aVxz9qA==}
+  '@singleton-sd/inkads-epaper-renderer@1.3.0':
+    resolution: {integrity: sha512-rq6KsKgeKW6liqJxa/1c6QYYe5FlJ9ug3JnpEfBTWNU9XdrIY4KwRPRqdmm6JvoUe7Uy8HCa4Z3sBvH+MlHuzw==}
     engines: {node: '>=22.12.0'}
 
   '@tailwindcss/node@4.3.3':
@@ -3199,7 +3199,7 @@ snapshots:
 
   '@shikijs/vscode-textmate@10.0.2': {}
 
-  '@singleton-sd/inkads-epaper-renderer@1.1.1':
+  '@singleton-sd/inkads-epaper-renderer@1.3.0':
     dependencies:
       jpeg-js: 0.4.4
       pngjs: 7.0.0

@@ -111,7 +111,7 @@ const captions = {
   </figure>
   <div class="epaper-preview__meta">
     <p data-epaper-caption>{captions[defaultTab]}</p>
-    <p>800 × 480 · 1-bit e-paper</p>
+    <p data-epaper-size>800 × 480 · 1-bit e-paper</p>
   </div>
   <div class="epaper-preview__controls" data-epaper-controls hidden>
     <label>
@@ -122,6 +122,34 @@ const captions = {
         <option value="floyd-steinberg">Floyd–Steinberg</option>
       </select>
     </label>
+    <div class="epaper-preview__orient" role="group" aria-label="Orientation">
+      <button
+        type="button"
+        class="epaper-preview__orient-btn"
+        data-epaper-rotate-image
+        aria-label="Rotate image 90 degrees clockwise"
+      >
+        Rotate image
+      </button>
+      <div class="epaper-preview__mount" role="group" aria-label="Screen mount">
+        <button
+          type="button"
+          class="epaper-preview__orient-btn is-active"
+          data-epaper-mount="landscape"
+          aria-pressed="true"
+        >
+          Landscape
+        </button>
+        <button
+          type="button"
+          class="epaper-preview__orient-btn"
+          data-epaper-mount="portrait"
+          aria-pressed="false"
+        >
+          Portrait
+        </button>
+      </div>
+    </div>
     <div class="epaper-preview__pan" role="group" aria-label="Pan framing">
       <span class="epaper-preview__pan-label">Pan</span>
       <div class="epaper-preview__pan-grid">
@@ -184,12 +212,17 @@ const captions = {
 
 <script>
   import {
+    NEXT_ROTATION,
     defaultFraming,
+    panelSizeLabel,
     readImageSize,
     renderUploadPreview,
+    rotatedImageSize,
     sourceRectFromFraming,
     type FramingState,
     type ImageSize,
+    type ScreenMount,
+    type SourceRotation,
   } from "../lib/epaper-preview.ts";
   import type { MonoRenderMode } from "@singleton-sd/inkads-epaper-renderer";
 
@@ -261,17 +294,48 @@ const captions = {
     const status = previewRoot.querySelector<HTMLElement>(
       "[data-epaper-status]",
     );
+    const sizeLabel =
+      previewRoot.querySelector<HTMLElement>("[data-epaper-size]");
+    const device = previewRoot.querySelector<HTMLElement>(
+      ".epaper-preview__device",
+    );
     const modeSelect =
       previewRoot.querySelector<HTMLSelectElement>("[data-epaper-mode]");
+    const rotateImageButton = previewRoot.querySelector<HTMLButtonElement>(
+      "[data-epaper-rotate-image]",
+    );
 
     let currentFile: File | undefined;
-    let imageSize: ImageSize | undefined;
+    /** Decoded upload size before artwork rotation. */
+    let rawImageSize: ImageSize | undefined;
+    let rotation: SourceRotation = 0;
+    let screenMount: ScreenMount = "landscape";
     let framing: FramingState = { centerX: 0, centerY: 0, zoom: 1 };
     let renderToken = 0;
     let loadToken = 0;
     let debounceTimer: ReturnType<typeof setTimeout> | undefined;
     let pinchStartDistance = 0;
     let pinchStartZoom = 1;
+
+    function framingImageSize(): ImageSize | undefined {
+      if (!rawImageSize) return undefined;
+      return rotatedImageSize(rawImageSize, rotation);
+    }
+
+    function syncMountUi() {
+      device?.classList.toggle("is-portrait", screenMount === "portrait");
+      if (sizeLabel) sizeLabel.textContent = panelSizeLabel(screenMount);
+      previewRoot
+        .querySelectorAll<HTMLButtonElement>("[data-epaper-mount]")
+        .forEach((button) => {
+          const active = button.dataset.epaperMount === screenMount;
+          button.classList.toggle("is-active", active);
+          button.setAttribute("aria-pressed", active ? "true" : "false");
+        });
+      if (rotateImageButton) {
+        rotateImageButton.textContent = `Rotate image (${rotation}°)`;
+      }
+    }
 
     previewRoot
       .querySelectorAll<HTMLButtonElement>("[data-epaper-tab]")
@@ -287,6 +351,7 @@ const captions = {
     }
 
     async function rerender() {
+      const imageSize = framingImageSize();
       if (!currentFile || !previewImage || !dropLabel || !imageSize) return;
       const token = ++renderToken;
       if (status) status.textContent = "Rendering…";
@@ -294,6 +359,8 @@ const captions = {
         const result = await renderUploadPreview(currentFile, {
           mode: readMode(),
           sourceRect: sourceRectFromFraming(imageSize, framing),
+          rotation,
+          screenMount,
         });
         if (token !== renderToken) return;
         previewImage.src = result.dataUrl;
@@ -340,6 +407,7 @@ const captions = {
       focalNormX: number,
       focalNormY: number,
     ) {
+      const imageSize = framingImageSize();
       if (!imageSize) return;
       const before = sourceRectFromFraming(imageSize, framing);
       const focalX = before.x + before.width * focalNormX;
@@ -361,22 +429,27 @@ const captions = {
       // rejected upload cannot be overwritten by a still-pending previous load.
       const token = ++loadToken;
       renderToken += 1;
-      imageSize = undefined;
+      rawImageSize = undefined;
+      rotation = 0;
       if (debounceTimer !== undefined) {
         clearTimeout(debounceTimer);
         debounceTimer = undefined;
       }
+<<<<<<< HEAD
       if (file.type !== "image/png" && file.type !== "image/jpeg") {
         currentFile = undefined;
         clearPreviewUi();
         if (status) status.textContent = "Only PNG and JPEG are supported";
         return;
       }
+=======
+      syncMountUi();
+>>>>>>> 26f694e (feat: #80 Add image and screen orientation to preview)
       try {
         const size = await readImageSize(file);
         if (token !== loadToken || currentFile !== file) return;
-        imageSize = size;
-        framing = defaultFraming(size);
+        rawImageSize = size;
+        framing = defaultFraming(rotatedImageSize(size, rotation));
         await rerender();
       } catch (error) {
         if (token !== loadToken || currentFile !== file) return;
@@ -406,7 +479,7 @@ const captions = {
     drop?.addEventListener(
       "wheel",
       (event) => {
-        if (!imageSize || !currentFile) return;
+        if (!rawImageSize || !currentFile) return;
         event.preventDefault();
         const rect = drop.getBoundingClientRect();
         const focalNormX =
@@ -422,7 +495,7 @@ const captions = {
     drop?.addEventListener(
       "touchstart",
       (event) => {
-        if (!imageSize || !currentFile || event.touches.length !== 2) return;
+        if (!rawImageSize || !currentFile || event.touches.length !== 2) return;
         pinchStartDistance = touchDistance(
           event.touches[0]!,
           event.touches[1]!,
@@ -435,7 +508,7 @@ const captions = {
     drop?.addEventListener(
       "touchmove",
       (event) => {
-        if (!imageSize || !currentFile || event.touches.length !== 2) return;
+        if (!rawImageSize || !currentFile || event.touches.length !== 2) return;
         if (pinchStartDistance <= 0) return;
         event.preventDefault();
         const distance = touchDistance(event.touches[0]!, event.touches[1]!);
@@ -457,12 +530,37 @@ const captions = {
       void rerender();
     });
 
+    rotateImageButton?.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      if (!rawImageSize) return;
+      rotation = NEXT_ROTATION[rotation];
+      framing = defaultFraming(rotatedImageSize(rawImageSize, rotation));
+      syncMountUi();
+      void rerender();
+    });
+
+    previewRoot
+      .querySelectorAll<HTMLButtonElement>("[data-epaper-mount]")
+      .forEach((button) => {
+        button.addEventListener("click", (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          const mount = button.dataset.epaperMount;
+          if (mount !== "landscape" && mount !== "portrait") return;
+          screenMount = mount;
+          syncMountUi();
+          void rerender();
+        });
+      });
+
     previewRoot
       .querySelectorAll<HTMLButtonElement>("[data-epaper-pan]")
       .forEach((button) => {
         button.addEventListener("click", (event) => {
           event.preventDefault();
           event.stopPropagation();
+          const imageSize = framingImageSize();
           if (!imageSize) return;
           const direction = button.dataset.epaperPan;
           if (direction === "reset") {
@@ -491,6 +589,8 @@ const captions = {
           void rerender();
         });
       });
+
+    syncMountUi();
   }
 
   setupEpaperPreview();
