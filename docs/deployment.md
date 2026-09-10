@@ -84,6 +84,53 @@ In the public `poc.singletonsd.com` hosted zone, create this record:
 Do not point the subdomain at the apex domain and do not create an alias to a
 private distribution. The record contains no secret.
 
+## Contact form (PostKit)
+
+The contact form posts to the shared PostKit Function App. **Source of truth**
+for the public base URL is PostKit Azure App Configuration store
+`ssd-postkit-appcs-prod-ae`, key `app:api:publicBaseUrl` (see PostKit
+[`docs/integrations/inkads-marketing.md`](https://github.com/singleton-sd/post-kit/blob/main/docs/integrations/inkads-marketing.md)).
+
+At build time, `pages.yml` / `preview.yml`:
+
+1. Log in with GitHub OIDC (`azure/login`) when no override is set
+2. Run `scripts/resolve-postkit-api-base-url.sh` → bake
+   `PUBLIC_POSTKIT_API_BASE_URL` into the Astro build
+
+The browser never talks to App Configuration.
+
+### Required GitHub Actions variables (OIDC)
+
+| Variable                | Purpose                                                         |
+| ----------------------- | --------------------------------------------------------------- |
+| `AZURE_CLIENT_ID`       | App registration client id for this repo’s federated credential |
+| `AZURE_TENANT_ID`       | Entra tenant                                                    |
+| `AZURE_SUBSCRIPTION_ID` | Subscription that holds the App Config store                    |
+
+Grant that identity **App Configuration Data Reader** on
+`ssd-postkit-appcs-prod-ae`. Add federated credentials for this repository
+(`ref:refs/heads/main` and `pull_request`). After PostKit seeds the key (or ops
+sets it in the portal), CI reads it on every build.
+
+### Emergency / local override
+
+Optional Actions variable `PUBLIC_POSTKIT_API_BASE_URL` (must be `https://`)
+skips App Config and bakes that value instead. Use only for break-glass or
+pointing a one-off build somewhere else. Locally:
+
+```sh
+export PUBLIC_POSTKIT_API_BASE_URL=https://ssd-postkit-api-prod-ae.azurewebsites.net
+# or, with az login + Data Reader:
+export PUBLIC_POSTKIT_API_BASE_URL="$(./scripts/resolve-postkit-api-base-url.sh)"
+pnpm build
+```
+
+The browser form refuses to enable submit unless the configured base starts with
+`https://`.
+
+PR preview pages send `X-PostKit-Contact-Preview: true` so PostKit uses the
+development email provider instead of the production InkAds inbox.
+
 ## Verification
 
 After merging the deployment PR, changing the Pages source, and creating the
