@@ -10,10 +10,21 @@ Requirements: Node.js 22.12 or newer and pnpm 11.
 
 ```sh
 pnpm install
+pnpm brand:sync   # pulls icons from pinned poc-inkads-assets CDN
 pnpm dev
 ```
 
+Brand marks come from [`poc-inkads-assets`](https://github.com/singleton-sd/poc-inkads-assets)
+via `pnpm brand:sync` (also runs before `pnpm build`). See
+[`docs/brand-assets.md`](docs/brand-assets.md).
+
 Run the full local quality gate with:
+
+```sh
+pnpm verify
+```
+
+Or step-by-step:
 
 ```sh
 pnpm format:check
