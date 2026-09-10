@@ -350,11 +350,22 @@ const captions = {
         return;
       }
       currentFile = file;
+      // Invalidate in-flight size reads and renders from a previous upload.
+      const token = ++loadToken;
+      renderToken += 1;
+      imageSize = undefined;
+      if (debounceTimer !== undefined) {
+        clearTimeout(debounceTimer);
+        debounceTimer = undefined;
+      }
       try {
-        imageSize = await readImageSize(file);
-        framing = defaultFraming(imageSize);
+        const size = await readImageSize(file);
+        if (token !== loadToken || currentFile !== file) return;
+        imageSize = size;
+        framing = defaultFraming(size);
         await rerender();
       } catch (error) {
+        if (token !== loadToken || currentFile !== file) return;
         if (status) {
           status.textContent =
             error instanceof Error
