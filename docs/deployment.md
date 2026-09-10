@@ -96,7 +96,10 @@ PUBLIC_POSTKIT_API_BASE_URL=https://ssd-postkit-api-prod-ae.azurewebsites.net
 
 To point builds at a different PostKit base URL without editing workflows, set
 the GitHub Actions variable `PUBLIC_POSTKIT_API_BASE_URL` (Settings → Secrets
-and variables → Actions → Variables).
+and variables → Actions → Variables). The value **must** be an `https://` URL;
+workflows reject `http://` (or other schemes) so the HTTPS marketing site never
+issues mixed-content fetches or cleartext PII posts. The browser form also
+refuses to enable submit unless the configured base starts with `https://`.
 
 PostKit’s Azure App Configuration store owns server-side host→inbox routing and
 CORS origins — not this public client base URL. InkAds host profile details are

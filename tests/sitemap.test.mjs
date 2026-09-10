@@ -17,4 +17,6 @@ test("sitemap generator script exists", async () => {
   assert.match(script, /inkads\.poc\.singletonsd\.com/);
   assert.match(script, /404\.html/);
   assert.match(script, /visual/);
+  assert.match(script, /startsWith\("\."\)/);
+  assert.match(script, /isDraftFrontmatter|draft:\s*true/);
 });

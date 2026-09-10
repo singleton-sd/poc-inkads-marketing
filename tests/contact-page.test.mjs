@@ -29,6 +29,9 @@ test("contact form posts to PostKit with loading and error states", async () => 
 
   assert.match(form, /PUBLIC_POSTKIT_API_BASE_URL/);
   assert.match(form, /fetch\(`\$\{apiBase\}\/contact`/);
+  assert.match(form, /startsWith\("https:\/\/"\)/);
+  assert.match(form, /AbortController/);
+  assert.match(form, /setCustomValidity/);
   assert.match(form, /partnership/);
   assert.match(form, /X-PostKit-Contact-Preview/);
   assert.match(form, /contactFormReady/);
