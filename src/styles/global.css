@@ -1277,6 +1277,15 @@ textarea.field-control {
   background: var(--ink-surface-muted, #f5f4f1);
 }
 
+.epaper-preview__pan-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.epaper-preview__pan-btn:disabled:hover {
+  background: var(--ink-surface, #fff);
+}
+
 .epaper-preview__pan-btn:focus-visible {
   outline: 2px solid var(--ink-accent, #2f5d50);
   outline-offset: 2px;

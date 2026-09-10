@@ -184,7 +184,7 @@ const captions = {
         >
       </div>
       <p class="epaper-preview__hint">
-        Scroll or pinch to zoom · arrows pan (zoom in if needed)
+        Scroll or pinch to zoom · arrows move the image in the frame
       </p>
     </div>
   </div>
@@ -215,6 +215,7 @@ const captions = {
   import {
     clampFraming,
     defaultFraming,
+    framingPanRoom,
     nextSourceRotation,
     panFraming,
     panelSizeLabel,
@@ -245,6 +246,7 @@ const captions = {
   const MAX_ZOOM = 8;
   const PAN_STEP = 0.25;
   const DEBOUNCE_MS = 80;
+  const PAN_ROOM_EPS = 1e-6;
 
   function activateTab(root: HTMLElement, tab: string) {
     root.dataset.active = tab;
@@ -330,6 +332,27 @@ const captions = {
       return rotatedImageSize(rawImageSize, rotation);
     }
 
+    function syncPanButtons() {
+      const imageSize = framingImageSize();
+      const room = imageSize
+        ? framingPanRoom(imageSize, framing, framingProfile)
+        : { west: 0, east: 0, north: 0, south: 0 };
+      const enabled: Record<string, boolean> = {
+        n: room.north > PAN_ROOM_EPS,
+        s: room.south > PAN_ROOM_EPS,
+        e: room.east > PAN_ROOM_EPS,
+        w: room.west > PAN_ROOM_EPS,
+        reset: Boolean(imageSize),
+      };
+      previewRoot
+        .querySelectorAll<HTMLButtonElement>("[data-epaper-pan]")
+        .forEach((button) => {
+          const key = button.dataset.epaperPan ?? "";
+          const on = enabled[key] ?? false;
+          button.disabled = !on;
+        });
+    }
+
     function syncMountUi() {
       device?.classList.toggle("is-portrait", screenMount === "portrait");
       if (sizeLabel) sizeLabel.textContent = panelSizeLabel(screenMount);
@@ -343,6 +366,7 @@ const captions = {
       if (rotateImageButton) {
         rotateImageButton.textContent = `Rotate image (${rotation}°)`;
       }
+      syncPanButtons();
     }
 
     function clearPreviewUi() {
@@ -437,6 +461,7 @@ const captions = {
         },
         framingProfile,
       );
+      syncPanButtons();
       scheduleRerender();
     }
 
@@ -577,6 +602,7 @@ const captions = {
           const direction = button.dataset.epaperPan;
           if (direction === "reset") {
             framing = defaultFraming(imageSize);
+            syncPanButtons();
             void rerender();
             return;
           }
@@ -588,25 +614,14 @@ const captions = {
           ) {
             return;
           }
-          const before = framing;
           framing = panFraming(
             imageSize,
             framing,
             framingProfile,
             direction as PanDirection,
-            { step: PAN_STEP, minZoom: MIN_ZOOM, maxZoom: MAX_ZOOM },
+            { step: PAN_STEP },
           );
-          if (
-            framing.centerX === before.centerX &&
-            framing.centerY === before.centerY &&
-            framing.zoom === before.zoom
-          ) {
-            if (status) {
-              status.textContent =
-                "Already at the edge — zoom out or reset framing";
-            }
-            return;
-          }
+          syncPanButtons();
           void rerender();
         });
       });

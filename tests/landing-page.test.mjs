@@ -86,7 +86,8 @@ test("shared e-paper preview module consumes the renderer package", async () => 
   assert.match(moduleSource, /@singleton-sd\/inkads-epaper-renderer/);
   assert.match(moduleSource, /fromRgbaImageData/);
   assert.match(moduleSource, /normaliseToProfile/);
-  assert.match(moduleSource, /zoom:\s*controls\.zoom/);
+  assert.match(moduleSource, /sourceRect/);
+  assert.match(moduleSource, /framingPanRoom/);
   assert.match(moduleSource, /rotation:\s*controls\.rotation/);
   assert.match(moduleSource, /renderMono/);
   assert.match(moduleSource, /packMonoBitmap/);
@@ -103,6 +104,7 @@ test("landing preview UI uses gesture zoom and button pan", async () => {
   assert.match(preview, /data-epaper-rotate-image/);
   assert.match(preview, /data-epaper-mount="portrait"/);
   assert.match(preview, /Scroll or pinch to zoom/);
+  assert.match(preview, /syncPanButtons/);
   assert.match(preview, /panFraming/);
   assert.doesNotMatch(preview, /Pan horizontal/);
   assert.doesNotMatch(preview, /data-epaper-crop-x/);
