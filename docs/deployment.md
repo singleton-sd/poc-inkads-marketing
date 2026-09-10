@@ -86,24 +86,47 @@ private distribution. The record contains no secret.
 
 ## Contact form (PostKit)
 
-The contact form posts to the shared PostKit Function App. Production and CI
-builds set `PUBLIC_POSTKIT_API_BASE_URL` from the repository Actions variable of
-the same name, falling back to the shared Function App hostname:
+The contact form posts to the shared PostKit Function App. **Source of truth**
+for the public base URL is PostKit Azure App Configuration store
+`ssd-postkit-appcs-prod-ae`, key `app:api:publicBaseUrl` (see PostKit
+[`docs/integrations/inkads-marketing.md`](https://github.com/singleton-sd/post-kit/blob/main/docs/integrations/inkads-marketing.md)).
 
-```text
-PUBLIC_POSTKIT_API_BASE_URL=https://ssd-postkit-api-prod-ae.azurewebsites.net
+At build time, `pages.yml` / `preview.yml`:
+
+1. Log in with GitHub OIDC (`azure/login`) when no override is set
+2. Run `scripts/resolve-postkit-api-base-url.sh` → bake
+   `PUBLIC_POSTKIT_API_BASE_URL` into the Astro build
+
+The browser never talks to App Configuration.
+
+### Required GitHub Actions variables (OIDC)
+
+| Variable | Purpose |
+| --- | --- |
+| `AZURE_CLIENT_ID` | App registration client id for this repo’s federated credential |
+| `AZURE_TENANT_ID` | Entra tenant |
+| `AZURE_SUBSCRIPTION_ID` | Subscription that holds the App Config store |
+
+Grant that identity **App Configuration Data Reader** on
+`ssd-postkit-appcs-prod-ae`. Add federated credentials for this repository
+(`ref:refs/heads/main` and `pull_request`). After PostKit seeds the key (or ops
+sets it in the portal), CI reads it on every build.
+
+### Emergency / local override
+
+Optional Actions variable `PUBLIC_POSTKIT_API_BASE_URL` (must be `https://`)
+skips App Config and bakes that value instead. Use only for break-glass or
+pointing a one-off build somewhere else. Locally:
+
+```sh
+export PUBLIC_POSTKIT_API_BASE_URL=https://ssd-postkit-api-prod-ae.azurewebsites.net
+# or, with az login + Data Reader:
+export PUBLIC_POSTKIT_API_BASE_URL="$(./scripts/resolve-postkit-api-base-url.sh)"
+pnpm build
 ```
 
-To point builds at a different PostKit base URL without editing workflows, set
-the GitHub Actions variable `PUBLIC_POSTKIT_API_BASE_URL` (Settings → Secrets
-and variables → Actions → Variables). The value **must** be an `https://` URL;
-workflows reject `http://` (or other schemes) so the HTTPS marketing site never
-issues mixed-content fetches or cleartext PII posts. The browser form also
-refuses to enable submit unless the configured base starts with `https://`.
-
-PostKit’s Azure App Configuration store owns server-side host→inbox routing and
-CORS origins — not this public client base URL. InkAds host profile details are
-in [`singleton-sd/post-kit`](https://github.com/singleton-sd/post-kit/blob/main/docs/integrations/inkads-marketing.md).
+The browser form refuses to enable submit unless the configured base starts with
+`https://`.
 
 PR preview pages send `X-PostKit-Contact-Preview: true` so PostKit uses the
 development email provider instead of the production InkAds inbox.
