@@ -1,7 +1,9 @@
 import {
+  clampFraming,
   coverWindowSize,
   defaultFraming,
   defineDisplayProfile,
+  framingPanRoom,
   fromRgbaImageData,
   nextSourceRotation,
   normaliseToProfile,
@@ -11,16 +13,19 @@ import {
   sourceRectFromFraming,
   toPreviewImage,
   waveshare75BwProfile,
+  type FramingPanRoom,
   type FramingState,
   type ImageSize,
   type MonoRenderMode,
   type SourceRotation,
 } from "@singleton-sd/inkads-epaper-renderer";
 
-export type { FramingState, ImageSize, SourceRotation };
+export type { FramingPanRoom, FramingState, ImageSize, SourceRotation };
 export {
+  clampFraming,
   coverWindowSize,
   defaultFraming,
+  framingPanRoom,
   nextSourceRotation,
   rotatedImageSize,
   sourceRectFromFraming,
@@ -30,64 +35,6 @@ export type FramingProfileSize = Pick<
   typeof waveshare75BwProfile,
   "width" | "height"
 >;
-
-export type FramingPanRoom = {
-  readonly west: number;
-  readonly east: number;
-  readonly north: number;
-  readonly south: number;
-};
-
-/**
- * Mirror of `@singleton-sd/inkads-epaper-renderer` framing clamp from #42
- * (letterbox pan). Drop this local copy once the package is ≥ the release that
- * exports `framingPanRoom` and the updated `clampFraming`, and pass zoom /
- * centre into `normaliseToProfile` again instead of `sourceRect`.
- */
-function centreBounds(
-  imageExtent: number,
-  windowExtent: number,
-): { min: number; max: number } {
-  const half = windowExtent / 2;
-  const a = half;
-  const b = imageExtent - half;
-  return { min: Math.min(a, b), max: Math.max(a, b) };
-}
-
-/** Keep crop windows inside the image; allow offset letterboxing when zoomed out. */
-export function clampFraming(
-  image: ImageSize,
-  framing: FramingState,
-  profile: FramingProfileSize,
-): FramingState {
-  const zoom = Math.max(framing.zoom, 0.05);
-  const rect = sourceRectFromFraming(image, { ...framing, zoom }, profile);
-  const x = centreBounds(image.width, rect.width);
-  const y = centreBounds(image.height, rect.height);
-  return {
-    zoom,
-    centerX: Math.min(Math.max(framing.centerX, x.min), x.max),
-    centerY: Math.min(Math.max(framing.centerY, y.min), y.max),
-  };
-}
-
-/** Remaining pan travel per axis (0 → disable that arrow). */
-export function framingPanRoom(
-  image: ImageSize,
-  framing: FramingState,
-  profile: FramingProfileSize,
-): FramingPanRoom {
-  const clamped = clampFraming(image, framing, profile);
-  const rect = sourceRectFromFraming(image, clamped, profile);
-  const x = centreBounds(image.width, rect.width);
-  const y = centreBounds(image.height, rect.height);
-  return {
-    west: clamped.centerX - x.min,
-    east: x.max - clamped.centerX,
-    north: clamped.centerY - y.min,
-    south: y.max - clamped.centerY,
-  };
-}
 
 export type PanDirection = "n" | "s" | "e" | "w";
 
@@ -226,8 +173,7 @@ export function panelSizeLabel(mount: ScreenMount): string {
 
 /**
  * Decode an uploaded image and run the shared renderer pipeline to a preview
- * data URL. Framing uses the letterbox-aware clamp, then passes `sourceRect`
- * so pan offsets are honoured even before the package ships the same clamp.
+ * data URL. Framing is zoom / centre / rotation — the package owns clamp math.
  */
 export async function renderUploadPreview(
   file: File,
@@ -247,24 +193,12 @@ export async function renderUploadPreview(
     const imageData = context.getImageData(0, 0, bitmap.width, bitmap.height);
 
     const decoded = fromRgbaImageData(imageData);
-    const size = rotatedImageSize(
-      { width: decoded.width, height: decoded.height },
-      controls.rotation,
-    );
-    const framing = clampFraming(
-      size,
-      {
-        zoom: controls.zoom,
-        centerX: controls.centerX,
-        centerY: controls.centerY,
-      },
-      landscapeProfile,
-    );
-    const sourceRect = sourceRectFromFraming(size, framing, landscapeProfile);
     const framed = normaliseToProfile(decoded, {
       profile,
       rotation: controls.rotation,
-      sourceRect,
+      zoom: controls.zoom,
+      centerX: controls.centerX,
+      centerY: controls.centerY,
     });
     const mono = renderMono(framed, { mode: controls.mode });
     const packed = packMonoBitmap(mono, { profile });

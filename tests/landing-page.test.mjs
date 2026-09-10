@@ -86,7 +86,7 @@ test("shared e-paper preview module consumes the renderer package", async () => 
   assert.match(moduleSource, /@singleton-sd\/inkads-epaper-renderer/);
   assert.match(moduleSource, /fromRgbaImageData/);
   assert.match(moduleSource, /normaliseToProfile/);
-  assert.match(moduleSource, /sourceRect/);
+  assert.match(moduleSource, /zoom:\s*controls\.zoom/);
   assert.match(moduleSource, /framingPanRoom/);
   assert.match(moduleSource, /rotation:\s*controls\.rotation/);
   assert.match(moduleSource, /renderMono/);
