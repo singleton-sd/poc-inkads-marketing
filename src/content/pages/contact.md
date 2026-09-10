@@ -1,4 +1,5 @@
 ---
+template: contact
 title: Request a demo | InkAds
 description: Send a venue or advertiser enquiry about the InkAds proof of concept, or email hello@inkads.poc.singletonsd.com.
 eyebrow: Request a demo

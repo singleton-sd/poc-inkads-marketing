@@ -9,9 +9,16 @@ const faqsDir = new URL("../src/content/faqs/", import.meta.url);
 
 test("home content contains the required public fields", async () => {
   const content = await readFile(homePath, "utf8");
-  for (const field of ["title", "description", "headline", "summary"]) {
+  for (const field of [
+    "template",
+    "title",
+    "description",
+    "headline",
+    "summary",
+  ]) {
     assert.match(content, new RegExp(`^${field}: .+`, "m"));
   }
+  assert.match(content, /^template: home$/m);
 });
 
 test("home content avoids placeholder performance claims", async () => {
@@ -22,6 +29,7 @@ test("home content avoids placeholder performance claims", async () => {
 test("contact content exposes demo-request copy and contact meta", async () => {
   const content = await readFile(contactPath, "utf8");
   for (const field of [
+    "template",
     "title",
     "description",
     "headline",
@@ -32,12 +40,14 @@ test("contact content exposes demo-request copy and contact meta", async () => {
   ]) {
     assert.match(content, new RegExp(`^${field}: .+`, "m"));
   }
+  assert.match(content, /^template: contact$/m);
   assert.match(content, /hello@inkads\.poc\.singletonsd\.com/);
 });
 
 test("FAQ page content contains the required public fields", async () => {
   const content = await readFile(faqPagePath, "utf8");
   for (const field of [
+    "template",
     "title",
     "description",
     "headline",
@@ -49,6 +59,7 @@ test("FAQ page content contains the required public fields", async () => {
   ]) {
     assert.match(content, new RegExp(`^${field}: .+`, "m"));
   }
+  assert.match(content, /^template: faq$/m);
 });
 
 test("FAQ items cover the design-reference questions", async () => {

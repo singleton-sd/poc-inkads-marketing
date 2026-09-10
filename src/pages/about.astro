@@ -9,10 +9,8 @@ import InverseSection from "../components/InverseSection.astro";
 import PageHero from "../components/PageHero.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { withBase } from "../lib/nav";
+import { requirePageData } from "../lib/require-page-data";
 import "../styles/pages/about.css";
-
-const about = await getEntry("pages", "about");
-if (!about) throw new Error("The about page content entry is missing.");
 
 const {
   title,
@@ -25,17 +23,7 @@ const {
   ctaTitle,
   primaryCta,
   secondaryCta,
-} = about.data;
-
-if (
-  !columns?.length ||
-  !parentBrand ||
-  !ctaTitle ||
-  !primaryCta ||
-  !secondaryCta
-) {
-  throw new Error("The about page content entry is missing required sections.");
-}
+} = requirePageData(await getEntry("pages", "about"), "about");
 
 const base = import.meta.env.BASE_URL;
 ---

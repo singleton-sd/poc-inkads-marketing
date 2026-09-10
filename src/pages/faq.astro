@@ -6,24 +6,24 @@ import FaqItem from "../components/FaqItem.astro";
 import PageHero from "../components/PageHero.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { withBase } from "../lib/nav";
+import { requirePageData } from "../lib/require-page-data";
 
-const page = await getEntry("pages", "faq");
-if (!page) throw new Error("The FAQ page content entry is missing.");
+const page = requirePageData(await getEntry("pages", "faq"), "faq");
 
 const faqs = (await getCollection("faqs"))
   .filter((entry) => !entry.data.draft)
   .sort((a, b) => a.data.order - b.data.order);
 
 const base = import.meta.env.BASE_URL;
-const eyebrow = page.data.eyebrow ?? "FAQ";
-const ctaTitle = page.data.ctaTitle ?? "Still have a question?";
-const ctaLabel = page.data.ctaLabel ?? "Contact us";
-const ctaHref = page.data.ctaHref ?? "/contact";
+const eyebrow = page.eyebrow ?? "FAQ";
+const ctaTitle = page.ctaTitle ?? "Still have a question?";
+const ctaLabel = page.ctaLabel ?? "Contact us";
+const ctaHref = page.ctaHref ?? "/contact";
 ---
 
-<BaseLayout title={page.data.title} description={page.data.description}>
+<BaseLayout title={page.title} description={page.description}>
   <main id="main-content">
-    <PageHero eyebrow={eyebrow} title={page.data.headline}>
+    <PageHero eyebrow={eyebrow} title={page.headline}>
       <ul class="faq-list" role="list">
         {
           faqs.map((item) => (

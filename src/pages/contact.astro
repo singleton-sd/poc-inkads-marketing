@@ -3,10 +3,8 @@ import { getEntry } from "astro:content";
 import ContactForm from "../components/ContactForm.astro";
 import MetaPair from "../components/MetaPair.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { requirePageData } from "../lib/require-page-data";
 import "../styles/pages/contact.css";
-
-const contact = await getEntry("pages", "contact");
-if (!contact) throw new Error("The contact page content entry is missing.");
 
 const {
   title,
@@ -19,7 +17,7 @@ const {
   submitLabel = "Preview form",
   successTitle = "Form preview complete.",
   successBody = "Nothing was sent. Email hello@inkads.poc.singletonsd.com to request a demo.",
-} = contact.data;
+} = requirePageData(await getEntry("pages", "contact"), "contact");
 ---
 
 <BaseLayout title={title} description={description}>
