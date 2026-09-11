@@ -139,10 +139,18 @@ Seeded keys today:
 | `marketing.waitlist-confirm` | Waitlist confirmation (used when a waitlist BFF ships) |
 
 **Not a Decap collection.** Do not model EmailBuilder JSON as widgets in
-`public/admin/config.yml`. An authenticated email admin UI (sibling to
-`/admin`, e.g. `/admin/emails`) will embed `@singleton-sd/post-kit-editor` and
-save via Git commit/PR — tracked under epic
-[#104](https://github.com/singleton-sd/poc-inkads-marketing/issues/104).
+`public/admin/config.yml`. An authenticated email admin UI (sibling to Decap
+`/admin`, e.g. `/admin/emails`) is tracked under epic
+[#104](https://github.com/singleton-sd/poc-inkads-marketing/issues/104) /
+[#101](https://github.com/singleton-sd/poc-inkads-marketing/issues/101) and is
+**deferred** until `@singleton-sd/post-kit-editor` ships the embeddable
+`EmailTemplateAdmin` page (PostKit
+[#138](https://github.com/singleton-sd/post-kit/issues/138) /
+[#140](https://github.com/singleton-sd/post-kit/issues/140)). That host will use
+cms-oauth-kit for GitHub OAuth and open PRs for
+`content/email-templates/<key>/{template,metadata,preview}.json`. Do not put a
+temporary SPA in this repository while waiting. Send-test needs a trusted BFF
+(#102) after publish CI (#100).
 
 After [#100](https://github.com/singleton-sd/poc-inkads-marketing/issues/100)
 lands, consumer CI will run `post-kit-publish` to Azure Blob for tenant
@@ -173,6 +181,12 @@ Open `/admin` on `https://inkads.poc.singletonsd.com` or `localhost:4321`.
 GitHub Pages / preview hosts that are not under `*.singletonsd.com` or
 `*.patoperpetua.com` will not complete the popup handshake. Do not implement a
 local OAuth proxy in this repository.
+
+If GitHub shows **redirect_uri is not associated with this application**, the
+shared org OAuth App used by cms-oauth-kit must list Authorization callback URL
+`https://auth.singletonsd.com/callback` (client id is non-secret and visible in
+the authorize redirect). Fix it once for Decap and any future email admin host.
+Do not put client secrets in this repository.
 
 Editors need **write** access to this repository so that the GitHub OAuth grant
 covers Decap's required `repo` scope. Do not commit OAuth client secrets or
