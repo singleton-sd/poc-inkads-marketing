@@ -53,6 +53,9 @@ test("editorial documentation states the cms-oauth-kit login path", async () => 
     /GitHub Pages.*cannot execute the\s+OAuth\s+callback/is,
   );
   assert.match(documentation, /Do not commit OAuth client\s+secrets/i);
+  assert.match(documentation, /EmailTemplateAdmin/);
+  assert.match(documentation, /redirect_uri is not associated/);
+  assert.match(documentation, /auth\.singletonsd\.com\/callback/);
   assert.doesNotMatch(
     documentation,
     /ssd-pocpk-decap-oauth-dev-ae|poc-plattform-kit/,

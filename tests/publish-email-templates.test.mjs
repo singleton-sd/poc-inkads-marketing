@@ -21,7 +21,10 @@ test("publish email templates workflow uses OIDC and inkads blob layout", async 
   assert.match(workflow, /azure\/login@v2/);
   assert.match(workflow, /id-token: write/);
   assert.match(workflow, /vars\.AZURE_CLIENT_ID/);
-  assert.doesNotMatch(workflow, /AZURE_CREDENTIALS|POSTKIT_API_KEY|account.key|connection.string/i);
+  assert.doesNotMatch(
+    workflow,
+    /AZURE_CREDENTIALS|POSTKIT_API_KEY|account.key|connection.string/i,
+  );
   assert.match(pkg, /@singleton-sd\/post-kit-publisher/);
   assert.match(pkg, /templates:compile/);
 });
