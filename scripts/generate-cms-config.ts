@@ -10,7 +10,7 @@ const rootDir = fileURLToPath(new URL("..", import.meta.url));
 const outPath = path.join(rootDir, "public/admin/config.yml");
 
 function yamlQuote(value: string): string {
-  if (/[:#\n]|^[\s-]/.test(value) || value.includes("'")) {
+  if (/[:#,\n]|^[\s-]/.test(value) || value.includes("'")) {
     return JSON.stringify(value);
   }
   return value;

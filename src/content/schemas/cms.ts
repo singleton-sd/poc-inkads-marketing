@@ -18,7 +18,7 @@ export const internalRouteCmsField = (
   label: "URL",
   name: "href",
   widget: "string",
-  hint: "Root-relative path from the CTA allowlist (/, /pricing, published marketing slugs, …). Validated at build against approvedInternalRoutes.",
+  hint: "Root-relative allowlisted path (validated at build).",
   ...overrides,
 });
 

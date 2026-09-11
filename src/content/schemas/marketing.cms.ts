@@ -45,7 +45,7 @@ const proseFields: CmsField[] = [
     label: "CTA URL",
     name: "ctaHref",
     required: false,
-    hint: "prose / audience-landing: must pair with CTA label. Root-relative allowlisted path; validated at build.",
+    hint: "prose / audience-landing: must pair with CTA label. Root-relative allowlisted path (validated at build).",
   }),
   {
     label: "Closing title",

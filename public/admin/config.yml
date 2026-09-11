@@ -62,13 +62,23 @@ collections:
             widget: object
             fields:
               - { label: Label, name: label, widget: string }
-              - { label: URL, name: href, widget: string }
+              - {
+                  label: URL,
+                  name: href,
+                  widget: string,
+                  hint: Root-relative allowlisted path (validated at build).,
+                }
           - label: Secondary CTA
             name: secondaryCta
             widget: object
             fields:
               - { label: Label, name: label, widget: string }
-              - { label: URL, name: href, widget: string }
+              - {
+                  label: URL,
+                  name: href,
+                  widget: string,
+                  hint: Root-relative allowlisted path (validated at build).,
+                }
           - label: Draft
             name: draft
             widget: boolean
@@ -238,7 +248,7 @@ collections:
             name: ctaHref
             widget: string
             required: false
-            hint: Root-relative path from the CTA allowlist (/, /pricing, published marketing slugs, …). Validated at build against approvedInternalRoutes.
+            hint: Root-relative allowlisted path (validated at build).
           - label: Draft
             name: draft
             widget: boolean
@@ -331,13 +341,23 @@ collections:
             widget: object
             fields:
               - { label: Label, name: label, widget: string }
-              - { label: URL, name: href, widget: string }
+              - {
+                  label: URL,
+                  name: href,
+                  widget: string,
+                  hint: Root-relative allowlisted path (validated at build).,
+                }
           - label: Secondary CTA
             name: secondaryCta
             widget: object
             fields:
               - { label: Label, name: label, widget: string }
-              - { label: URL, name: href, widget: string }
+              - {
+                  label: URL,
+                  name: href,
+                  widget: string,
+                  hint: Root-relative allowlisted path (validated at build).,
+                }
           - label: Draft
             name: draft
             widget: boolean
@@ -449,7 +469,12 @@ collections:
               - { label: Title, name: title, widget: string }
               - { label: Description, name: description, widget: text }
               - { label: CTA label, name: ctaLabel, widget: string }
-              - { label: Href, name: href, widget: string }
+              - {
+                  label: Href,
+                  name: href,
+                  widget: string,
+                  hint: Root-relative allowlisted path (validated at build).,
+                }
               - {
                   label: Accent,
                   name: accent,
@@ -528,7 +553,7 @@ collections:
           - label: CTA URL
             name: ctaHref
             widget: string
-            hint: Root-relative path from the CTA allowlist (/, /pricing, published marketing slugs, …). Validated at build against approvedInternalRoutes.
+            hint: Root-relative allowlisted path (validated at build).
           - label: Media placeholder label
             name: mediaLabel
             widget: string
@@ -610,7 +635,7 @@ collections:
         name: ctaHref
         widget: string
         required: false
-        hint: "prose / audience-landing: must pair with CTA label. Root-relative allowlisted path; validated at build."
+        hint: "prose / audience-landing: must pair with CTA label. Root-relative allowlisted path (validated at build)."
       - label: Closing title
         name: closingTitle
         widget: string
@@ -628,7 +653,12 @@ collections:
         hint: "cta-heavy / landing-band: required for those templates."
         fields:
           - { label: Label, name: label, widget: string }
-          - { label: URL, name: href, widget: string }
+          - {
+              label: URL,
+              name: href,
+              widget: string,
+              hint: Root-relative allowlisted path (validated at build).,
+            }
       - label: Secondary CTA
         name: secondaryCta
         widget: object
@@ -636,7 +666,12 @@ collections:
         hint: "cta-heavy: optional. landing-band: required."
         fields:
           - { label: Label, name: label, widget: string }
-          - { label: URL, name: href, widget: string }
+          - {
+              label: URL,
+              name: href,
+              widget: string,
+              hint: Root-relative allowlisted path (validated at build).,
+            }
       - label: Columns
         name: columns
         widget: list
@@ -700,13 +735,13 @@ collections:
         name: showInHeader
         widget: boolean
         required: false
-        hint: When true, appends this page to the primary header nav at build time.
+        hint: "When true, appends this page to the primary header nav at build time."
         default: false
       - label: Show in footer
         name: showInFooter
         widget: boolean
         required: false
-        hint: When true, appends this page to the footer Company column at build time.
+        hint: "When true, appends this page to the footer Company column at build time."
         default: false
       - label: Draft
         name: draft
