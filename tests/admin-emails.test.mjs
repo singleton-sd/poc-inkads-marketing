@@ -106,6 +106,23 @@ test("editorial docs describe /admin/emails Decap-parity path", async () => {
   assert.match(documentation, /#102/);
 });
 
+test("email admin index.html carries BaseLayout-parity SEO props", async () => {
+  const index = await readFile(
+    path.join(root, "admin-emails/index.html"),
+    "utf8",
+  );
+  assert.match(index, /lang="en-AU"/);
+  assert.match(index, /name="description"/);
+  assert.match(index, /noindex, nofollow/);
+  assert.match(index, /theme-color/);
+  assert.match(index, /rel="canonical"/);
+  assert.match(index, /og:title/);
+  assert.match(index, /og:description/);
+  assert.match(index, /twitter:card/);
+  assert.match(index, /Email templates \| InkAds admin/);
+  assert.match(index, /assets\.inkads\.poc\.singletonsd\.com.*icon-dark/);
+});
+
 test("built email admin is present after SPA build output exists", async () => {
   const outDir = path.join(root, "admin-emails/dist");
   try {
@@ -117,7 +134,8 @@ test("built email admin is present after SPA build output exists", async () => {
   }
   const index = await readFile(path.join(outDir, "index.html"), "utf8");
   assert.match(index, /noindex/);
-  assert.match(index, /InkAds email templates/i);
+  assert.match(index, /Email templates \| InkAds admin/);
+  assert.match(index, /name="description"/);
   const assets = await readdir(path.join(outDir, "assets")).catch(() => []);
   const bundle = await Promise.all(
     assets
