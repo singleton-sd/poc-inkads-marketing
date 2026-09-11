@@ -752,6 +752,19 @@ collections:
         name: body
         widget: markdown
 
+  - name: redirects
+    label: Redirects
+    files:
+      - label: QR redirect (/go)
+        file: src/content/redirects/go.md
+        name: go
+        fields:
+          - label: Target
+            name: target
+            widget: string
+            hint: "Root-relative allowlisted path only (e.g. /contact?role=venue). No http(s):// or // hosts. Validated at build."
+            default: /contact?role=venue
+
   - name: faqs
     label: FAQ items
     label_singular: FAQ item

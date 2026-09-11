@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import type { CmsField } from "../src/content/schemas/cms.ts";
 import { pageCmsEntries } from "../src/content/schemas/cms-registry.ts";
 import { marketingCmsFields } from "../src/content/schemas/marketing.cms.ts";
+import { goRedirectCms } from "../src/content/schemas/redirect.cms.ts";
 
 const rootDir = fileURLToPath(new URL("..", import.meta.url));
 const outPath = path.join(rootDir, "public/admin/config.yml");
@@ -108,6 +109,24 @@ function serializePageFiles(): string {
   return lines.join("\n");
 }
 
+function serializeRedirectFiles(): string {
+  const entries = [goRedirectCms];
+  return entries
+    .map((entry) => {
+      const fieldBlock = entry.fields
+        .map((field) => serializeField(field))
+        .join("\n");
+      return [
+        "      - label: " + yamlQuote(entry.label),
+        `        file: ${entry.file}`,
+        `        name: ${entry.name}`,
+        "        fields:",
+        fieldBlock,
+      ].join("\n");
+    })
+    .join("\n");
+}
+
 const config = `backend:
   name: github
   repo: singleton-sd/poc-inkads-marketing
@@ -144,6 +163,11 @@ ${serializeFolderFields(marketingCmsFields)}
       - label: Body
         name: body
         widget: markdown
+
+  - name: redirects
+    label: Redirects
+    files:
+${serializeRedirectFiles()}
 
   - name: faqs
     label: FAQ items

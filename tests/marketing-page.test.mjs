@@ -181,5 +181,5 @@ test("content config registers the marketing collection", async () => {
 
   assert.match(schema, /base: "\.\/src\/content\/marketing"/);
   assert.match(schema, /marketingPageSchema/);
-  assert.match(schema, /marketing, pages \}/);
+  assert.match(schema, /marketing, pages(?:, redirects)? \}/);
 });

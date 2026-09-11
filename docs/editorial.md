@@ -2,8 +2,9 @@
 
 InkAds content is stored as Markdown in Git. Fixed page copy lives in
 `src/content/pages`, editor-created marketing pages live in
-`src/content/marketing`, FAQ answers live in `src/content/faqs`, and future
-legal pages live in `src/content/legal`. Astro validates these collections
+`src/content/marketing`, FAQ answers live in `src/content/faqs`, future
+legal pages live in `src/content/legal`, and the house-ad QR redirect target
+lives in `src/content/redirects`. Astro validates these collections
 during `pnpm build`, so a pull request containing invalid or incomplete
 frontmatter will fail the build before it can be merged.
 
@@ -88,6 +89,23 @@ Legal-page frontmatter requires:
 - `effectiveDate`
 - optional `draft` (defaults to `true`)
 
+### House-ad QR redirect (`/go`)
+
+QR artwork for house ads must encode this **stable HTTPS URL**:
+
+`https://inkads.poc.singletonsd.com/go`
+
+Change the destination without regenerating QR art by editing
+`src/content/redirects/go.md` (Decap **Redirects → QR redirect (/go)**), then
+rebuild/publish. Frontmatter:
+
+- `target` — root-relative allowlisted path only (optional query/hash), e.g.
+  `/contact?role=venue` (default). Absolute `http(s)://` URLs, protocol-relative
+  `//…` hosts, and paths outside the site allowlist are rejected at build time.
+
+The `/go` page is a static meta-refresh + `location.replace` hop (GitHub Pages
+has no server-side redirects). It is `noindex` and omitted from the sitemap.
+
 Run the full quality gate before merging editorial changes:
 
 ```sh
@@ -101,7 +119,7 @@ pnpm build
 
 The production build includes a static Decap application at `/admin/`. Its
 configuration targets `singleton-sd/poc-inkads-marketing` and maps the same
-page, marketing, FAQ, and legal fields enforced by the Astro schemas.
+page, marketing, FAQ, legal, and redirect fields enforced by the Astro schemas.
 
 GitHub Pages can serve the static admin files, but it cannot execute the OAuth
 callback or safely hold the OAuth client secret. CMS login therefore uses the

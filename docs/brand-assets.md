@@ -26,3 +26,13 @@ https://assets.inkads.poc.singletonsd.com/svg/lockup-horizontal/lockup-horizonta
 See the [assets README](https://github.com/singleton-sd/poc-inkads-assets) and
 [`docs/deployment.md`](https://github.com/singleton-sd/poc-inkads-assets/blob/main/docs/deployment.md)
 for the full catalog.
+
+## House-ad QR destination
+
+Encode this marketing-site URL in house-ad QR art (not an assets CDN path):
+
+`https://inkads.poc.singletonsd.com/go`
+
+The destination behind `/go` is configured in the marketing repo
+(`src/content/redirects/go.md`) so QR artwork stays stable when the landing
+target changes. See marketing `docs/editorial.md` and `docs/deployment.md`.
