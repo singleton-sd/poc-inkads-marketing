@@ -15,12 +15,6 @@ export default [
     languageOptions: { globals: globals.node },
   },
   {
-    ignores: [
-      ".astro/**",
-      "dist/**",
-      "visual-base/**",
-      "public/admin/emails/**",
-      "admin-emails/dist/**",
-    ],
+    ignores: [".astro/**", "dist/**", "visual-base/**", "admin-emails/dist/**"],
   },
 ];

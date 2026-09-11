@@ -9,7 +9,7 @@ export default defineConfig({
   base: "./",
   plugins: [react()],
   build: {
-    outDir: path.join(rootDir, "../public/admin/emails"),
+    outDir: path.join(rootDir, "dist"),
     emptyOutDir: true,
     sourcemap: true,
   },

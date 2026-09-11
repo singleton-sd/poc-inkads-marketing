@@ -131,8 +131,10 @@ out of scope until a trusted BFF lands (#102). Epic:
 
 Open `/admin/emails` on `https://inkads.poc.singletonsd.com` or
 `localhost:4321` after `pnpm build` (or `pnpm admin:emails:dev` during SPA
-work). Editors need **write** access to this repository. Never put
-`POSTKIT_API_KEY` (or any `PUBLIC_*` PostKit key) in the email admin bundle.
+work). The SPA is built to `admin-emails/dist` and copied into the site
+`dist/admin/emails` after Astro build. Editors need **write** access to this
+repository. Never put `POSTKIT_API_KEY` (or any `PUBLIC_*` PostKit key) in the
+email admin bundle.
 
 After [#100](https://github.com/singleton-sd/poc-inkads-marketing/issues/100)
 lands, consumer CI will run `post-kit-publish` to Azure Blob for tenant

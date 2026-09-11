@@ -1,6 +1,6 @@
 # build output
 dist/
-public/admin/emails/
+admin-emails/dist/
 # generated types
 .astro/
 

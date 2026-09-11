@@ -10,7 +10,7 @@
     "dev": "astro dev",
     "admin:emails:build": "pnpm --filter @inkads/admin-emails build",
     "admin:emails:dev": "pnpm --filter @inkads/admin-emails dev",
-    "build": "pnpm admin:emails:build && astro check && astro build && node scripts/generate-sitemap.mjs",
+    "build": "pnpm admin:emails:build && astro check && astro build && node scripts/copy-admin-emails.mjs && node scripts/generate-sitemap.mjs",
     "preview": "astro preview",
     "astro": "astro",
     "format": "prettier --write .",

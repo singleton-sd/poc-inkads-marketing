@@ -43,6 +43,7 @@ test("email admin SPA sources exist and use cms-oauth-kit", async () => {
   assert.match(github, /\/repos\/\$\{GITHUB_REPO\}\/pulls/);
   assert.match(pkg, /@singleton-sd\/post-kit-editor/);
   assert.match(rootPkg, /admin:emails:build/);
+  assert.match(rootPkg, /copy-admin-emails\.mjs/);
   assert.match(rootPkg, /pnpm admin:emails:build && astro check/);
 });
 
@@ -72,8 +73,8 @@ test("editorial docs describe /admin/emails Decap-parity path", async () => {
   assert.match(documentation, /#102/);
 });
 
-test("built email admin is present after public output exists", async () => {
-  const outDir = path.join(root, "public/admin/emails");
+test("built email admin is present after SPA build output exists", async () => {
+  const outDir = path.join(root, "admin-emails/dist");
   try {
     await stat(outDir);
   } catch {
