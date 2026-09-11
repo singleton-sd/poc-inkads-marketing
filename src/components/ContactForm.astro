@@ -106,6 +106,13 @@ const roleOptions = ["Venue owner / operator", "Advertiser / brand", "Other"];
     general: "Other",
   };
 
+  /** Option labels → short query aliases written back to the URL. */
+  const ROLE_OPTION_TO_QUERY: Record<string, string> = {
+    "Venue owner / operator": "venue",
+    "Advertiser / brand": "advertiser",
+    Other: "other",
+  };
+
   const ROLE_OPTION_VALUES = new Set(Object.values(ROLE_QUERY_TO_OPTION));
   const SAFE_NAME_MAX = 200;
   const SAFE_EMAIL_MAX = 254;
@@ -159,6 +166,25 @@ const roleOptions = ["Venue owner / operator", "Advertiser / brand", "Other"];
     }
   }
 
+  /** Keep the address bar in sync when the role select changes (replaceState). */
+  function syncRoleQueryParam(form: HTMLFormElement) {
+    const roleSelect = form.elements.namedItem(
+      "role",
+    ) as HTMLSelectElement | null;
+    if (!roleSelect) return;
+
+    const url = new URL(window.location.href);
+    const alias = ROLE_OPTION_TO_QUERY[roleSelect.value];
+    if (alias) url.searchParams.set("role", alias);
+    else url.searchParams.delete("role");
+
+    const next = `${url.pathname}${url.search}${url.hash}`;
+    const current = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+    if (next !== current) {
+      history.replaceState(history.state, "", next);
+    }
+  }
+
   function setupContactForm() {
     const root = document.querySelector<HTMLElement>("[data-contact-form]");
     if (!root) return;
@@ -166,9 +192,10 @@ const roleOptions = ["Venue owner / operator", "Advertiser / brand", "Other"];
     const form = root.querySelector<HTMLFormElement>(
       "[data-contact-form-fields]",
     );
+    // Always re-apply prefills (full load + client navigations).
     if (form) applyContactQueryPrefills(form);
 
-    // Guard: astro:page-load fires on first load and on client navigations.
+    // Guard listeners: astro:page-load may fire when ClientRouter is present.
     if (root.dataset.contactFormReady === "true") return;
     root.dataset.contactFormReady = "true";
 
@@ -180,6 +207,11 @@ const roleOptions = ["Venue owner / operator", "Advertiser / brand", "Other"];
       "[data-contact-form-submit]",
     );
     if (!form || !success || !error || !submitButton) return;
+
+    const roleSelect = form.elements.namedItem(
+      "role",
+    ) as HTMLSelectElement | null;
+    roleSelect?.addEventListener("change", () => syncRoleQueryParam(form));
 
     const apiBase = (
       import.meta.env.PUBLIC_POSTKIT_API_BASE_URL as string | undefined
@@ -297,6 +329,8 @@ const roleOptions = ["Venue owner / operator", "Advertiser / brand", "Other"];
     });
   }
 
-  // astro:page-load also fires on the initial page load.
+  // Run on full page load (this site has no ClientRouter). Also listen for
+  // astro:page-load if View Transitions are added later.
+  setupContactForm();
   document.addEventListener("astro:page-load", setupContactForm);
 </script>

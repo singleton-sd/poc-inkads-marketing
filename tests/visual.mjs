@@ -312,6 +312,33 @@ for (const dir of ["pr", "base", "diff"]) {
 const routes = collectHtmlRoutes();
 assert.ok(routes.length > 0, "Expected at least one HTML route in dist/");
 
+/** Query-param UI states (same HTML file; client JS applies prefills). */
+const EXTRA_VISUAL_CAPTURES = [
+  {
+    urlPath: "contact",
+    query: "?role=venue",
+    id: "contact-role-venue",
+  },
+  {
+    urlPath: "contact",
+    query: "?role=advertiser",
+    id: "contact-role-advertiser",
+  },
+];
+
+const captures = [
+  ...routes.map((route) => ({
+    urlPath: route.urlPath,
+    query: "",
+    id: routeSlug(route.urlPath),
+  })),
+  ...EXTRA_VISUAL_CAPTURES.map((extra) => ({
+    urlPath: extra.urlPath,
+    query: extra.query,
+    id: extra.id,
+  })),
+];
+
 const viewports = [
   { name: "desktop", width: 1440, height: 900 },
   { name: "mobile", width: 390, height: 844 },
@@ -321,9 +348,9 @@ const browser = await chromium.launch();
 const manifest = [];
 
 try {
-  for (const route of routes) {
+  for (const capture of captures) {
     for (const viewport of viewports) {
-      const slug = `${routeSlug(route.urlPath)}-${viewport.name}`;
+      const slug = `${capture.id}-${viewport.name}`;
       const prRel = `pr/${slug}.png`;
       const baseRel = `base/${slug}.png`;
       const diffRel = `diff/${slug}.png`;
@@ -331,7 +358,8 @@ try {
       const baseFile = path.join(outDir, baseRel);
       const diffFile = path.join(outDir, diffRel);
 
-      const prUrl = `${prOrigin}${publicUrl(route.urlPath)}`;
+      const pathWithQuery = `${publicUrl(capture.urlPath)}${capture.query}`;
+      const prUrl = `${prOrigin}${pathWithQuery}`;
       const prShot = await screenshotPage(browser, prUrl, viewport, prFile);
       assert.ok(
         prShot.ok && prShot.status < 400,
@@ -344,8 +372,8 @@ try {
       let baseUrl = null;
       if (!skipBase) {
         baseUrl = baseOrigin
-          ? `${baseOrigin}${publicUrl(route.urlPath)}`
-          : `${baseSiteUrl}${sitePath(route.urlPath)}`;
+          ? `${baseOrigin}${publicUrl(capture.urlPath)}${capture.query}`
+          : `${baseSiteUrl}${sitePath(capture.urlPath)}${capture.query}`;
         const baseShot = await screenshotPage(
           browser,
           baseUrl,
@@ -373,14 +401,15 @@ try {
             ? "changed"
             : "unchanged";
 
+      const routeLabel = `${capture.urlPath || "/"}${capture.query}`;
       manifest.push({
-        route: route.urlPath || "/",
+        route: routeLabel,
         viewport: viewport.name,
         prFile: prRel,
         baseFile: baseOk ? baseRel : null,
         diffFile: mismatched > 0 ? diffRel : null,
         mismatched: mismatched > 0 ? mismatched : 0,
-        prUrl: publicUrl(route.urlPath),
+        prUrl: pathWithQuery,
         baseUrl: skipBase ? null : baseUrl,
         status,
       });

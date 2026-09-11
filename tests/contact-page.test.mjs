@@ -65,6 +65,10 @@ test("contact form prefills role/name/email from safe query params", async () =>
   assert.match(form, /params\.get\("name"\)/);
   assert.match(form, /params\.get\("email"\)/);
   assert.match(form, /SAFE_EMAIL_RE/);
+  assert.match(form, /setupContactForm\(\);/);
+  assert.match(form, /syncRoleQueryParam/);
+  assert.match(form, /ROLE_OPTION_TO_QUERY/);
+  assert.match(form, /history\.replaceState/);
   assert.match(form, /ROLE_OPTION_VALUES\.has\(trimmed\)/);
   // Regression: each email segment must reject C0/DEL controls (e.g. %00 / NUL).
   assert.match(

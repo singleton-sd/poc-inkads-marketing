@@ -48,8 +48,11 @@ Fields: Name | Venue / company (row) · Email · Role select (“I am a…”) �
 
 ## Query prefills (deep links / QR)
 
-`/contact` reads optional URL query params on `astro:page-load` and prefills
-safe fields. Invalid values are ignored (form stays on defaults).
+`/contact` reads optional URL query params on load (and on `astro:page-load` if
+View Transitions are enabled) and prefills safe fields. Invalid values are
+ignored (form stays on defaults). Changing the **I am a…** select updates the
+`role` query param via `history.replaceState` (short aliases: `venue` /
+`advertiser` / `other`) so the address bar stays shareable.
 
 | Param   | Values                                                                                         | Effect                                                                                                   |
 | ------- | ---------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
@@ -61,6 +64,10 @@ Examples:
 
 - `/contact?role=venue`
 - `/contact?role=advertiser&name=Ada&email=ada@example.com`
+
+Manual check: open those URLs on preview or `pnpm preview`. Automated:
+`pnpm build && pnpm test:contact-prefill` (Playwright). Visual CI also captures
+`/contact?role=venue` and `/contact?role=advertiser`.
 
 **Do not put secrets in query strings** (tokens, passwords, API keys, or other
 sensitive PII). Query params appear in browser history, server/CDN logs, and
