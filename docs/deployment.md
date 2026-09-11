@@ -131,6 +131,13 @@ The browser form refuses to enable submit unless the configured base starts with
 PR preview pages send `X-PostKit-Contact-Preview: true` so PostKit uses the
 development email provider instead of the production InkAds inbox.
 
+### Deep-link query prefills
+
+Marketing CTAs and QR codes may open `/contact?role=venue|advertiser|other`
+(and optional safe `name` / `email`). See
+[design-reference/contact.md](design-reference/contact.md#query-prefills-deep-links--qr).
+**Never put secrets in URL query strings.**
+
 ## Verification
 
 After merging the deployment PR, changing the Pages source, and creating the

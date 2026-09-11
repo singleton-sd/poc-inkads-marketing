@@ -41,6 +41,36 @@ test("contact form posts to PostKit with loading and error states", async () => 
   assert.doesNotMatch(form, /Preview form|Nothing was sent/);
 });
 
+test("contact form prefills role/name/email from safe query params", async () => {
+  const form = await readFile(
+    new URL("src/components/ContactForm.astro", root),
+    "utf8",
+  );
+  const docs = await readFile(
+    new URL("docs/design-reference/contact.md", root),
+    "utf8",
+  );
+
+  assert.match(form, /ROLE_QUERY_TO_OPTION/);
+  assert.match(form, /applyContactQueryPrefills/);
+  assert.match(form, /URLSearchParams/);
+  assert.match(form, /resolveRoleOption/);
+  assert.match(form, /venue:\s*"Venue owner \/ operator"/);
+  assert.match(form, /advertiser:\s*"Advertiser \/ brand"/);
+  assert.match(form, /other:\s*"Other"/);
+  assert.match(form, /partnership:\s*"Venue owner \/ operator"/);
+  assert.match(form, /sales:\s*"Advertiser \/ brand"/);
+  assert.match(form, /general:\s*"Other"/);
+  assert.match(form, /params\.get\("role"\)/);
+  assert.match(form, /params\.get\("name"\)/);
+  assert.match(form, /params\.get\("email"\)/);
+  assert.match(form, /SAFE_EMAIL_RE/);
+  assert.match(form, /ROLE_OPTION_VALUES\.has\(trimmed\)/);
+
+  assert.match(docs, /role=venue/);
+  assert.match(docs, /Do not put secrets in query strings/i);
+});
+
 test("contact content describes live enquiry delivery", async () => {
   const content = await readFile(
     new URL("src/content/pages/contact.md", root),

@@ -96,15 +96,80 @@ const roleOptions = ["Venue owner / operator", "Advertiser / brand", "Other"];
     Other: "general",
   };
 
+  /** Query `role` aliases → select option labels (same mapping as submit subjects). */
+  const ROLE_QUERY_TO_OPTION: Record<string, string> = {
+    venue: "Venue owner / operator",
+    partnership: "Venue owner / operator",
+    advertiser: "Advertiser / brand",
+    sales: "Advertiser / brand",
+    other: "Other",
+    general: "Other",
+  };
+
+  const ROLE_OPTION_VALUES = new Set(Object.values(ROLE_QUERY_TO_OPTION));
+  const SAFE_NAME_MAX = 200;
+  const SAFE_EMAIL_MAX = 254;
+  const SAFE_EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  function resolveRoleOption(raw: string | null): string | null {
+    if (raw == null) return null;
+    const trimmed = raw.trim();
+    if (!trimmed) return null;
+    const byAlias = ROLE_QUERY_TO_OPTION[trimmed.toLowerCase()];
+    if (byAlias) return byAlias;
+    if (ROLE_OPTION_VALUES.has(trimmed)) return trimmed;
+    return null;
+  }
+
+  function applyContactQueryPrefills(form: HTMLFormElement) {
+    const params = new URLSearchParams(window.location.search);
+
+    const roleOption = resolveRoleOption(params.get("role"));
+    if (roleOption) {
+      const roleSelect = form.elements.namedItem(
+        "role",
+      ) as HTMLSelectElement | null;
+      if (roleSelect) roleSelect.value = roleOption;
+    }
+
+    const nameRaw = params.get("name")?.trim() ?? "";
+    if (
+      nameRaw.length > 0 &&
+      nameRaw.length <= SAFE_NAME_MAX &&
+      !/[\u0000-\u001f\u007f]/.test(nameRaw)
+    ) {
+      const nameInput = form.elements.namedItem(
+        "name",
+      ) as HTMLInputElement | null;
+      if (nameInput) nameInput.value = nameRaw;
+    }
+
+    const emailRaw = params.get("email")?.trim() ?? "";
+    if (
+      emailRaw.length > 0 &&
+      emailRaw.length <= SAFE_EMAIL_MAX &&
+      SAFE_EMAIL_RE.test(emailRaw)
+    ) {
+      const emailInput = form.elements.namedItem(
+        "email",
+      ) as HTMLInputElement | null;
+      if (emailInput) emailInput.value = emailRaw;
+    }
+  }
+
   function setupContactForm() {
     const root = document.querySelector<HTMLElement>("[data-contact-form]");
-    // Guard: astro:page-load fires on first load and on client navigations.
-    if (!root || root.dataset.contactFormReady === "true") return;
-    root.dataset.contactFormReady = "true";
+    if (!root) return;
 
     const form = root.querySelector<HTMLFormElement>(
       "[data-contact-form-fields]",
     );
+    if (form) applyContactQueryPrefills(form);
+
+    // Guard: astro:page-load fires on first load and on client navigations.
+    if (root.dataset.contactFormReady === "true") return;
+    root.dataset.contactFormReady = "true";
+
     const success = root.querySelector<HTMLElement>(
       "[data-contact-form-success]",
     );

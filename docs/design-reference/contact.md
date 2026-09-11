@@ -46,4 +46,23 @@ Default: form visible. On submit: success panel (gold border) replaces the field
 
 Fields: Name | Venue / company (row) · Email · Role select (“I am a…”) · Message textarea · Send request (gold button).
 
-This is a local PoC form (client-side submitted flag); production should post to a real endpoint.
+## Query prefills (deep links / QR)
+
+`/contact` reads optional URL query params on `astro:page-load` and prefills
+safe fields. Invalid values are ignored (form stays on defaults).
+
+| Param   | Values                                                                                         | Effect                                                                                                   |
+| ------- | ---------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `role`  | `venue` / `partnership`, `advertiser` / `sales`, `other` / `general`, or an exact option label | Selects “I am a…”; submit still maps via `ROLE_TO_SUBJECT` → PostKit `partnership` / `sales` / `general` |
+| `name`  | Non-empty trimmed text ≤ 200 chars, no control characters                                      | Prefills Name                                                                                            |
+| `email` | Simple email shape ≤ 254 chars                                                                 | Prefills Email                                                                                           |
+
+Examples:
+
+- `/contact?role=venue`
+- `/contact?role=advertiser&name=Ada&email=ada@example.com`
+
+**Do not put secrets in query strings** (tokens, passwords, API keys, or other
+sensitive PII). Query params appear in browser history, server/CDN logs, and
+Referer headers. Prefer short CTA deep links with `role` only; use `name` /
+`email` only for low-sensitivity convenience prefills.
