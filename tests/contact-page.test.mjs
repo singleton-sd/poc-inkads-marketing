@@ -66,6 +66,21 @@ test("contact form prefills role/name/email from safe query params", async () =>
   assert.match(form, /params\.get\("email"\)/);
   assert.match(form, /SAFE_EMAIL_RE/);
   assert.match(form, /ROLE_OPTION_VALUES\.has\(trimmed\)/);
+  // Regression: each email segment must reject C0/DEL controls (e.g. %00 / NUL).
+  assert.match(
+    form,
+    /SAFE_EMAIL_RE\s*=\s*\/\^[^\n]*\\u0000-\\u001f\\u007f[^\n]*\\u0000-\\u001f\\u007f[^\n]*\\u0000-\\u001f\\u007f/,
+  );
+
+  const emailReMatch = form.match(
+    /const SAFE_EMAIL_RE\s*=\s*\/([\s\S]*?)\/\s*;/,
+  );
+  assert.ok(emailReMatch, "SAFE_EMAIL_RE literal should be present");
+  const SAFE_EMAIL_RE = new RegExp(emailReMatch[1]);
+  assert.equal(SAFE_EMAIL_RE.test("user@example.com"), true);
+  assert.equal(SAFE_EMAIL_RE.test("user\u0000@example.com"), false);
+  assert.equal(SAFE_EMAIL_RE.test("user@exam\u0007ple.com"), false);
+  assert.equal(SAFE_EMAIL_RE.test("user@example.com\u007f"), false);
 
   assert.match(docs, /role=venue/);
   assert.match(docs, /Do not put secrets in query strings/i);

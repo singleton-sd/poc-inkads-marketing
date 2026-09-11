@@ -55,7 +55,7 @@ safe fields. Invalid values are ignored (form stays on defaults).
 | ------- | ---------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
 | `role`  | `venue` / `partnership`, `advertiser` / `sales`, `other` / `general`, or an exact option label | Selects “I am a…”; submit still maps via `ROLE_TO_SUBJECT` → PostKit `partnership` / `sales` / `general` |
 | `name`  | Non-empty trimmed text ≤ 200 chars, no control characters                                      | Prefills Name                                                                                            |
-| `email` | Simple email shape ≤ 254 chars                                                                 | Prefills Email                                                                                           |
+| `email` | Simple email shape ≤ 254 chars, no control characters in each segment                          | Prefills Email                                                                                           |
 
 Examples:
 

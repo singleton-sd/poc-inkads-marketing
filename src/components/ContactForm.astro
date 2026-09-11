@@ -109,7 +109,9 @@ const roleOptions = ["Venue owner / operator", "Advertiser / brand", "Other"];
   const ROLE_OPTION_VALUES = new Set(Object.values(ROLE_QUERY_TO_OPTION));
   const SAFE_NAME_MAX = 200;
   const SAFE_EMAIL_MAX = 254;
-  const SAFE_EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  // Reject whitespace, @, and C0/DEL controls in each segment (blocks %00 etc.).
+  const SAFE_EMAIL_RE =
+    /^[^\s@\u0000-\u001f\u007f]+@[^\s@\u0000-\u001f\u007f]+\.[^\s@\u0000-\u001f\u007f]+$/;
 
   function resolveRoleOption(raw: string | null): string | null {
     if (raw == null) return null;
