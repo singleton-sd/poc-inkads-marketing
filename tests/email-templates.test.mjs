@@ -83,11 +83,8 @@ test("editorial docs describe email-templates layout and Decap boundary", async 
   assert.match(documentation, /preview\.json/);
   assert.match(documentation, /Not a Decap collection/i);
   assert.match(documentation, /post-kit-publish/);
-  assert.match(documentation, /#100/);
-  assert.match(
-    documentation,
-    /Until then, merged template sources stay in Git only/,
-  );
+  assert.match(documentation, /publish-email-templates\.yml/);
+  assert.match(documentation, /templates:compile/);
   assert.match(documentation, /Never commit PostKit API keys/i);
   assert.doesNotMatch(documentation, forbiddenSecretPattern);
 });

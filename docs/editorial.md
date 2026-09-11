@@ -142,14 +142,14 @@ Seeded keys today:
 `public/admin/config.yml`. An authenticated email admin UI (sibling to
 `/admin`, e.g. `/admin/emails`) will embed `@singleton-sd/post-kit-editor` and
 save via Git commit/PR — tracked under epic
-[#104](https://github.com/singleton-sd/poc-inkads-marketing/issues/104).
+[#104](https://github.com/singleton-sd/poc-inkads-marketing/issues/104) /
+[#101](https://github.com/singleton-sd/poc-inkads-marketing/issues/101)
+(deferred until PostKit ships `EmailTemplateAdmin`).
 
-After [#100](https://github.com/singleton-sd/poc-inkads-marketing/issues/100)
-lands, consumer CI will run `post-kit-publish` to Azure Blob for tenant
-`inkads` (see PostKit
-[`docs/examples/publish-email-templates.yml`](https://github.com/singleton-sd/post-kit/blob/main/docs/examples/publish-email-templates.yml)
-and [`docs/guides/template-publishing.md`](https://github.com/singleton-sd/post-kit/blob/main/docs/guides/template-publishing.md)).
-Until then, merged template sources stay in Git only. Authoring rules:
+On merge to `main`, `.github/workflows/publish-email-templates.yml` runs
+`post-kit-publish` (OIDC → Blob) for tenant `inkads`. PRs only compile
+(`pnpm templates:compile`). See [`docs/deployment.md`](deployment.md) for
+storage account / RBAC. Authoring rules:
 [`docs/guides/template-authoring.md`](https://github.com/singleton-sd/post-kit/blob/main/docs/guides/template-authoring.md).
 
 Never commit PostKit API keys or other secrets under `content/email-templates/`.

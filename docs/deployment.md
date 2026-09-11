@@ -112,6 +112,38 @@ Grant that identity **App Configuration Data Reader** on
 (`ref:refs/heads/main` and `pull_request`). After PostKit seeds the key (or ops
 sets it in the portal), CI reads it on every build.
 
+### Email template publish (Blob)
+
+`.github/workflows/publish-email-templates.yml` compiles
+`content/email-templates/` on PRs and, on `main` (or `workflow_dispatch`),
+runs `post-kit-publish` over OIDC into Azure Blob:
+
+```text
+tenants/inkads/{environment}/templates/{key}/template.html
+tenants/inkads/{environment}/templates/{key}/metadata.json
+tenants/inkads/{environment}/templates/{key}/manifest.json
+```
+
+| Setting         | Default                                    | Override variable                    |
+| --------------- | ------------------------------------------ | ------------------------------------ |
+| Tenant          | `inkads`                                   | (fixed)                              |
+| Environment     | `production` on `main`; else `development` | `workflow_dispatch` input            |
+| Storage account | `ssdpostkitstprodae`                       | `POSTKIT_TEMPLATE_STORAGE_ACCOUNT`   |
+| Container       | `templates`                                | `POSTKIT_TEMPLATE_STORAGE_CONTAINER` |
+
+Uses the same `AZURE_CLIENT_ID` / `AZURE_TENANT_ID` / `AZURE_SUBSCRIPTION_ID`
+OIDC variables as App Config. That identity also needs **Storage Blob Data
+Contributor** (or narrower container scope) on the template storage account —
+App Configuration Data Reader alone is not enough to publish. Never put
+storage account keys, connection strings, or `POSTKIT_API_KEY` in GitHub
+Secrets or this repository.
+
+Local compile check (no Azure):
+
+```sh
+pnpm templates:compile
+```
+
 ### Emergency / local override
 
 Optional Actions variable `PUBLIC_POSTKIT_API_BASE_URL` (must be `https://`)
