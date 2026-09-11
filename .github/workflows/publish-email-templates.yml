@@ -1,0 +1,119 @@
+# Compile PostKit email templates and publish to Azure Blob (tenant inkads).
+# Adapted from PostKit docs/examples/publish-email-templates.yml.
+# Auth: GitHub OIDC → azure/login → DefaultAzureCredential (no storage keys).
+
+name: Publish email templates
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "content/email-templates/**"
+      - ".github/workflows/publish-email-templates.yml"
+      - "scripts/compile-email-templates.mjs"
+      - "package.json"
+      - "pnpm-lock.yaml"
+  pull_request:
+    paths:
+      - "content/email-templates/**"
+      - ".github/workflows/publish-email-templates.yml"
+      - "scripts/compile-email-templates.mjs"
+      - "package.json"
+      - "pnpm-lock.yaml"
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment (overrides the branch default)"
+        required: false
+        type: choice
+        options:
+          - development
+          - staging
+          - production
+
+concurrency:
+  group: publish-email-templates-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          run_install: false
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Compile email templates
+        run: pnpm templates:compile
+
+  publish:
+    if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
+    needs: compile
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          run_install: false
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Require Azure OIDC variables
+        if: ${{ vars.AZURE_CLIENT_ID == '' || vars.AZURE_TENANT_ID == '' || vars.AZURE_SUBSCRIPTION_ID == '' }}
+        run: |
+          echo "::error::Configure AZURE_CLIENT_ID, AZURE_TENANT_ID, and AZURE_SUBSCRIPTION_ID for OIDC publish."
+          exit 1
+      - name: Select environment
+        id: env
+        run: |
+          if [ -n "${{ inputs.environment }}" ]; then
+            selected="${{ inputs.environment }}"
+          elif [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            selected="production"
+          else
+            selected="development"
+          fi
+          echo "name=$selected" >> "$GITHUB_OUTPUT"
+          echo "Publishing to $selected"
+      - name: Azure login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      - name: Publish templates
+        env:
+          # Non-secret account name; override via repo variable if PostKit moves storage.
+          POSTKIT_TEMPLATE_STORAGE_ACCOUNT: ${{ vars.POSTKIT_TEMPLATE_STORAGE_ACCOUNT }}
+          POSTKIT_TEMPLATE_STORAGE_CONTAINER: ${{ vars.POSTKIT_TEMPLATE_STORAGE_CONTAINER }}
+        run: |
+          set -euo pipefail
+          storage="${POSTKIT_TEMPLATE_STORAGE_ACCOUNT:-ssdpostkitstprodae}"
+          container="${POSTKIT_TEMPLATE_STORAGE_CONTAINER:-templates}"
+          pnpm exec post-kit-publish \
+            --templates ./content/email-templates \
+            --tenant inkads \
+            --environment "${{ steps.env.outputs.name }}" \
+            --storage-account "$storage" \
+            --container "$container" \
+            --commit "${{ github.sha }}"

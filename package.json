@@ -21,6 +21,7 @@
     "test:contact-prefill": "node tests/contact-prefill.mjs",
     "test:visual": "node tests/visual.mjs",
     "test:visual:gate": "node tests/visual-gate.mjs",
+    "templates:compile": "node scripts/compile-email-templates.mjs",
     "verify": "pnpm format:check && pnpm lint && pnpm test && pnpm build && pnpm test:seo",
     "cms:config": "node --experimental-strip-types scripts/generate-cms-config.ts",
     "prepare": "husky"
@@ -43,6 +44,8 @@
     "@astrojs/check": "^0.9.10",
     "@axe-core/playwright": "^4.13.0",
     "@eslint/js": "^10.0.1",
+    "@singleton-sd/post-kit-compiler": "0.4.0",
+    "@singleton-sd/post-kit-publisher": "0.4.0",
     "@tailwindcss/vite": "^4.3.3",
     "@types/pngjs": "^6.0.5",
     "@types/react": "^19.2.2",

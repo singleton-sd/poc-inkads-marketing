@@ -10,8 +10,11 @@ template key and must contain:
 These files are **not** an Astro content collection and are **not** edited
 through Decap. An in-browser editor is deferred until PostKit ships
 `EmailTemplateAdmin` (then marketing #101). Publishing with CI
-(`post-kit-publish`) is planned in
-[#100](https://github.com/singleton-sd/poc-inkads-marketing/issues/100) and is
-not enabled yet; see [`docs/editorial.md`](../../docs/editorial.md).
+(`post-kit-publish`) runs on merge to `main` via
+`.github/workflows/publish-email-templates.yml`; see
+[`docs/editorial.md`](../../docs/editorial.md) and
+[`docs/deployment.md`](../../docs/deployment.md).
+
+Local compile check: `pnpm templates:compile`.
 
 Do not put API keys or other secrets in this tree.

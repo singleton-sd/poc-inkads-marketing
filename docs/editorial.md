@@ -150,14 +150,12 @@ Seeded keys today:
 cms-oauth-kit for GitHub OAuth and open PRs for
 `content/email-templates/<key>/{template,metadata,preview}.json`. Do not put a
 temporary SPA in this repository while waiting. Send-test needs a trusted BFF
-(#102) after publish CI (#100).
+(#102) after templates are published (#100).
 
-After [#100](https://github.com/singleton-sd/poc-inkads-marketing/issues/100)
-lands, consumer CI will run `post-kit-publish` to Azure Blob for tenant
-`inkads` (see PostKit
-[`docs/examples/publish-email-templates.yml`](https://github.com/singleton-sd/post-kit/blob/main/docs/examples/publish-email-templates.yml)
-and [`docs/guides/template-publishing.md`](https://github.com/singleton-sd/post-kit/blob/main/docs/guides/template-publishing.md)).
-Until then, merged template sources stay in Git only. Authoring rules:
+On merge to `main`, `.github/workflows/publish-email-templates.yml` runs
+`post-kit-publish` (OIDC → Blob) for tenant `inkads`. PRs only compile
+(`pnpm templates:compile`). See [`docs/deployment.md`](deployment.md) for
+storage account / RBAC. Authoring rules:
 [`docs/guides/template-authoring.md`](https://github.com/singleton-sd/post-kit/blob/main/docs/guides/template-authoring.md).
 
 Never commit PostKit API keys or other secrets under `content/email-templates/`.
