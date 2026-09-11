@@ -11,6 +11,7 @@ import {
   listTemplateDirectories,
   loadTemplateFromGit,
   saveTemplatePullRequest,
+  type TemplateBlobShas,
   type TemplateListItem,
 } from "./github";
 
@@ -26,6 +27,9 @@ export function App() {
     null,
   );
   const [template, setTemplate] = useState<TemplateSourceFiles | null>(null);
+  const [loadedBlobShas, setLoadedBlobShas] = useState<TemplateBlobShas | null>(
+    null,
+  );
   const [loadError, setLoadError] = useState<string | null>(null);
   const [loadingTemplate, setLoadingTemplate] = useState(false);
   const [lastPrUrl, setLastPrUrl] = useState<string | null>(null);
@@ -69,21 +73,24 @@ export function App() {
   useEffect(() => {
     if (!token || !selectedDirectory) {
       setTemplate(null);
+      setLoadedBlobShas(null);
       return;
     }
     let cancelled = false;
     setLoadingTemplate(true);
     setLoadError(null);
     void loadTemplateFromGit(token, selectedDirectory)
-      .then((files) => {
+      .then((loaded) => {
         if (!cancelled) {
-          setTemplate(files);
+          setTemplate(loaded.files);
+          setLoadedBlobShas(loaded.blobShas);
           setLoadingTemplate(false);
         }
       })
       .catch((err: unknown) => {
         if (!cancelled) {
           setTemplate(null);
+          setLoadedBlobShas(null);
           setLoadError(
             err instanceof Error ? err.message : "Failed to load template.",
           );
@@ -113,6 +120,7 @@ export function App() {
     setLogin(null);
     setCatalog([]);
     setTemplate(null);
+    setLoadedBlobShas(null);
     setSelectedDirectory(null);
     setLastPrUrl(null);
     setStatus(null);
@@ -123,7 +131,7 @@ export function App() {
     serialized: SerializedTemplateSource,
     files: TemplateSourceFiles,
   ) {
-    if (!token || !selectedDirectory) {
+    if (!token || !selectedDirectory || !loadedBlobShas) {
       return { ok: false as const, message: "Not signed in." };
     }
     setStatus(null);
@@ -134,6 +142,7 @@ export function App() {
         selectedDirectory,
         serialized,
         files,
+        loadedBlobShas,
       );
       setLastPrUrl(result.prUrl);
       setStatus(`Opened pull request on branch ${result.branch}.`);
@@ -230,7 +239,13 @@ export function App() {
           <select
             aria-label="Select template"
             value={selectedDirectory ?? ""}
-            onChange={(event) => setSelectedDirectory(event.target.value)}
+            onChange={(event) => {
+              setTemplate(null);
+              setLoadedBlobShas(null);
+              setLoadError(null);
+              setLoadingTemplate(true);
+              setSelectedDirectory(event.target.value);
+            }}
           >
             {catalog.map((item) => (
               <option key={item.directory} value={item.directory}>

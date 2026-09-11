@@ -8,7 +8,7 @@ test("build script generates sitemap after astro build", async () => {
   const pkg = await readFile(new URL("package.json", root), "utf8");
   assert.match(
     pkg,
-    /astro build && node scripts\/copy-admin-emails\.mjs && node scripts\/generate-sitemap\.mjs/,
+    /astro build && node scripts\/copy-admin-emails\.mjs && node scripts\/check-admin-emails-bundle\.mjs && node scripts\/generate-sitemap\.mjs/,
   );
 });
 

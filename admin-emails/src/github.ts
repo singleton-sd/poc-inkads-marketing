@@ -11,6 +11,13 @@ import {
   GITHUB_REPO_NAME,
   TEMPLATES_ROOT,
 } from "./auth";
+import { assertTemplateRevisionFresh, type TemplateBlobShas } from "./revision";
+
+export type { TemplateBlobShas } from "./revision";
+export {
+  assertTemplateRevisionFresh,
+  STALE_TEMPLATE_MESSAGE,
+} from "./revision";
 
 export interface TemplateListItem {
   directory: string;
@@ -77,11 +84,11 @@ export async function listTemplateDirectories(
 
   for (const dir of dirs) {
     try {
-      const files = await loadTemplateFromGit(token, dir.name);
+      const loaded = await loadTemplateFromGit(token, dir.name);
       listed.push({
         directory: dir.name,
-        key: files.metadata.key,
-        name: files.metadata.name,
+        key: loaded.files.metadata.key,
+        name: loaded.files.metadata.name,
       });
     } catch {
       // Skip incomplete directories (e.g. README-only).
@@ -91,19 +98,29 @@ export async function listTemplateDirectories(
   return listed.sort((a, b) => a.key.localeCompare(b.key));
 }
 
-async function readRepoFile(token: string, path: string): Promise<string> {
+async function readRepoFile(
+  token: string,
+  path: string,
+): Promise<{ text: string; sha: string }> {
   const encoded = path
     .split("/")
     .map((segment) => encodeURIComponent(segment))
     .join("/");
-  const item = await githubJson<{ content?: string; encoding?: string }>(
+  const item = await githubJson<{
+    content?: string;
+    encoding?: string;
+    sha?: string;
+  }>(
     token,
     `/repos/${GITHUB_REPO}/contents/${encoded}?ref=${GITHUB_BASE_BRANCH}`,
   );
-  if (!item.content || item.encoding !== "base64") {
+  if (!item.content || item.encoding !== "base64" || !item.sha) {
     throw new Error(`Could not read ${path}`);
   }
-  return decodeBase64Utf8(item.content.replace(/\n/g, ""));
+  return {
+    text: decodeBase64Utf8(item.content.replace(/\n/g, "")),
+    sha: item.sha,
+  };
 }
 
 function decodeBase64Utf8(base64: string): string {
@@ -112,21 +129,50 @@ function decodeBase64Utf8(base64: string): string {
   return new TextDecoder().decode(bytes);
 }
 
+export interface LoadedTemplate {
+  files: TemplateSourceFiles;
+  blobShas: TemplateBlobShas;
+}
+
 export async function loadTemplateFromGit(
   token: string,
   directory: string,
-): Promise<TemplateSourceFiles> {
+): Promise<LoadedTemplate> {
   const base = `${TEMPLATES_ROOT}/${directory}`;
-  const [templateRaw, metadataRaw, previewRaw] = await Promise.all([
+  const [templateFile, metadataFile, previewFile] = await Promise.all([
     readRepoFile(token, `${base}/template.json`),
     readRepoFile(token, `${base}/metadata.json`),
     readRepoFile(token, `${base}/preview.json`),
   ]);
-  return loadTemplateSource({
-    templateJson: JSON.parse(templateRaw) as unknown,
-    metadata: JSON.parse(metadataRaw) as unknown,
-    previewData: JSON.parse(previewRaw) as unknown,
-  });
+  return {
+    files: loadTemplateSource({
+      templateJson: JSON.parse(templateFile.text) as unknown,
+      metadata: JSON.parse(metadataFile.text) as unknown,
+      previewData: JSON.parse(previewFile.text) as unknown,
+    }),
+    blobShas: {
+      template: templateFile.sha,
+      metadata: metadataFile.sha,
+      preview: previewFile.sha,
+    },
+  };
+}
+
+async function fetchTemplateBlobShas(
+  token: string,
+  directory: string,
+): Promise<TemplateBlobShas> {
+  const base = `${TEMPLATES_ROOT}/${directory}`;
+  const [templateFile, metadataFile, previewFile] = await Promise.all([
+    readRepoFile(token, `${base}/template.json`),
+    readRepoFile(token, `${base}/metadata.json`),
+    readRepoFile(token, `${base}/preview.json`),
+  ]);
+  return {
+    template: templateFile.sha,
+    metadata: metadataFile.sha,
+    preview: previewFile.sha,
+  };
 }
 
 function utf8ToBase64(text: string): string {
@@ -149,6 +195,7 @@ export async function saveTemplatePullRequest(
   directory: string,
   serialized: SerializedTemplateSource,
   files: TemplateSourceFiles,
+  expectedBlobShas: TemplateBlobShas,
 ): Promise<SavePullRequestResult> {
   if (files.metadata.key.length === 0) {
     throw new Error("metadata.key is required.");
@@ -160,6 +207,9 @@ export async function saveTemplatePullRequest(
   ) {
     throw new Error("Invalid template directory name.");
   }
+
+  const currentShas = await fetchTemplateBlobShas(token, directory);
+  assertTemplateRevisionFresh(expectedBlobShas, currentShas);
 
   const user = await fetchAuthenticatedUser(token);
   const ref = await githubJson<{ object: { sha: string } }>(

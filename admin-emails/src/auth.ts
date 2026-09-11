@@ -55,11 +55,15 @@ export function loginWithGithub(): Promise<string> {
     }
 
     function onMessage(event: MessageEvent) {
+      const oauthOrigin = new URL(OAUTH_AUTH_URL).origin;
+      if (event.source !== popup || event.origin !== oauthOrigin) {
+        return;
+      }
       if (typeof event.data !== "string") return;
 
       if (event.data === "authorizing:github") {
         // Handshake: confirm our origin so the callback may post the token.
-        (event.source as Window | null)?.postMessage(event.data, event.origin);
+        popup.postMessage(event.data, event.origin);
         return;
       }
 
