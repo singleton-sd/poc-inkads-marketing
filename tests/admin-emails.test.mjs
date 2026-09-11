@@ -35,10 +35,11 @@ test("email admin SPA sources exist and use cms-oauth-kit", async () => {
 
   assert.match(auth, /auth\.singletonsd\.com\/auth/);
   assert.match(auth, /authorization:github/);
+  assert.match(auth, /content\/email-templates/);
   assert.match(app, /EmailTemplateEditor/);
   assert.match(app, /onSave/);
   assert.doesNotMatch(app, /onSendTest/);
-  assert.match(github, /content\/email-templates/);
+  assert.match(github, /TEMPLATES_ROOT/);
   assert.match(github, /\/repos\/\$\{GITHUB_REPO\}\/pulls/);
   assert.match(pkg, /@singleton-sd\/post-kit-editor/);
   assert.match(rootPkg, /admin:emails:build/);
