@@ -6,8 +6,43 @@ import { fileURLToPath } from "node:url";
 const rootDir = path.dirname(fileURLToPath(new URL(".", import.meta.url)));
 
 /** Fail the build if PostKit credential names appear in either admin bundle tree. */
-const forbiddenSecretPattern =
+export const forbiddenSecretPattern =
   /PUBLIC_POSTKIT_API_KEY|VITE_POSTKIT_API_KEY|POSTKIT_API_KEY\s*[=:]|["']POSTKIT_API_KEY["']\s*:/;
+
+/** Env keys that must never appear as inlined literal values in the SPA bundle. */
+export const postkitCredentialEnvKeys = [
+  "POSTKIT_API_KEY",
+  "VITE_POSTKIT_API_KEY",
+  "PUBLIC_POSTKIT_API_KEY",
+];
+
+/**
+ * Return configured credential values worth scanning for (non-empty strings).
+ * Vite can replace `import.meta.env.VITE_*` with these literals at build time.
+ */
+export function configuredPostkitCredentialValues(env = process.env) {
+  const values = [];
+  for (const key of postkitCredentialEnvKeys) {
+    const value = env[key];
+    if (typeof value === "string" && value.trim().length > 0) {
+      values.push({ key, value });
+    }
+  }
+  return values;
+}
+
+/** @returns {string | null} Human-readable hit reason, or null if clean. */
+export function findForbiddenCredentialMaterial(raw, env = process.env) {
+  if (forbiddenSecretPattern.test(raw)) {
+    return "credential name or assignment pattern";
+  }
+  for (const { key, value } of configuredPostkitCredentialValues(env)) {
+    if (raw.includes(value)) {
+      return `inlined ${key} value`;
+    }
+  }
+  return null;
+}
 
 async function listFilesRecursive(dir) {
   const entries = await readdir(dir, { withFileTypes: true });
@@ -23,7 +58,7 @@ async function listFilesRecursive(dir) {
   return files;
 }
 
-async function assertCleanBundle(dir) {
+async function assertCleanBundle(dir, env = process.env) {
   if (!existsSync(dir)) {
     console.error(`Missing admin email bundle at ${dir}`);
     process.exit(1);
@@ -32,15 +67,22 @@ async function assertCleanBundle(dir) {
   for (const filePath of files) {
     if (!/\.(js|mjs|cjs|html|map)$/.test(filePath)) continue;
     const raw = await readFile(filePath, "utf8");
-    if (forbiddenSecretPattern.test(raw)) {
+    const hit = findForbiddenCredentialMaterial(raw, env);
+    if (hit) {
       console.error(
-        `Forbidden PostKit credential material in ${path.relative(rootDir, filePath)}`,
+        `Forbidden PostKit credential material (${hit}) in ${path.relative(rootDir, filePath)}`,
       );
       process.exit(1);
     }
   }
 }
 
-await assertCleanBundle(path.join(rootDir, "admin-emails/dist"));
-await assertCleanBundle(path.join(rootDir, "dist/admin/emails"));
-console.log("Admin email bundles contain no PostKit API key material.");
+const isMain =
+  process.argv[1] &&
+  path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+
+if (isMain) {
+  await assertCleanBundle(path.join(rootDir, "admin-emails/dist"));
+  await assertCleanBundle(path.join(rootDir, "dist/admin/emails"));
+  console.log("Admin email bundles contain no PostKit API key material.");
+}

@@ -101,6 +101,7 @@ export async function listTemplateDirectories(
 async function readRepoFile(
   token: string,
   path: string,
+  ref: string = GITHUB_BASE_BRANCH,
 ): Promise<{ text: string; sha: string }> {
   const encoded = path
     .split("/")
@@ -112,7 +113,7 @@ async function readRepoFile(
     sha?: string;
   }>(
     token,
-    `/repos/${GITHUB_REPO}/contents/${encoded}?ref=${GITHUB_BASE_BRANCH}`,
+    `/repos/${GITHUB_REPO}/contents/${encoded}?ref=${encodeURIComponent(ref)}`,
   );
   if (!item.content || item.encoding !== "base64" || !item.sha) {
     throw new Error(`Could not read ${path}`);
@@ -161,18 +162,28 @@ export async function loadTemplateFromGit(
 async function fetchTemplateBlobShas(
   token: string,
   directory: string,
+  ref: string,
 ): Promise<TemplateBlobShas> {
   const base = `${TEMPLATES_ROOT}/${directory}`;
   const [templateFile, metadataFile, previewFile] = await Promise.all([
-    readRepoFile(token, `${base}/template.json`),
-    readRepoFile(token, `${base}/metadata.json`),
-    readRepoFile(token, `${base}/preview.json`),
+    readRepoFile(token, `${base}/template.json`, ref),
+    readRepoFile(token, `${base}/metadata.json`, ref),
+    readRepoFile(token, `${base}/preview.json`, ref),
   ]);
   return {
     template: templateFile.sha,
     metadata: metadataFile.sha,
     preview: previewFile.sha,
   };
+}
+
+/** Resolve main tip once; freshness + PR tree must share this commit. */
+async function fetchBaseBranchSha(token: string): Promise<string> {
+  const ref = await githubJson<{ object: { sha: string } }>(
+    token,
+    `/repos/${GITHUB_REPO}/git/ref/heads/${GITHUB_BASE_BRANCH}`,
+  );
+  return ref.object.sha;
 }
 
 function utf8ToBase64(text: string): string {
@@ -208,15 +219,13 @@ export async function saveTemplatePullRequest(
     throw new Error("Invalid template directory name.");
   }
 
-  const currentShas = await fetchTemplateBlobShas(token, directory);
+  // Pin freshness reads and the PR parent to the same commit so main cannot
+  // advance between the SHA check and tree creation (stale overwrite risk).
+  const baseSha = await fetchBaseBranchSha(token);
+  const currentShas = await fetchTemplateBlobShas(token, directory, baseSha);
   assertTemplateRevisionFresh(expectedBlobShas, currentShas);
 
   const user = await fetchAuthenticatedUser(token);
-  const ref = await githubJson<{ object: { sha: string } }>(
-    token,
-    `/repos/${GITHUB_REPO}/git/ref/heads/${GITHUB_BASE_BRANCH}`,
-  );
-  const baseSha = ref.object.sha;
   const baseCommit = await githubJson<{ tree: { sha: string } }>(
     token,
     `/repos/${GITHUB_REPO}/git/commits/${baseSha}`,

@@ -8,11 +8,13 @@ import {
   assertTemplateRevisionFresh,
   STALE_TEMPLATE_MESSAGE,
 } from "../admin-emails/src/revision.ts";
+import {
+  findForbiddenCredentialMaterial,
+  forbiddenSecretPattern,
+} from "../scripts/check-admin-emails-bundle.mjs";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const adminEmailsSrc = path.join(root, "admin-emails/src");
-const forbiddenSecretPattern =
-  /PUBLIC_POSTKIT_API_KEY|VITE_POSTKIT_API_KEY|POSTKIT_API_KEY\s*[=:]|["']POSTKIT_API_KEY["']\s*:/;
 
 async function listFilesRecursive(dir) {
   const entries = await readdir(dir, { withFileTypes: true });
@@ -62,6 +64,27 @@ test("email admin SPA sources exist and use cms-oauth-kit", async () => {
   assert.match(rootPkg, /pnpm admin:emails:build && astro check/);
 });
 
+test("save pins freshness reads to the PR base commit SHA", async () => {
+  const github = await readFile(path.join(adminEmailsSrc, "github.ts"), "utf8");
+  const saveFn = github.slice(github.indexOf("saveTemplatePullRequest"));
+  const baseShaIdx = saveFn.indexOf("const baseSha = await fetchBaseBranchSha");
+  const freshnessIdx = saveFn.indexOf(
+    "fetchTemplateBlobShas(token, directory, baseSha)",
+  );
+  const treeIdx = saveFn.indexOf("git/commits/${baseSha}");
+  assert.ok(baseShaIdx >= 0, "save must resolve baseSha first");
+  assert.ok(freshnessIdx > baseShaIdx, "freshness must use pinned baseSha");
+  assert.ok(treeIdx > freshnessIdx, "tree must reuse the same baseSha");
+  assert.match(
+    github,
+    /readRepoFile\(\s*token: string,\s*path: string,\s*ref:/,
+  );
+  assert.match(
+    github,
+    /fetchTemplateBlobShas\(\s*token: string,\s*directory: string,\s*ref: string/,
+  );
+});
+
 test("email admin sources contain no PostKit API key material", async () => {
   const files = await listFilesRecursive(adminEmailsSrc);
   assert.ok(files.length > 0);
@@ -90,6 +113,32 @@ test("stale template blob SHAs are rejected before opening a PR", () => {
         template: "sha-template-2",
       }),
     (err) => err instanceof Error && err.message === STALE_TEMPLATE_MESSAGE,
+  );
+});
+
+test("bundle checker detects inlined PostKit credential values", () => {
+  const sentinel = "pk_test_inline_sentinel_9f3c2a1b";
+  assert.equal(
+    findForbiddenCredentialMaterial(`const x = "${sentinel}";`, {
+      POSTKIT_API_KEY: sentinel,
+    }),
+    "inlined POSTKIT_API_KEY value",
+  );
+  assert.equal(
+    findForbiddenCredentialMaterial(`const x = "${sentinel}";`, {
+      VITE_POSTKIT_API_KEY: sentinel,
+    }),
+    "inlined VITE_POSTKIT_API_KEY value",
+  );
+  assert.equal(
+    findForbiddenCredentialMaterial("const x = 1;", {
+      POSTKIT_API_KEY: sentinel,
+    }),
+    null,
+  );
+  assert.equal(
+    findForbiddenCredentialMaterial('VITE_POSTKIT_API_KEY="x"', {}),
+    "credential name or assignment pattern",
   );
 });
 
@@ -142,6 +191,6 @@ test("built email admin is present after SPA build output exists", async () => {
       .map((name) => readFile(path.join(outDir, "assets", name), "utf8")),
   );
   for (const source of bundle) {
-    assert.doesNotMatch(source, forbiddenSecretPattern);
+    assert.equal(findForbiddenCredentialMaterial(source), null);
   }
 });
