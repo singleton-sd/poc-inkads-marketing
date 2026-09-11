@@ -1,3 +1,7 @@
+packages:
+  - .
+  - admin-emails
+
 allowBuilds:
   esbuild: true
   sharp: true
@@ -5,4 +9,7 @@ minimumReleaseAgeExclude:
   - "@astrojs/internal-helpers@0.10.3"
   - "@astrojs/markdown-satteri@0.3.6"
   - astro@7.2.3
-  - '@singleton-sd/inkads-epaper-renderer@1.1.1 || 1.4.0 || 1.4.1'
+  - "@singleton-sd/inkads-epaper-renderer@1.1.1 || 1.4.0 || 1.4.1"
+  - "@singleton-sd/post-kit-editor@0.7.0"
+  - "@singleton-sd/post-kit-compiler@0.4.0"
+  - "@singleton-sd/post-kit-types@0.4.0"

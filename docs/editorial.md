@@ -121,10 +121,18 @@ Seeded keys today:
 | `marketing.waitlist-confirm` | Waitlist confirmation (used when a waitlist BFF ships) |
 
 **Not a Decap collection.** Do not model EmailBuilder JSON as widgets in
-`public/admin/config.yml`. An authenticated email admin UI (sibling to
-`/admin`, e.g. `/admin/emails`) will embed `@singleton-sd/post-kit-editor` and
-save via Git commit/PR — tracked under epic
+`public/admin/config.yml`. Editors use the authenticated email admin at
+`/admin/emails` (sibling to Decap `/admin`). That static SPA embeds
+`@singleton-sd/post-kit-editor`, signs in through the same **cms-oauth-kit**
+GitHub OAuth proxy as Decap, and `onSave` opens a pull request that updates
+`content/email-templates/<key>/{template,metadata,preview}.json`. Send-test is
+out of scope until a trusted BFF lands (#102). Epic:
 [#104](https://github.com/singleton-sd/poc-inkads-marketing/issues/104).
+
+Open `/admin/emails` on `https://inkads.poc.singletonsd.com` or
+`localhost:4321` after `pnpm build` (or `pnpm admin:emails:dev` during SPA
+work). Editors need **write** access to this repository. Never put
+`POSTKIT_API_KEY` (or any `PUBLIC_*` PostKit key) in the email admin bundle.
 
 After [#100](https://github.com/singleton-sd/poc-inkads-marketing/issues/100)
 lands, consumer CI will run `post-kit-publish` to Azure Blob for tenant
