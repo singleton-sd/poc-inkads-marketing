@@ -96,6 +96,7 @@ test("Astro schemas validate landing and future legal frontmatter", async () => 
   assert.doesNotMatch(pagesUnionBody, /\bmarketingPageSchema\b/);
   assert.match(
     schema,
-    /export const collections = \{ faqs, legal, marketing, pages \}/,
+    /export const collections = \{ faqs, legal, marketing, pages, redirects \}/,
   );
+  assert.match(schema, /base: "\.\/src\/content\/redirects"/);
 });

@@ -131,6 +131,13 @@ The browser form refuses to enable submit unless the configured base starts with
 PR preview pages send `X-PostKit-Contact-Preview: true` so PostKit uses the
 development email provider instead of the production InkAds inbox.
 
+### Deep-link query prefills
+
+Marketing CTAs and QR codes may open `/contact?role=venue|advertiser|other`
+(and optional safe `name` / `email`). See
+[design-reference/contact.md](design-reference/contact.md#query-prefills-deep-links--qr).
+**Never put secrets in URL query strings.**
+
 ## Verification
 
 After merging the deployment PR, changing the Pages source, and creating the
@@ -143,6 +150,18 @@ curl --fail --head https://inkads.poc.singletonsd.com
 
 Expected DNS response: `singleton-sd.github.io.`. The HTTPS response should be
 successful and use a certificate valid for `inkads.poc.singletonsd.com`.
+
+## House-ad QR redirect
+
+House-ad QR codes must encode the stable public URL (HTTPS only):
+
+`https://inkads.poc.singletonsd.com/go`
+
+GitHub Pages serves a static redirect page at `/go` (meta-refresh + JS). Editors
+change the destination in `src/content/redirects/go.md` (or Decap **Redirects**)
+without regenerating QR artwork. Targets must be root-relative allowlisted paths
+only — no open redirects to arbitrary hosts. Default target:
+`/contact?role=venue`.
 
 If deployment must be rolled back, revert the responsible commit on `main`.
 The resulting Pages workflow republishes the previous static build.

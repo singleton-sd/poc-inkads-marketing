@@ -11,6 +11,7 @@ import { howItWorksPageSchema } from "./content/schemas/how-it-works";
 import { marketingPageSchema } from "./content/schemas/marketing";
 import { placesPageSchema } from "./content/schemas/places";
 import { pricingPageSchema } from "./content/schemas/pricing";
+import { redirectEntrySchema } from "./content/schemas/redirect";
 import { supportPageSchema } from "./content/schemas/support";
 import { venuesPageSchema } from "./content/schemas/venues";
 
@@ -68,4 +69,9 @@ const marketing = defineCollection({
   schema: marketingPageSchema,
 });
 
-export const collections = { faqs, legal, marketing, pages };
+const redirects = defineCollection({
+  loader: glob({ base: "./src/content/redirects", pattern: "**/*.{md,mdx}" }),
+  schema: redirectEntrySchema,
+});
+
+export const collections = { faqs, legal, marketing, pages, redirects };

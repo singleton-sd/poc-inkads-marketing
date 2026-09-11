@@ -10,6 +10,8 @@ const contentRoot = path.join(repoRoot, "src", "content");
 const site = "https://inkads.poc.singletonsd.com";
 
 const SKIP_FILES = new Set(["404.html"]);
+/** Utility routes that must not appear in the public sitemap. */
+const SKIP_ROUTES = new Set(["/go/"]);
 
 /**
  * Optional `slug:` from frontmatter (marketing collection).
@@ -109,7 +111,7 @@ async function collectHtmlRoutes(dir, prefix = "") {
 
 const draftRoutes = await loadDraftRoutes();
 const routes = (await collectHtmlRoutes(distDir)).filter(
-  (route) => !draftRoutes.has(route),
+  (route) => !draftRoutes.has(route) && !SKIP_ROUTES.has(route),
 );
 const uniqueRoutes = [...new Set(routes)].sort((a, b) => a.localeCompare(b));
 

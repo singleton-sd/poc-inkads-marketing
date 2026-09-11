@@ -49,6 +49,7 @@ test("brand assets docs describe Pages CDN consume", async () => {
   assert.match(docs, /poc-inkads-assets/);
   assert.match(docs, /assets\.inkads\.poc\.singletonsd\.com/);
   assert.match(docs, /live/i);
+  assert.match(docs, /https:\/\/inkads\.poc\.singletonsd\.com\/go/);
   assert.doesNotMatch(docs, /brand:sync/);
   assert.doesNotMatch(docs, /INKADS_ASSETS_COMMIT/);
 });

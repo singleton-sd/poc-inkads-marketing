@@ -89,6 +89,8 @@ jobs:
         run: pnpm build
       - name: Install Playwright browsers
         run: pnpm playwright:install
+      - name: Contact query prefill (Playwright)
+        run: pnpm test:contact-prefill
       - name: Capture visual screenshots
         run: pnpm test:visual
         env:
