@@ -1,5 +1,5 @@
 {
   "extends": "astro/tsconfigs/strict",
   "include": [".astro/types.d.ts", "**/*"],
-  "exclude": ["dist", "visual-base", "public/admin/emails", "admin-emails/dist"]
+  "exclude": ["dist", "visual-base"]
 }

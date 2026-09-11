@@ -14,7 +14,5 @@ export default [
     files: ["**/*.{js,mjs,cjs}"],
     languageOptions: { globals: globals.node },
   },
-  {
-    ignores: [".astro/**", "dist/**", "visual-base/**", "admin-emails/dist/**"],
-  },
+  { ignores: [".astro/**", "dist/**", "visual-base/**"] },
 ];

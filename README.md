@@ -40,7 +40,6 @@ pnpm build
 - Tailwind CSS with an InkAds semantic token layer
 - Markdown content collections under `src/content/pages`
 - PostKit email template sources under `content/email-templates/`
-- Email template admin at `/admin/emails` (sibling to Decap `/admin`)
 - GitHub Issues for engineering delivery
 - GitHub Pages at `inkads.poc.singletonsd.com`
 

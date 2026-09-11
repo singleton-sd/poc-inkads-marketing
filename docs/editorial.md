@@ -2,8 +2,9 @@
 
 InkAds content is stored as Markdown in Git. Fixed page copy lives in
 `src/content/pages`, editor-created marketing pages live in
-`src/content/marketing`, FAQ answers live in `src/content/faqs`, and future
-legal pages live in `src/content/legal`. Astro validates these collections
+`src/content/marketing`, FAQ answers live in `src/content/faqs`, future
+legal pages live in `src/content/legal`, and the house-ad QR redirect target
+lives in `src/content/redirects`. Astro validates these collections
 during `pnpm build`, so a pull request containing invalid or incomplete
 frontmatter will fail the build before it can be merged.
 
@@ -93,6 +94,23 @@ Legal-page frontmatter requires:
 - `effectiveDate`
 - optional `draft` (defaults to `true`)
 
+### House-ad QR redirect (`/go`)
+
+QR artwork for house ads must encode this **stable HTTPS URL**:
+
+`https://inkads.poc.singletonsd.com/go`
+
+Change the destination without regenerating QR art by editing
+`src/content/redirects/go.md` (Decap **Redirects → QR redirect (/go)**), then
+rebuild/publish. Frontmatter:
+
+- `target` — root-relative allowlisted path only (optional query/hash), e.g.
+  `/contact?role=venue` (default). Absolute `http(s)://` URLs, protocol-relative
+  `//…` hosts, and paths outside the site allowlist are rejected at build time.
+
+The `/go` page is a static meta-refresh + `location.replace` hop (GitHub Pages
+has no server-side redirects). It is `noindex` and omitted from the sitemap.
+
 Run the full quality gate before merging editorial changes:
 
 ```sh
@@ -121,26 +139,18 @@ Seeded keys today:
 | `marketing.waitlist-confirm` | Waitlist confirmation (used when a waitlist BFF ships) |
 
 **Not a Decap collection.** Do not model EmailBuilder JSON as widgets in
-`public/admin/config.yml`. Editors use the authenticated email admin at
-`/admin/emails` (sibling to Decap `/admin`). That static SPA embeds
-`@singleton-sd/post-kit-editor`, signs in through the same **cms-oauth-kit**
-GitHub OAuth proxy as Decap, and `onSave` opens a pull request that updates
-`content/email-templates/<key>/{template,metadata,preview}.json`. Send-test is
-out of scope until a trusted BFF lands (#102). Epic:
-[#104](https://github.com/singleton-sd/poc-inkads-marketing/issues/104).
-
-Open `/admin/emails` on `https://inkads.poc.singletonsd.com` or
-`localhost:4321` after `pnpm build` (or `pnpm admin:emails:dev` during SPA
-work). The SPA is built to `admin-emails/dist` and copied into the site
-`dist/admin/emails` after Astro build. Editors need **write** access to this
-repository. Never put `POSTKIT_API_KEY` (or any `PUBLIC_*` PostKit key) in the
-email admin bundle.
-
-If GitHub shows **redirect_uri is not associated with this application**, the
-shared org OAuth App used by cms-oauth-kit must list Authorization callback URL
-`https://auth.singletonsd.com/callback` (client id is non-secret and visible in
-the authorize redirect). Decap `/admin` uses the same app — fix it once for both
-surfaces. Do not put client secrets in this repository.
+`public/admin/config.yml`. An authenticated email admin UI (sibling to Decap
+`/admin`, e.g. `/admin/emails`) is tracked under epic
+[#104](https://github.com/singleton-sd/poc-inkads-marketing/issues/104) /
+[#101](https://github.com/singleton-sd/poc-inkads-marketing/issues/101) and is
+**deferred** until `@singleton-sd/post-kit-editor` ships the embeddable
+`EmailTemplateAdmin` page (PostKit
+[#138](https://github.com/singleton-sd/post-kit/issues/138) /
+[#140](https://github.com/singleton-sd/post-kit/issues/140)). That host will use
+cms-oauth-kit for GitHub OAuth and open PRs for
+`content/email-templates/<key>/{template,metadata,preview}.json`. Do not put a
+temporary SPA in this repository while waiting. Send-test needs a trusted BFF
+(#102) after publish CI (#100).
 
 After [#100](https://github.com/singleton-sd/poc-inkads-marketing/issues/100)
 lands, consumer CI will run `post-kit-publish` to Azure Blob for tenant
@@ -158,7 +168,7 @@ these templates.
 
 The production build includes a static Decap application at `/admin/`. Its
 configuration targets `singleton-sd/poc-inkads-marketing` and maps the same
-page, marketing, FAQ, and legal fields enforced by the Astro schemas.
+page, marketing, FAQ, legal, and redirect fields enforced by the Astro schemas.
 
 GitHub Pages can serve the static admin files, but it cannot execute the OAuth
 callback or safely hold the OAuth client secret. CMS login therefore uses the
@@ -171,6 +181,12 @@ Open `/admin` on `https://inkads.poc.singletonsd.com` or `localhost:4321`.
 GitHub Pages / preview hosts that are not under `*.singletonsd.com` or
 `*.patoperpetua.com` will not complete the popup handshake. Do not implement a
 local OAuth proxy in this repository.
+
+If GitHub shows **redirect_uri is not associated with this application**, the
+shared org OAuth App used by cms-oauth-kit must list Authorization callback URL
+`https://auth.singletonsd.com/callback` (client id is non-secret and visible in
+the authorize redirect). Fix it once for Decap and any future email admin host.
+Do not put client secrets in this repository.
 
 Editors need **write** access to this repository so that the GitHub OAuth grant
 covers Decap's required `repo` scope. Do not commit OAuth client secrets or

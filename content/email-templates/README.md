@@ -8,8 +8,9 @@ template key and must contain:
 - `preview.json` — sample values for in-editor preview
 
 These files are **not** an Astro content collection and are **not** edited
-through Decap. Edit them in `/admin/emails` (GitHub OAuth via cms-oauth-kit;
-save opens a PR). Publishing with CI (`post-kit-publish`) is planned in
+through Decap. An in-browser editor is deferred until PostKit ships
+`EmailTemplateAdmin` (then marketing #101). Publishing with CI
+(`post-kit-publish`) is planned in
 [#100](https://github.com/singleton-sd/poc-inkads-marketing/issues/100) and is
 not enabled yet; see [`docs/editorial.md`](../../docs/editorial.md).
 
