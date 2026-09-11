@@ -1,5 +1,3 @@
-import { approvedInternalRoutes } from "../../lib/approved-internal-routes.ts";
-
 export type CmsField = {
   label: string;
   name: string;
@@ -12,6 +10,17 @@ export type CmsField = {
   fields?: CmsField[];
   options?: string[];
 };
+
+/** Build-validated root-relative CTA path (Decap cannot refresh select options live). */
+export const internalRouteCmsField = (
+  overrides: Partial<CmsField> = {},
+): CmsField => ({
+  label: "URL",
+  name: "href",
+  widget: "string",
+  hint: "Root-relative path from the CTA allowlist (/, /pricing, published marketing slugs, …). Validated at build against approvedInternalRoutes.",
+  ...overrides,
+});
 
 export const seoCmsFields: CmsField[] = [
   {
@@ -58,12 +67,7 @@ export const draftCmsField: CmsField = {
 
 export const ctaLinkCmsFields: CmsField[] = [
   { label: "Label", name: "label", widget: "string" },
-  {
-    label: "URL",
-    name: "href",
-    widget: "select",
-    options: approvedInternalRoutes,
-  },
+  internalRouteCmsField(),
 ];
 
 export const featureItemCmsFields: CmsField[] = [

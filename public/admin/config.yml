@@ -62,55 +62,13 @@ collections:
             widget: object
             fields:
               - { label: Label, name: label, widget: string }
-              - {
-                  label: URL,
-                  name: href,
-                  widget: select,
-                  options:
-                    [
-                      /,
-                      /how-it-works,
-                      /places,
-                      /venues,
-                      /advertisers,
-                      /pricing,
-                      /about,
-                      /faq,
-                      /support,
-                      /contact,
-                      /layout-audience,
-                      /layout-cta-heavy,
-                      /layout-landing-band,
-                      /layout-prose,
-                    ],
-                }
+              - { label: URL, name: href, widget: string }
           - label: Secondary CTA
             name: secondaryCta
             widget: object
             fields:
               - { label: Label, name: label, widget: string }
-              - {
-                  label: URL,
-                  name: href,
-                  widget: select,
-                  options:
-                    [
-                      /,
-                      /how-it-works,
-                      /places,
-                      /venues,
-                      /advertisers,
-                      /pricing,
-                      /about,
-                      /faq,
-                      /support,
-                      /contact,
-                      /layout-audience,
-                      /layout-cta-heavy,
-                      /layout-landing-band,
-                      /layout-prose,
-                    ],
-                }
+              - { label: URL, name: href, widget: string }
           - label: Draft
             name: draft
             widget: boolean
@@ -278,25 +236,9 @@ collections:
             required: false
           - label: CTA URL
             name: ctaHref
-            widget: select
+            widget: string
             required: false
-            options:
-              [
-                /,
-                /how-it-works,
-                /places,
-                /venues,
-                /advertisers,
-                /pricing,
-                /about,
-                /faq,
-                /support,
-                /contact,
-                /layout-audience,
-                /layout-cta-heavy,
-                /layout-landing-band,
-                /layout-prose,
-              ]
+            hint: Root-relative path from the CTA allowlist (/, /pricing, published marketing slugs, …). Validated at build against approvedInternalRoutes.
           - label: Draft
             name: draft
             widget: boolean
@@ -389,55 +331,13 @@ collections:
             widget: object
             fields:
               - { label: Label, name: label, widget: string }
-              - {
-                  label: URL,
-                  name: href,
-                  widget: select,
-                  options:
-                    [
-                      /,
-                      /how-it-works,
-                      /places,
-                      /venues,
-                      /advertisers,
-                      /pricing,
-                      /about,
-                      /faq,
-                      /support,
-                      /contact,
-                      /layout-audience,
-                      /layout-cta-heavy,
-                      /layout-landing-band,
-                      /layout-prose,
-                    ],
-                }
+              - { label: URL, name: href, widget: string }
           - label: Secondary CTA
             name: secondaryCta
             widget: object
             fields:
               - { label: Label, name: label, widget: string }
-              - {
-                  label: URL,
-                  name: href,
-                  widget: select,
-                  options:
-                    [
-                      /,
-                      /how-it-works,
-                      /places,
-                      /venues,
-                      /advertisers,
-                      /pricing,
-                      /about,
-                      /faq,
-                      /support,
-                      /contact,
-                      /layout-audience,
-                      /layout-cta-heavy,
-                      /layout-landing-band,
-                      /layout-prose,
-                    ],
-                }
+              - { label: URL, name: href, widget: string }
           - label: Draft
             name: draft
             widget: boolean
@@ -549,28 +449,7 @@ collections:
               - { label: Title, name: title, widget: string }
               - { label: Description, name: description, widget: text }
               - { label: CTA label, name: ctaLabel, widget: string }
-              - {
-                  label: Href,
-                  name: href,
-                  widget: select,
-                  options:
-                    [
-                      /,
-                      /how-it-works,
-                      /places,
-                      /venues,
-                      /advertisers,
-                      /pricing,
-                      /about,
-                      /faq,
-                      /support,
-                      /contact,
-                      /layout-audience,
-                      /layout-cta-heavy,
-                      /layout-landing-band,
-                      /layout-prose,
-                    ],
-                }
+              - { label: Href, name: href, widget: string }
               - {
                   label: Accent,
                   name: accent,
@@ -648,24 +527,8 @@ collections:
             widget: string
           - label: CTA URL
             name: ctaHref
-            widget: select
-            options:
-              [
-                /,
-                /how-it-works,
-                /places,
-                /venues,
-                /advertisers,
-                /pricing,
-                /about,
-                /faq,
-                /support,
-                /contact,
-                /layout-audience,
-                /layout-cta-heavy,
-                /layout-landing-band,
-                /layout-prose,
-              ]
+            widget: string
+            hint: Root-relative path from the CTA allowlist (/, /pricing, published marketing slugs, …). Validated at build against approvedInternalRoutes.
           - label: Media placeholder label
             name: mediaLabel
             widget: string
@@ -745,26 +608,9 @@ collections:
         hint: "prose / audience-landing: button label."
       - label: CTA URL
         name: ctaHref
-        widget: select
+        widget: string
         required: false
-        hint: "prose / audience-landing: must pair with CTA label."
-        options:
-          [
-            /,
-            /how-it-works,
-            /places,
-            /venues,
-            /advertisers,
-            /pricing,
-            /about,
-            /faq,
-            /support,
-            /contact,
-            /layout-audience,
-            /layout-cta-heavy,
-            /layout-landing-band,
-            /layout-prose,
-          ]
+        hint: "prose / audience-landing: must pair with CTA label. Root-relative allowlisted path; validated at build."
       - label: Closing title
         name: closingTitle
         widget: string
@@ -782,28 +628,7 @@ collections:
         hint: "cta-heavy / landing-band: required for those templates."
         fields:
           - { label: Label, name: label, widget: string }
-          - {
-              label: URL,
-              name: href,
-              widget: select,
-              options:
-                [
-                  /,
-                  /how-it-works,
-                  /places,
-                  /venues,
-                  /advertisers,
-                  /pricing,
-                  /about,
-                  /faq,
-                  /support,
-                  /contact,
-                  /layout-audience,
-                  /layout-cta-heavy,
-                  /layout-landing-band,
-                  /layout-prose,
-                ],
-            }
+          - { label: URL, name: href, widget: string }
       - label: Secondary CTA
         name: secondaryCta
         widget: object
@@ -811,28 +636,7 @@ collections:
         hint: "cta-heavy: optional. landing-band: required."
         fields:
           - { label: Label, name: label, widget: string }
-          - {
-              label: URL,
-              name: href,
-              widget: select,
-              options:
-                [
-                  /,
-                  /how-it-works,
-                  /places,
-                  /venues,
-                  /advertisers,
-                  /pricing,
-                  /about,
-                  /faq,
-                  /support,
-                  /contact,
-                  /layout-audience,
-                  /layout-cta-heavy,
-                  /layout-landing-band,
-                  /layout-prose,
-                ],
-            }
+          - { label: URL, name: href, widget: string }
       - label: Columns
         name: columns
         widget: list

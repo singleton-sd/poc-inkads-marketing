@@ -2,22 +2,14 @@ import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { isDraftFrontmatter } from "../src/lib/draft-frontmatter.mjs";
+
 const repoRoot = fileURLToPath(new URL("..", import.meta.url));
 const distDir = path.join(repoRoot, "dist");
 const contentRoot = path.join(repoRoot, "src", "content");
 const site = "https://inkads.poc.singletonsd.com";
 
 const SKIP_FILES = new Set(["404.html"]);
-
-/**
- * Parse a simple `draft: true|false` from markdown/YAML frontmatter.
- * @param {string} source
- */
-function isDraftFrontmatter(source) {
-  const match = source.match(/^---\r?\n([\s\S]*?)\r?\n---/);
-  if (!match) return false;
-  return /^draft:\s*true\s*$/m.test(match[1] ?? "");
-}
 
 /**
  * Optional `slug:` from frontmatter (marketing collection).

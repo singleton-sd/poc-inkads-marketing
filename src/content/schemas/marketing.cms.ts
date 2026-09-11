@@ -1,9 +1,9 @@
-import { approvedInternalRoutes } from "../../lib/approved-internal-routes.ts";
 import type { CmsField } from "./cms.ts";
 import {
   ctaLinkCmsFields,
   draftCmsField,
   featureItemCmsFields,
+  internalRouteCmsField,
   processStepCmsFields,
   seoCmsFields,
 } from "./cms.ts";
@@ -41,14 +41,12 @@ const proseFields: CmsField[] = [
     required: false,
     hint: "prose / audience-landing: button label.",
   },
-  {
+  internalRouteCmsField({
     label: "CTA URL",
     name: "ctaHref",
-    widget: "select",
-    options: approvedInternalRoutes,
     required: false,
-    hint: "prose / audience-landing: must pair with CTA label.",
-  },
+    hint: "prose / audience-landing: must pair with CTA label. Root-relative allowlisted path; validated at build.",
+  }),
   {
     label: "Closing title",
     name: "closingTitle",

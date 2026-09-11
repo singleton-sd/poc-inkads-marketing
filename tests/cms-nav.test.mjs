@@ -101,6 +101,25 @@ test("approved routes include discovered marketing URLs", async () => {
   }
 });
 
+test("draft frontmatter with inline comment is excluded from discovery", async () => {
+  const { isDraftFrontmatter } = await import(
+    pathToFileURL(new URL("src/lib/draft-frontmatter.mjs", root).pathname).href
+  );
+
+  assert.equal(
+    isDraftFrontmatter("---\ntitle: X\ndraft: true # unpublished\n---\nbody\n"),
+    true,
+  );
+  assert.equal(
+    isDraftFrontmatter("---\ntitle: X\ndraft: false # live\n---\nbody\n"),
+    false,
+  );
+  assert.equal(
+    isDraftFrontmatter("---\ntitle: X\ndraft: true\n---\nbody\n"),
+    true,
+  );
+});
+
 test("reserved marketing slugs are not discovered as routes", async () => {
   const { isReservedPageSlug } = await import(
     pathToFileURL(new URL("src/lib/reserved-slugs.ts", root).pathname).href

@@ -68,6 +68,9 @@ function serializeInlineField(field: CmsField, indent: number): string {
   if (field.required === false) {
     attrs.push("required: false");
   }
+  if (field.hint) {
+    attrs.push(`hint: ${yamlQuote(field.hint)}`);
+  }
   if (field.default !== undefined) {
     attrs.push(
       `default: ${typeof field.default === "string" ? yamlQuote(field.default) : field.default}`,

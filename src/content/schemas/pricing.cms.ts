@@ -1,5 +1,9 @@
-import { approvedInternalRoutes } from "../../lib/approved-internal-routes.ts";
-import { draftCmsField, seoCmsFields, templateField } from "./cms.ts";
+import {
+  draftCmsField,
+  internalRouteCmsField,
+  seoCmsFields,
+  templateField,
+} from "./cms.ts";
 
 export const pricingPageCms = {
   file: "src/content/pages/pricing.md",
@@ -20,12 +24,7 @@ export const pricingPageCms = {
         { label: "Title", name: "title", widget: "string" },
         { label: "Description", name: "description", widget: "text" },
         { label: "CTA label", name: "ctaLabel", widget: "string" },
-        {
-          label: "Href",
-          name: "href",
-          widget: "select",
-          options: approvedInternalRoutes,
-        },
+        internalRouteCmsField({ label: "Href" }),
         {
           label: "Accent",
           name: "accent",

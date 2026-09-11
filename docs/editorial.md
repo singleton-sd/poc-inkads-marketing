@@ -60,7 +60,10 @@ from the public site.
 
 Published marketing slugs are also added to the CTA allowlist
 (`approvedInternalRoutes`) at build time, so peer marketing pages can be linked
-from CTAs even when they remain hidden from navigation.
+from CTAs even when they remain hidden from navigation. Decap CTA URL fields are
+free-text root-relative paths (not a static select list) so newly published
+marketing routes are usable without regenerating `public/admin/config.yml`; the
+Astro schemas still reject paths outside the allowlist at build.
 
 Layout fixtures for visual review live at `/layout-prose/`, `/layout-cta-heavy/`,
 `/layout-landing-band/`, and `/layout-audience/` (`draft: false`, titles prefixed

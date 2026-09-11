@@ -2,6 +2,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { isDraftFrontmatter } from "./draft-frontmatter.mjs";
 import { isReservedPageSlug, isValidMarketingSlug } from "./reserved-slugs.ts";
 
 const marketingDir = join(
@@ -9,12 +10,7 @@ const marketingDir = join(
   "../content/marketing",
 );
 
-/** True when frontmatter sets `draft: true` (absent/false = published). */
-export function isDraftFrontmatter(raw: string): boolean {
-  const match = raw.match(/^---\r?\n([\s\S]*?)\r?\n---/);
-  if (!match) return false;
-  return /^draft:\s*true\s*$/m.test(match[1] ?? "");
-}
+export { isDraftFrontmatter };
 
 /**
  * Build-time scan of marketing markdown slugs for CTA allowlisting.
