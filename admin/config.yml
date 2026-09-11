@@ -65,20 +65,8 @@ collections:
               - {
                   label: URL,
                   name: href,
-                  widget: select,
-                  options:
-                    [
-                      /,
-                      /how-it-works,
-                      /places,
-                      /venues,
-                      /advertisers,
-                      /pricing,
-                      /about,
-                      /faq,
-                      /support,
-                      /contact,
-                    ],
+                  widget: string,
+                  hint: Root-relative allowlisted path (validated at build).,
                 }
           - label: Secondary CTA
             name: secondaryCta
@@ -88,20 +76,8 @@ collections:
               - {
                   label: URL,
                   name: href,
-                  widget: select,
-                  options:
-                    [
-                      /,
-                      /how-it-works,
-                      /places,
-                      /venues,
-                      /advertisers,
-                      /pricing,
-                      /about,
-                      /faq,
-                      /support,
-                      /contact,
-                    ],
+                  widget: string,
+                  hint: Root-relative allowlisted path (validated at build).,
                 }
           - label: Draft
             name: draft
@@ -270,21 +246,9 @@ collections:
             required: false
           - label: CTA URL
             name: ctaHref
-            widget: select
+            widget: string
             required: false
-            options:
-              [
-                /,
-                /how-it-works,
-                /places,
-                /venues,
-                /advertisers,
-                /pricing,
-                /about,
-                /faq,
-                /support,
-                /contact,
-              ]
+            hint: Root-relative allowlisted path (validated at build).
           - label: Draft
             name: draft
             widget: boolean
@@ -380,20 +344,8 @@ collections:
               - {
                   label: URL,
                   name: href,
-                  widget: select,
-                  options:
-                    [
-                      /,
-                      /how-it-works,
-                      /places,
-                      /venues,
-                      /advertisers,
-                      /pricing,
-                      /about,
-                      /faq,
-                      /support,
-                      /contact,
-                    ],
+                  widget: string,
+                  hint: Root-relative allowlisted path (validated at build).,
                 }
           - label: Secondary CTA
             name: secondaryCta
@@ -403,20 +355,8 @@ collections:
               - {
                   label: URL,
                   name: href,
-                  widget: select,
-                  options:
-                    [
-                      /,
-                      /how-it-works,
-                      /places,
-                      /venues,
-                      /advertisers,
-                      /pricing,
-                      /about,
-                      /faq,
-                      /support,
-                      /contact,
-                    ],
+                  widget: string,
+                  hint: Root-relative allowlisted path (validated at build).,
                 }
           - label: Draft
             name: draft
@@ -532,20 +472,8 @@ collections:
               - {
                   label: Href,
                   name: href,
-                  widget: select,
-                  options:
-                    [
-                      /,
-                      /how-it-works,
-                      /places,
-                      /venues,
-                      /advertisers,
-                      /pricing,
-                      /about,
-                      /faq,
-                      /support,
-                      /contact,
-                    ],
+                  widget: string,
+                  hint: Root-relative allowlisted path (validated at build).,
                 }
               - {
                   label: Accent,
@@ -624,20 +552,8 @@ collections:
             widget: string
           - label: CTA URL
             name: ctaHref
-            widget: select
-            options:
-              [
-                /,
-                /how-it-works,
-                /places,
-                /venues,
-                /advertisers,
-                /pricing,
-                /about,
-                /faq,
-                /support,
-                /contact,
-              ]
+            widget: string
+            hint: Root-relative allowlisted path (validated at build).
           - label: Media placeholder label
             name: mediaLabel
             widget: string
@@ -717,22 +633,9 @@ collections:
         hint: "prose / audience-landing: button label."
       - label: CTA URL
         name: ctaHref
-        widget: select
+        widget: string
         required: false
-        hint: "prose / audience-landing: must pair with CTA label."
-        options:
-          [
-            /,
-            /how-it-works,
-            /places,
-            /venues,
-            /advertisers,
-            /pricing,
-            /about,
-            /faq,
-            /support,
-            /contact,
-          ]
+        hint: "prose / audience-landing: must pair with CTA label. Root-relative allowlisted path (validated at build)."
       - label: Closing title
         name: closingTitle
         widget: string
@@ -753,20 +656,8 @@ collections:
           - {
               label: URL,
               name: href,
-              widget: select,
-              options:
-                [
-                  /,
-                  /how-it-works,
-                  /places,
-                  /venues,
-                  /advertisers,
-                  /pricing,
-                  /about,
-                  /faq,
-                  /support,
-                  /contact,
-                ],
+              widget: string,
+              hint: Root-relative allowlisted path (validated at build).,
             }
       - label: Secondary CTA
         name: secondaryCta
@@ -778,20 +669,8 @@ collections:
           - {
               label: URL,
               name: href,
-              widget: select,
-              options:
-                [
-                  /,
-                  /how-it-works,
-                  /places,
-                  /venues,
-                  /advertisers,
-                  /pricing,
-                  /about,
-                  /faq,
-                  /support,
-                  /contact,
-                ],
+              widget: string,
+              hint: Root-relative allowlisted path (validated at build).,
             }
       - label: Columns
         name: columns
@@ -847,6 +726,23 @@ collections:
         widget: string
         required: false
         hint: "audience-landing: CtaBand title."
+      - label: Nav label
+        name: navLabel
+        widget: string
+        required: false
+        hint: Label in header/footer when navigation opt-in is enabled. Required if either show flag is on.
+      - label: Show in header
+        name: showInHeader
+        widget: boolean
+        required: false
+        hint: "When true, appends this page to the primary header nav at build time."
+        default: false
+      - label: Show in footer
+        name: showInFooter
+        widget: boolean
+        required: false
+        hint: "When true, appends this page to the footer Company column at build time."
+        default: false
       - label: Draft
         name: draft
         widget: boolean
