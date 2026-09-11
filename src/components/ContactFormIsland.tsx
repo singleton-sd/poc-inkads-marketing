@@ -1,25 +1,18 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useReducer, useRef, type ReactNode } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 import {
-  parseEmailFromQuery,
-  parseNameFromQuery,
-  resolveRoleOption,
-  serializeEmailQuery,
-  serializeNameQuery,
-  serializeRoleQuery,
-} from "../lib/form-query-sync";
-import { useFormQuerySync } from "../hooks/useFormQuerySync";
-
-const ROLE_OPTIONS = [
-  "Venue owner / operator",
-  "Advertiser / brand",
-  "Other",
-] as const;
-
-const ROLE_TO_SUBJECT: Record<string, string> = {
-  "Venue owner / operator": "partnership",
-  "Advertiser / brand": "sales",
-  Other: "general",
-};
+  CONTACT_ROLE_OPTIONS,
+  contactFormQuerySchema,
+  contactFormQuerySerializers,
+  contactFormSchema,
+  subjectFromRole,
+  type ContactFormDefaultValues,
+  type ContactFormQueryValues,
+  type ContactFormValues,
+  type ContactRole,
+} from "../lib/contact-form-schema";
+import { useZodFormQuerySync } from "../hooks/useZodFormQuerySync";
 
 const FETCH_TIMEOUT_MS = 15_000;
 const TEXT_DEBOUNCE_MS = 300;
@@ -35,11 +28,32 @@ export type ContactFormIslandProps = {
   initialEmail?: string;
 };
 
-type ContactQueryFields = {
-  role: string;
-  name: string;
-  email: string;
-};
+type SubmitState =
+  | { status: "idle" }
+  | { status: "submitting" }
+  | { status: "success" }
+  | { status: "error"; message: string };
+
+type SubmitAction =
+  | { type: "submit" }
+  | { type: "success" }
+  | { type: "error"; message: string }
+  | { type: "resetError" };
+
+function submitReducer(_state: SubmitState, action: SubmitAction): SubmitState {
+  switch (action.type) {
+    case "submit":
+      return { status: "submitting" };
+    case "success":
+      return { status: "success" };
+    case "error":
+      return { status: "error", message: action.message };
+    case "resetError":
+      return { status: "idle" };
+    default:
+      return { status: "idle" };
+  }
+}
 
 function Field({
   id,
@@ -60,6 +74,15 @@ function Field({
   );
 }
 
+function FieldError({ message }: { message?: string }) {
+  if (!message) return null;
+  return (
+    <p className="contact-form__error" role="alert">
+      {message}
+    </p>
+  );
+}
+
 export default function ContactFormIsland({
   successTitle = "Message sent.",
   successBody = "Thank you. We will follow up by email if your enquiry needs a response.",
@@ -70,56 +93,69 @@ export default function ContactFormIsland({
   initialName = "",
   initialEmail = "",
 }: ContactFormIslandProps) {
-  const fieldConfigs = useMemo(
-    () => ({
-      role: {
-        param: "role",
-        parse: (raw: string | null) => resolveRoleOption(raw) ?? "",
-        serialize: serializeRoleQuery,
-      },
-      name: {
-        param: "name",
-        parse: parseNameFromQuery,
-        serialize: serializeNameQuery,
-        debounceMs: TEXT_DEBOUNCE_MS,
-      },
-      email: {
-        param: "email",
-        parse: parseEmailFromQuery,
-        serialize: serializeEmailQuery,
-        debounceMs: TEXT_DEBOUNCE_MS,
-      },
-    }),
-    [],
-  );
+  const successRef = useRef<HTMLDivElement>(null);
+  const [submitState, dispatch] = useReducer(submitReducer, {
+    status: "idle",
+  });
 
-  const initialValues = useMemo(
+  const defaultValues = useMemo<ContactFormDefaultValues>(
     () => ({
-      role: initialRole,
       name: initialName,
+      company: "",
       email: initialEmail,
+      role: (initialRole as ContactRole | "") || "",
+      message: "",
     }),
     [initialRole, initialName, initialEmail],
   );
 
-  const { values, setField } = useFormQuerySync<ContactQueryFields>(
-    fieldConfigs,
-    initialValues,
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm<ContactFormValues>({
+    resolver: zodResolver(contactFormSchema),
+    defaultValues: defaultValues as ContactFormValues,
+    mode: "onSubmit",
+  });
+
+  const nameValue = watch("name");
+  const emailValue = watch("email");
+  const roleValue = watch("role");
+  const queryValues = useMemo<ContactFormQueryValues>(
+    () => ({
+      name: nameValue ?? "",
+      email: emailValue ?? "",
+      role: (roleValue as ContactRole | "") || "",
+    }),
+    [nameValue, emailValue, roleValue],
   );
 
-  const [company, setCompany] = useState("");
-  const [message, setMessage] = useState("");
-  const [errorText, setErrorText] = useState("");
-  const [submitted, setSubmitted] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
+  useZodFormQuerySync({
+    schema: contactFormQuerySchema,
+    values: queryValues,
+    onUrlValues: (next) => {
+      setValue("name", next.name, {
+        shouldDirty: false,
+        shouldValidate: false,
+      });
+      setValue("email", next.email, {
+        shouldDirty: false,
+        shouldValidate: false,
+      });
+      setValue("role", next.role as ContactFormValues["role"], {
+        shouldDirty: false,
+        shouldValidate: false,
+      });
+    },
+    serialize: contactFormQuerySerializers,
+    debounceMs: { name: TEXT_DEBOUNCE_MS, email: TEXT_DEBOUNCE_MS },
+  });
 
-  const nameRef = useRef<HTMLInputElement>(null);
-  const companyRef = useRef<HTMLInputElement>(null);
-  const messageRef = useRef<HTMLTextAreaElement>(null);
-  const successRef = useRef<HTMLDivElement>(null);
-  const formRef = useRef<HTMLFormElement>(null);
+  const submitted = submitState.status === "success";
 
-  // Focus after React commits the success panel (post-await microtasks can race paint).
   useEffect(() => {
     if (submitted) successRef.current?.focus();
   }, [submitted]);
@@ -128,56 +164,29 @@ export default function ContactFormIsland({
   const deliveryConfigured =
     apiBase.length > 0 && apiBase.startsWith("https://");
 
-  async function onSubmit(event: { preventDefault(): void }) {
-    event.preventDefault();
-    setErrorText("");
+  const configError = !deliveryConfigured
+    ? "Contact delivery is not configured. Email hello@inkads.poc.singletonsd.com instead."
+    : "";
 
-    const form = formRef.current;
-    if (!form) return;
+  const submitError = submitState.status === "error" ? submitState.message : "";
 
-    if (!form.checkValidity()) {
-      form.reportValidity();
-      return;
-    }
-
-    const name = values.name.trim();
-    const companyValue = company.trim();
-    const email = values.email.trim();
-    const role = values.role.trim();
-    const messageBody = message.trim();
-
-    const trimmedRequired: Array<{
-      el: HTMLInputElement | HTMLTextAreaElement | null;
-      value: string;
-      label: string;
-    }> = [
-      { el: nameRef.current, value: name, label: "Name" },
-      { el: companyRef.current, value: companyValue, label: "Venue / company" },
-      { el: messageRef.current, value: messageBody, label: "Message" },
-    ];
-    for (const field of trimmedRequired) {
-      if (!field.el) continue;
-      if (field.value.length === 0) {
-        field.el.setCustomValidity(`${field.label} is required.`);
-        field.el.reportValidity();
-        field.el.setCustomValidity("");
-        return;
-      }
-      field.el.setCustomValidity("");
-    }
+  async function onValidSubmit(values: ContactFormValues) {
+    dispatch({ type: "resetError" });
 
     if (!deliveryConfigured) {
-      setErrorText(
-        "Contact delivery is not configured. Email hello@inkads.poc.singletonsd.com instead.",
-      );
+      dispatch({
+        type: "error",
+        message:
+          "Contact delivery is not configured. Email hello@inkads.poc.singletonsd.com instead.",
+      });
       return;
     }
 
-    const subject = ROLE_TO_SUBJECT[role] ?? "general";
-    const messagePayload = `Venue / company: ${companyValue}\n\n${messageBody}`;
+    const subject = subjectFromRole(values.role);
+    const messagePayload = `Venue / company: ${values.company}\n\n${values.message}`;
     const isPreview = location.pathname.includes("/pr-preview/");
 
-    setSubmitting(true);
+    dispatch({ type: "submit" });
     const controller = new AbortController();
     const timeoutId = window.setTimeout(
       () => controller.abort(),
@@ -195,8 +204,8 @@ export default function ContactFormIsland({
         credentials: "omit",
         signal: controller.signal,
         body: JSON.stringify({
-          name,
-          email,
+          name: values.name,
+          email: values.email,
           subject,
           message: messagePayload,
         }),
@@ -204,124 +213,122 @@ export default function ContactFormIsland({
 
       if (!response.ok) {
         if (response.status === 400) {
-          setErrorText("Please check the highlighted fields and try again.");
+          dispatch({
+            type: "error",
+            message: "Please check the highlighted fields and try again.",
+          });
         } else if (response.status === 429) {
-          setErrorText(
-            "Too many messages were sent. Please wait a minute and try again.",
-          );
+          dispatch({
+            type: "error",
+            message:
+              "Too many messages were sent. Please wait a minute and try again.",
+          });
         } else if (response.status >= 500) {
-          setErrorText(
-            "Delivery is temporarily unavailable. Please try again later.",
-          );
+          dispatch({
+            type: "error",
+            message:
+              "Delivery is temporarily unavailable. Please try again later.",
+          });
         } else {
-          setErrorText(
-            "We could not send your message. Please try again shortly.",
-          );
+          dispatch({
+            type: "error",
+            message:
+              "We could not send your message. Please try again shortly.",
+          });
         }
         return;
       }
 
-      setSubmitted(true);
+      dispatch({ type: "success" });
     } catch (err) {
       const timedOut = err instanceof DOMException && err.name === "AbortError";
-      setErrorText(
-        timedOut
+      dispatch({
+        type: "error",
+        message: timedOut
           ? "Delivery is temporarily unavailable. Please try again later."
           : "We could not reach the server. Check your connection and try again.",
-      );
+      });
     } finally {
       window.clearTimeout(timeoutId);
-      setSubmitting(false);
     }
   }
 
-  const configError = !deliveryConfigured
-    ? "Contact delivery is not configured. Email hello@inkads.poc.singletonsd.com instead."
-    : "";
+  const submitting = submitState.status === "submitting";
 
   return (
     <div className="contact-form-shell" data-contact-form="">
       {!submitted ? (
         <form
-          ref={formRef}
           className="contact-form"
           data-contact-form-fields=""
           noValidate
-          onSubmit={onSubmit}
+          onSubmit={handleSubmit(onValidSubmit)}
         >
           <div className="contact-form__row">
             <Field id="contact-name" label="Name">
               <input
-                ref={nameRef}
                 className="field-control"
                 id="contact-name"
-                name="name"
                 type="text"
-                required
                 autoComplete="name"
-                value={values.name}
-                onChange={(e) => setField("name", e.target.value)}
+                aria-invalid={errors.name ? "true" : undefined}
+                {...register("name")}
               />
+              <FieldError message={errors.name?.message} />
             </Field>
             <Field id="contact-company" label="Venue / company">
               <input
-                ref={companyRef}
                 className="field-control"
                 id="contact-company"
-                name="company"
                 type="text"
-                required
                 autoComplete="organization"
-                value={company}
-                onChange={(e) => setCompany(e.target.value)}
+                aria-invalid={errors.company ? "true" : undefined}
+                {...register("company")}
               />
+              <FieldError message={errors.company?.message} />
             </Field>
           </div>
           <Field id="contact-email" label="Email">
             <input
               className="field-control"
               id="contact-email"
-              name="email"
               type="email"
-              required
               autoComplete="email"
-              value={values.email}
-              onChange={(e) => setField("email", e.target.value)}
+              aria-invalid={errors.email ? "true" : undefined}
+              {...register("email")}
             />
+            <FieldError message={errors.email?.message} />
           </Field>
           <Field id="contact-role" label="I am a…">
             <select
               className="field-control"
               id="contact-role"
-              name="role"
-              required
-              value={values.role}
-              onChange={(e) => setField("role", e.target.value)}
+              aria-invalid={errors.role ? "true" : undefined}
+              {...register("role")}
             >
               <option value="" disabled>
                 Select an option
               </option>
-              {ROLE_OPTIONS.map((option) => (
+              {CONTACT_ROLE_OPTIONS.map((option) => (
                 <option key={option} value={option}>
                   {option}
                 </option>
               ))}
             </select>
+            <FieldError message={errors.role?.message} />
           </Field>
           <Field
             id="contact-message"
             label="Tell us about your space or campaign"
           >
             <textarea
-              ref={messageRef}
               className="field-control"
               id="contact-message"
-              name="message"
-              required
               rows={5}
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
+              aria-invalid={errors.message ? "true" : undefined}
+              {...register("message")}
             />
+            <FieldError message={errors.message?.message} />
           </Field>
           <p className="contact-form__privacy">
             See our{" "}
@@ -333,11 +340,11 @@ export default function ContactFormIsland({
           </p>
           <p
             className="contact-form__error"
-            hidden={!(errorText || configError)}
+            hidden={!(submitError || configError)}
             role="alert"
             data-contact-form-error=""
           >
-            {errorText || configError}
+            {submitError || configError}
           </p>
           <button
             className="button-link button-link--primary button-link--block"

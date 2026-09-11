@@ -36,8 +36,9 @@ test("contact form posts to PostKit with loading and error states", async () => 
   assert.match(island, /fetch\(`\$\{apiBase\}\/contact`/);
   assert.match(island, /startsWith\("https:\/\/"\)/);
   assert.match(island, /AbortController/);
-  assert.match(island, /setCustomValidity/);
-  assert.match(island, /partnership/);
+  assert.match(island, /zodResolver|contactFormSchema/);
+  assert.match(island, /handleSubmit/);
+  assert.match(island, /partnership|subjectFromRole/);
   assert.match(island, /X-PostKit-Contact-Preview/);
   assert.match(island, /data-contact-form-error/);
   assert.match(island, /data-contact-form-success/);
@@ -49,12 +50,16 @@ test("contact form posts to PostKit with loading and error states", async () => 
 });
 
 test("contact form prefills role/name/email from safe query params", async () => {
+  const schema = await readFile(
+    new URL("src/lib/contact-form-schema.ts", root),
+    "utf8",
+  );
   const sync = await readFile(
     new URL("src/lib/form-query-sync.ts", root),
     "utf8",
   );
   const hook = await readFile(
-    new URL("src/hooks/useFormQuerySync.ts", root),
+    new URL("src/hooks/useZodFormQuerySync.ts", root),
     "utf8",
   );
   const island = await readFile(
@@ -70,37 +75,49 @@ test("contact form prefills role/name/email from safe query params", async () =>
     "utf8",
   );
 
-  assert.match(sync, /ROLE_QUERY_TO_OPTION/);
-  assert.match(sync, /ROLE_OPTION_TO_QUERY/);
-  assert.match(sync, /resolveRoleOption/);
-  assert.match(sync, /venue:\s*"Venue owner \/ operator"/);
-  assert.match(sync, /advertiser:\s*"Advertiser \/ brand"/);
-  assert.match(sync, /other:\s*"Other"/);
-  assert.match(sync, /partnership:\s*"Venue owner \/ operator"/);
-  assert.match(sync, /sales:\s*"Advertiser \/ brand"/);
-  assert.match(sync, /general:\s*"Other"/);
-  assert.match(sync, /SAFE_EMAIL_RE/);
-  assert.match(sync, /SAFE_NAME_MAX/);
-  assert.match(sync, /history\.replaceState/);
-  assert.match(sync, /ROLE_OPTION_VALUES\.has\(trimmed\)/);
+  assert.match(schema, /ROLE_QUERY_TO_OPTION/);
+  assert.match(schema, /ROLE_OPTION_TO_QUERY/);
+  assert.match(schema, /resolveRoleOption/);
+  assert.match(schema, /venue:\s*"Venue owner \/ operator"/);
+  assert.match(schema, /advertiser:\s*"Advertiser \/ brand"/);
+  assert.match(schema, /other:\s*"Other"/);
+  assert.match(schema, /partnership:\s*"Venue owner \/ operator"/);
+  assert.match(schema, /sales:\s*"Advertiser \/ brand"/);
+  assert.match(schema, /general:\s*"Other"/);
+  assert.match(schema, /SAFE_EMAIL_RE/);
+  assert.match(schema, /SAFE_NAME_MAX/);
+  assert.match(schema, /ROLE_OPTION_VALUES\.has\(trimmed\)/);
+  assert.match(schema, /contactFormSchema/);
+  assert.match(schema, /contactFormQuerySchema/);
 
-  assert.match(hook, /useFormQuerySync/);
+  assert.match(sync, /history\.replaceState/);
+  assert.match(sync, /replaceUrlSearchParam/);
+
+  assert.match(hook, /useZodFormQuerySync/);
+  assert.match(hook, /parseQueryWithSchema/);
   assert.match(
     hook,
     /replaceUrlSearchParam|history\.replaceState|replaceState/,
   );
   assert.match(hook, /popstate/);
 
-  assert.match(island, /useFormQuerySync/);
-  assert.match(island, /serializeRoleQuery/);
-  assert.match(island, /parseNameFromQuery/);
-  assert.match(island, /parseEmailFromQuery/);
+  const zodQuery = await readFile(
+    new URL("src/lib/zod-form-query.ts", root),
+    "utf8",
+  );
+  assert.match(zodQuery, /parseQueryWithSchema/);
+  assert.match(zodQuery, /serializeQueryWithSchema/);
+
+  assert.match(island, /useZodFormQuerySync/);
+  assert.match(island, /zodResolver/);
+  assert.match(island, /useForm/);
+  assert.match(island, /contactFormQuerySerializers|serializeRoleQuery/);
   assert.match(form, /client:load/);
   assert.match(form, /ContactFormIsland/);
 
   // Regression: each email segment must reject C0/DEL controls (e.g. %00 / NUL).
   assert.match(
-    sync,
+    schema,
     /SAFE_EMAIL_RE\s*=\s*\/\^[^\n]*\\u0000-\\u001f\\u007f[^\n]*\\u0000-\\u001f\\u007f[^\n]*\\u0000-\\u001f\\u007f/,
   );
 
@@ -109,8 +126,17 @@ test("contact form prefills role/name/email from safe query params", async () =>
     resolveRoleOption,
     parseNameFromQuery,
     parseEmailFromQuery,
+    serializeRoleQuery,
+    serializeNameQuery,
+    serializeEmailQuery,
+    contactFormQuerySchema,
+    contactFormSchema,
   } = await import(
-    pathToFileURL(new URL("src/lib/form-query-sync.ts", root).pathname).href
+    pathToFileURL(new URL("src/lib/contact-form-schema.ts", root).pathname).href
+  );
+
+  const { parseQueryWithSchema, serializeQueryWithSchema } = await import(
+    pathToFileURL(new URL("src/lib/zod-form-query.ts", root).pathname).href
   );
 
   assert.equal(SAFE_EMAIL_RE.test("user@example.com"), true);
@@ -141,9 +167,70 @@ test("contact form prefills role/name/email from safe query params", async () =>
   assert.equal(parseEmailFromQuery("not-an-email"), "");
   assert.equal(parseEmailFromQuery(null), "");
 
+  // Query parse/serialize roundtrip helpers
+  assert.equal(serializeRoleQuery("Venue owner / operator"), "venue");
+  assert.equal(serializeRoleQuery("Advertiser / brand"), "advertiser");
+  assert.equal(serializeRoleQuery("Other"), "other");
+  assert.equal(serializeRoleQuery(""), null);
+  assert.equal(serializeNameQuery("Ada"), "Ada");
+  assert.equal(serializeNameQuery("  "), null);
+  assert.equal(serializeEmailQuery("ada@example.com"), "ada@example.com");
+  assert.equal(serializeEmailQuery("not-an-email"), null);
+
+  const parsed = parseQueryWithSchema(
+    contactFormQuerySchema,
+    new URLSearchParams(
+      "role=venue&name=Ada&email=ada@example.com&company=secret",
+    ),
+  );
+  assert.equal(parsed.role, "Venue owner / operator");
+  assert.equal(parsed.name, "Ada");
+  assert.equal(parsed.email, "ada@example.com");
+  assert.equal("company" in parsed, false);
+
+  const serialized = serializeQueryWithSchema(contactFormQuerySchema, parsed, {
+    serialize: {
+      role: serializeRoleQuery,
+      name: serializeNameQuery,
+      email: serializeEmailQuery,
+    },
+  });
+  const asMap = Object.fromEntries(
+    serialized.map(({ param, value }) => [param, value]),
+  );
+  assert.equal(asMap.role, "venue");
+  assert.equal(asMap.name, "Ada");
+  assert.equal(asMap.email, "ada@example.com");
+
+  const invalid = parseQueryWithSchema(
+    contactFormQuerySchema,
+    new URLSearchParams("role=nope&name=bad\u0000&email=nope"),
+  );
+  assert.equal(invalid.role, "");
+  assert.equal(invalid.name, "");
+  assert.equal(invalid.email, "");
+
+  const formOk = contactFormSchema.safeParse({
+    name: "Ada",
+    company: "InkAds",
+    email: "ada@example.com",
+    role: "Advertiser / brand",
+    message: "Hello",
+  });
+  assert.equal(formOk.success, true);
+
+  const formBad = contactFormSchema.safeParse({
+    name: "",
+    company: "",
+    email: "nope",
+    role: "",
+    message: "",
+  });
+  assert.equal(formBad.success, false);
+
   assert.match(docs, /role=venue/);
   assert.match(docs, /Do not put secrets in query strings/i);
-  assert.match(docs, /useFormQuerySync|React island/i);
+  assert.match(docs, /useZodFormQuerySync|Zod schema/i);
 });
 
 test("contact content describes live enquiry delivery", async () => {

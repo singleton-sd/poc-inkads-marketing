@@ -46,9 +46,14 @@ Default: form visible. On submit: success panel (gold border) replaces the field
 
 Fields: Name | Venue / company (row) · Email · Role select (“I am a…”) · Message textarea · Send request (gold button).
 
-Implemented as a React island (`ContactFormIsland`, `client:load`) with a reusable
-`useFormQuerySync` hook for URL ↔ field sync. Pure parse/serialize helpers live in
-`src/lib/form-query-sync.ts`.
+Implemented as a React island (`ContactFormIsland`, `client:load`) with:
+
+- **Zod schema** (`src/lib/contact-form-schema.ts`) as source of truth for field
+  types, role aliases, PostKit subject mapping, and query parse/serialize
+- **react-hook-form + `@hookform/resolvers/zod`** for typed form state and submit
+  validation
+- **`useZodFormQuerySync`** — reusable Zod ↔ URL query sync (pass any Zod object
+  schema; `exclude` / `paramNames` / `debounceMs` / `serialize`)
 
 ## Query prefills (deep links / QR)
 
