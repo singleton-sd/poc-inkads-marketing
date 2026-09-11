@@ -8,6 +8,24 @@ const root = fileURLToPath(new URL("../", import.meta.url));
 const templatesRoot = path.join(root, "content/email-templates");
 const requiredFiles = ["template.json", "metadata.json", "preview.json"];
 
+/** Credential names / assignments that must never appear under the template tree. */
+const forbiddenSecretPattern =
+  /PUBLIC_POSTKIT_API_KEY|POSTKIT_API_KEY\s*[=:]|["']POSTKIT_API_KEY["']\s*:/;
+
+async function listFilesRecursive(dir) {
+  const entries = await readdir(dir, { withFileTypes: true });
+  const files = [];
+  for (const entry of entries) {
+    const fullPath = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      files.push(...(await listFilesRecursive(fullPath)));
+    } else if (entry.isFile()) {
+      files.push(fullPath);
+    }
+  }
+  return files;
+}
+
 test("email template directories follow PostKit triple-file layout", async () => {
   const entries = await readdir(templatesRoot, { withFileTypes: true });
   const keys = entries
@@ -38,6 +56,21 @@ test("email template directories follow PostKit triple-file layout", async () =>
   }
 });
 
+test("email template tree has no PostKit credential material", async () => {
+  const files = await listFilesRecursive(templatesRoot);
+  assert.ok(files.length > 0, "expected template tree files");
+
+  for (const filePath of files) {
+    const relative = path.relative(templatesRoot, filePath);
+    const raw = await readFile(filePath, "utf8");
+    assert.doesNotMatch(
+      raw,
+      forbiddenSecretPattern,
+      `${relative} must not contain PostKit API key material`,
+    );
+  }
+});
+
 test("editorial docs describe email-templates layout and Decap boundary", async () => {
   const documentation = await readFile(
     path.join(root, "docs/editorial.md"),
@@ -50,9 +83,11 @@ test("editorial docs describe email-templates layout and Decap boundary", async 
   assert.match(documentation, /preview\.json/);
   assert.match(documentation, /Not a Decap collection/i);
   assert.match(documentation, /post-kit-publish/);
-  assert.match(documentation, /Never commit PostKit API keys/i);
-  assert.doesNotMatch(
+  assert.match(documentation, /#100/);
+  assert.match(
     documentation,
-    /PUBLIC_POSTKIT_API_KEY|POSTKIT_API_KEY\s*=/,
+    /Until then, merged template sources stay in Git only/,
   );
+  assert.match(documentation, /Never commit PostKit API keys/i);
+  assert.doesNotMatch(documentation, forbiddenSecretPattern);
 });

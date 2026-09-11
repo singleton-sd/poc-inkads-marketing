@@ -8,7 +8,8 @@ template key and must contain:
 - `preview.json` — sample values for in-editor preview
 
 These files are **not** an Astro content collection and are **not** edited
-through Decap. Publish is handled by CI (`post-kit-publish`) after merge; see
-[`docs/editorial.md`](../../docs/editorial.md).
+through Decap. Publishing with CI (`post-kit-publish`) is planned in
+[#100](https://github.com/singleton-sd/poc-inkads-marketing/issues/100) and is
+not enabled yet; see [`docs/editorial.md`](../../docs/editorial.md).
 
 Do not put API keys or other secrets in this tree.
