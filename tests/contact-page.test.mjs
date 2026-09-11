@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
+import { pathToFileURL } from "node:url";
 
 const root = new URL("../", import.meta.url);
 
@@ -22,26 +23,44 @@ test("contact page uses shared chrome and a split MetaPair + form layout", async
 });
 
 test("contact form posts to PostKit with loading and error states", async () => {
+  const island = await readFile(
+    new URL("src/components/ContactFormIsland.tsx", root),
+    "utf8",
+  );
   const form = await readFile(
     new URL("src/components/ContactForm.astro", root),
     "utf8",
   );
 
-  assert.match(form, /PUBLIC_POSTKIT_API_BASE_URL/);
-  assert.match(form, /fetch\(`\$\{apiBase\}\/contact`/);
-  assert.match(form, /startsWith\("https:\/\/"\)/);
-  assert.match(form, /AbortController/);
-  assert.match(form, /setCustomValidity/);
-  assert.match(form, /partnership/);
-  assert.match(form, /X-PostKit-Contact-Preview/);
-  assert.match(form, /contactFormReady/);
-  assert.match(form, /data-contact-form-error/);
-  assert.match(form, /data-contact-form-success/);
+  assert.match(island, /PUBLIC_POSTKIT_API_BASE_URL|postkitApiBaseUrl/);
+  assert.match(island, /fetch\(`\$\{apiBase\}\/contact`/);
+  assert.match(island, /startsWith\("https:\/\/"\)/);
+  assert.match(island, /AbortController/);
+  assert.match(island, /setCustomValidity/);
+  assert.match(island, /partnership/);
+  assert.match(island, /X-PostKit-Contact-Preview/);
+  assert.match(island, /data-contact-form-error/);
+  assert.match(island, /data-contact-form-success/);
   assert.match(form, /withBase\("\/privacy"/);
+  assert.match(form, /client:load/);
+  assert.match(form, /ContactFormIsland/);
+  assert.doesNotMatch(island, /Preview form|Nothing was sent/);
   assert.doesNotMatch(form, /Preview form|Nothing was sent/);
 });
 
 test("contact form prefills role/name/email from safe query params", async () => {
+  const sync = await readFile(
+    new URL("src/lib/form-query-sync.ts", root),
+    "utf8",
+  );
+  const hook = await readFile(
+    new URL("src/hooks/useFormQuerySync.ts", root),
+    "utf8",
+  );
+  const island = await readFile(
+    new URL("src/components/ContactFormIsland.tsx", root),
+    "utf8",
+  );
   const form = await readFile(
     new URL("src/components/ContactForm.astro", root),
     "utf8",
@@ -51,36 +70,43 @@ test("contact form prefills role/name/email from safe query params", async () =>
     "utf8",
   );
 
-  assert.match(form, /ROLE_QUERY_TO_OPTION/);
-  assert.match(form, /applyContactQueryPrefills/);
-  assert.match(form, /URLSearchParams/);
-  assert.match(form, /resolveRoleOption/);
-  assert.match(form, /venue:\s*"Venue owner \/ operator"/);
-  assert.match(form, /advertiser:\s*"Advertiser \/ brand"/);
-  assert.match(form, /other:\s*"Other"/);
-  assert.match(form, /partnership:\s*"Venue owner \/ operator"/);
-  assert.match(form, /sales:\s*"Advertiser \/ brand"/);
-  assert.match(form, /general:\s*"Other"/);
-  assert.match(form, /params\.get\("role"\)/);
-  assert.match(form, /params\.get\("name"\)/);
-  assert.match(form, /params\.get\("email"\)/);
-  assert.match(form, /SAFE_EMAIL_RE/);
-  assert.match(form, /setupContactForm\(\);/);
-  assert.match(form, /syncRoleQueryParam/);
-  assert.match(form, /ROLE_OPTION_TO_QUERY/);
-  assert.match(form, /history\.replaceState/);
-  assert.match(form, /ROLE_OPTION_VALUES\.has\(trimmed\)/);
+  assert.match(sync, /ROLE_QUERY_TO_OPTION/);
+  assert.match(sync, /ROLE_OPTION_TO_QUERY/);
+  assert.match(sync, /resolveRoleOption/);
+  assert.match(sync, /venue:\s*"Venue owner \/ operator"/);
+  assert.match(sync, /advertiser:\s*"Advertiser \/ brand"/);
+  assert.match(sync, /other:\s*"Other"/);
+  assert.match(sync, /partnership:\s*"Venue owner \/ operator"/);
+  assert.match(sync, /sales:\s*"Advertiser \/ brand"/);
+  assert.match(sync, /general:\s*"Other"/);
+  assert.match(sync, /SAFE_EMAIL_RE/);
+  assert.match(sync, /SAFE_NAME_MAX/);
+  assert.match(sync, /history\.replaceState/);
+  assert.match(sync, /ROLE_OPTION_VALUES\.has\(trimmed\)/);
+
+  assert.match(hook, /useFormQuerySync/);
+  assert.match(
+    hook,
+    /replaceUrlSearchParam|history\.replaceState|replaceState/,
+  );
+  assert.match(hook, /popstate/);
+
+  assert.match(island, /useFormQuerySync/);
+  assert.match(island, /serializeRoleQuery/);
+  assert.match(island, /parseNameFromQuery/);
+  assert.match(island, /parseEmailFromQuery/);
+  assert.match(form, /client:load/);
+  assert.match(form, /ContactFormIsland/);
+
   // Regression: each email segment must reject C0/DEL controls (e.g. %00 / NUL).
   assert.match(
-    form,
+    sync,
     /SAFE_EMAIL_RE\s*=\s*\/\^[^\n]*\\u0000-\\u001f\\u007f[^\n]*\\u0000-\\u001f\\u007f[^\n]*\\u0000-\\u001f\\u007f/,
   );
 
-  const emailReMatch = form.match(
-    /const SAFE_EMAIL_RE\s*=\s*\/([\s\S]*?)\/\s*;/,
+  const { SAFE_EMAIL_RE } = await import(
+    pathToFileURL(new URL("src/lib/form-query-sync.ts", root).pathname).href
   );
-  assert.ok(emailReMatch, "SAFE_EMAIL_RE literal should be present");
-  const SAFE_EMAIL_RE = new RegExp(emailReMatch[1]);
   assert.equal(SAFE_EMAIL_RE.test("user@example.com"), true);
   assert.equal(SAFE_EMAIL_RE.test("user\u0000@example.com"), false);
   assert.equal(SAFE_EMAIL_RE.test("user@exam\u0007ple.com"), false);
@@ -88,6 +114,7 @@ test("contact form prefills role/name/email from safe query params", async () =>
 
   assert.match(docs, /role=venue/);
   assert.match(docs, /Do not put secrets in query strings/i);
+  assert.match(docs, /useFormQuerySync|React island/i);
 });
 
 test("contact content describes live enquiry delivery", async () => {
@@ -95,11 +122,11 @@ test("contact content describes live enquiry delivery", async () => {
     new URL("src/content/pages/contact.md", root),
     "utf8",
   );
-  const form = await readFile(
-    new URL("src/components/ContactForm.astro", root),
+  const island = await readFile(
+    new URL("src/components/ContactFormIsland.tsx", root),
     "utf8",
   );
-  const publicCopy = `${content}\n${form}`;
+  const publicCopy = `${content}\n${island}`;
 
   assert.match(publicCopy, /Send message/);
   assert.match(publicCopy, /Message sent/);

@@ -98,35 +98,40 @@ const origin = `http://127.0.0.1:${actualPort}`;
 const browser = await chromium.launch();
 const page = await browser.newPage();
 
+async function waitForInputValue(selector, expected) {
+  await page.waitForFunction(
+    ({ sel, val }) => {
+      const el = document.querySelector(sel);
+      return el instanceof HTMLInputElement || el instanceof HTMLSelectElement
+        ? el.value === val
+        : false;
+    },
+    { sel: selector, val: expected },
+    { timeout: 10_000 },
+  );
+}
+
 try {
   await page.goto(`${origin}/contact/?role=venue`, {
     waitUntil: "networkidle",
   });
-  assert.equal(
-    await page.locator("#contact-role").inputValue(),
-    "Venue owner / operator",
-  );
+  await waitForInputValue("#contact-role", "Venue owner / operator");
 
   await page.goto(
     `${origin}/contact/?role=advertiser&name=Ada&email=ada@example.com`,
     { waitUntil: "networkidle" },
   );
-  assert.equal(
-    await page.locator("#contact-role").inputValue(),
-    "Advertiser / brand",
-  );
-  assert.equal(await page.locator("#contact-name").inputValue(), "Ada");
-  assert.equal(
-    await page.locator("#contact-email").inputValue(),
-    "ada@example.com",
-  );
+  await waitForInputValue("#contact-role", "Advertiser / brand");
+  await waitForInputValue("#contact-name", "Ada");
+  await waitForInputValue("#contact-email", "ada@example.com");
 
   await page.goto(`${origin}/contact/?role=nope`, {
     waitUntil: "networkidle",
   });
-  assert.equal(await page.locator("#contact-role").inputValue(), "");
+  await waitForInputValue("#contact-role", "");
 
   await page.goto(`${origin}/contact/`, { waitUntil: "networkidle" });
+  await page.waitForSelector("#contact-role");
   await page.locator("#contact-role").selectOption("Advertiser / brand");
   await page.waitForFunction(
     () =>

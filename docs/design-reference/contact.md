@@ -46,13 +46,17 @@ Default: form visible. On submit: success panel (gold border) replaces the field
 
 Fields: Name | Venue / company (row) · Email · Role select (“I am a…”) · Message textarea · Send request (gold button).
 
+Implemented as a React island (`ContactFormIsland`, `client:load`) with a reusable
+`useFormQuerySync` hook for URL ↔ field sync. Pure parse/serialize helpers live in
+`src/lib/form-query-sync.ts`.
+
 ## Query prefills (deep links / QR)
 
-`/contact` reads optional URL query params on load (and on `astro:page-load` if
-View Transitions are enabled) and prefills safe fields. Invalid values are
-ignored (form stays on defaults). Changing the **I am a…** select updates the
-`role` query param via `history.replaceState` (short aliases: `venue` /
-`advertiser` / `other`) so the address bar stays shareable.
+`/contact` reads optional URL query params on load (and on `popstate`) and prefills
+safe fields via the React island. Invalid values are ignored (form stays on
+defaults). Changing synced fields updates the address bar via `history.replaceState`
+(`role` uses short aliases `venue` / `advertiser` / `other`; `name` / `email` write
+back too; empty values clear the param). Company and message are never put in the URL.
 
 | Param   | Values                                                                                         | Effect                                                                                                   |
 | ------- | ---------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |

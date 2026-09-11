@@ -1,5 +1,6 @@
 // @ts-check
 import { defineConfig } from "astro/config";
+import react from "@astrojs/react";
 import tailwindcss from "@tailwindcss/vite";
 
 const environment = /** @type {Record<string, string | undefined>} */ (
@@ -10,5 +11,6 @@ const environment = /** @type {Record<string, string | undefined>} */ (
 export default defineConfig({
   site: "https://inkads.poc.singletonsd.com",
   base: environment.PREVIEW_BASE_PATH ?? "/",
+  integrations: [react()],
   vite: { plugins: [tailwindcss()] },
 });
