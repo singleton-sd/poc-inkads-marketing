@@ -7,6 +7,11 @@ legal pages live in `src/content/legal`. Astro validates these collections
 during `pnpm build`, so a pull request containing invalid or incomplete
 frontmatter will fail the build before it can be merged.
 
+Transactional and marketing **email** sources live separately under
+`content/email-templates/` (PostKit). They are not Astro collections and are
+not Decap widgets — see [Email templates (PostKit)](#email-templates-postkit)
+below.
+
 ## Editing through Git
 
 Editors with repository access can edit or add Markdown files in GitHub and
@@ -96,6 +101,41 @@ pnpm lint
 pnpm test
 pnpm build
 ```
+
+## Email templates (PostKit)
+
+Git is the source of truth for PostKit email template sources. Layout:
+
+```text
+content/email-templates/<key>/
+  template.json   # EmailBuilder.js document
+  metadata.json   # key, name, subject, variables, schemaVersion
+  preview.json    # synthetic sample values for in-editor preview
+```
+
+Seeded keys today:
+
+| Key                          | Purpose                                                |
+| ---------------------------- | ------------------------------------------------------ |
+| `demo.welcome`               | Compile-clean fixture for publish CI                   |
+| `marketing.waitlist-confirm` | Waitlist confirmation (used when a waitlist BFF ships) |
+
+**Not a Decap collection.** Do not model EmailBuilder JSON as widgets in
+`public/admin/config.yml`. An authenticated email admin UI (sibling to
+`/admin`, e.g. `/admin/emails`) will embed `@singleton-sd/post-kit-editor` and
+save via Git commit/PR — tracked under epic
+[#104](https://github.com/singleton-sd/poc-inkads-marketing/issues/104).
+
+After merge, consumer CI runs `post-kit-publish` to Azure Blob for tenant
+`inkads` (see PostKit
+[`docs/examples/publish-email-templates.yml`](https://github.com/singleton-sd/post-kit/blob/main/docs/examples/publish-email-templates.yml)
+and [`docs/guides/template-publishing.md`](https://github.com/singleton-sd/post-kit/blob/main/docs/guides/template-publishing.md)).
+Authoring rules:
+[`docs/guides/template-authoring.md`](https://github.com/singleton-sd/post-kit/blob/main/docs/guides/template-authoring.md).
+
+Never commit PostKit API keys or other secrets under `content/email-templates/`.
+The contact form continues to use browser `POST /contact` and does not require
+these templates.
 
 ## Decap admin and authentication boundary
 

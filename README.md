@@ -39,13 +39,14 @@ pnpm build
 - strict TypeScript
 - Tailwind CSS with an InkAds semantic token layer
 - Markdown content collections under `src/content/pages`
+- PostKit email template sources under `content/email-templates/`
 - GitHub Issues for engineering delivery
 - GitHub Pages at `inkads.poc.singletonsd.com`
 
 Deployment and Route 53 setup are documented in
 [`docs/deployment.md`](docs/deployment.md).
-Git-backed content schemas, the static Decap admin, and its external OAuth
-requirement are documented in [`docs/editorial.md`](docs/editorial.md).
+Git-backed content schemas, the static Decap admin, email-template layout, and
+OAuth requirements are documented in [`docs/editorial.md`](docs/editorial.md).
 
 The shared `@singleton-sd/tokens` package is currently hosted in a private
 registry. This public repository therefore keeps its small semantic token
