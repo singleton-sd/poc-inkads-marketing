@@ -118,30 +118,40 @@ export function useFormQuerySync<TFields extends Record<string, string>>(
     [scheduleWrite],
   );
 
+  const clearDebounceTimers = useCallback(() => {
+    for (const key of Object.keys(debounceTimers.current) as Array<
+      keyof TFields
+    >) {
+      const timer = debounceTimers.current[key];
+      if (timer) {
+        clearTimeout(timer);
+        delete debounceTimers.current[key];
+      }
+    }
+  }, []);
+
   // Client navigations / back-forward: re-read the address bar.
   useEffect(() => {
     const onPopState = () => {
+      // Drop in-flight debounced writes so they cannot overwrite history state.
+      clearDebounceTimers();
       setValuesState(readFieldsFromUrl(configsRef.current));
     };
     window.addEventListener("popstate", onPopState);
     return () => window.removeEventListener("popstate", onPopState);
-  }, []);
+  }, [clearDebounceTimers]);
 
   // Static Astro builds cannot see request query params at SSR time — sync once on mount.
   useEffect(() => {
     setValuesState(readFieldsFromUrl(configsRef.current));
   }, []);
 
-  // Flush pending debounced writes on unmount.
+  // Clear pending debounced writes on unmount (do not flush — avoid late URL writes).
   useEffect(() => {
-    const timers = debounceTimers;
     return () => {
-      for (const key of Object.keys(timers.current) as Array<keyof TFields>) {
-        const timer = timers.current[key];
-        if (timer) clearTimeout(timer);
-      }
+      clearDebounceTimers();
     };
-  }, []);
+  }, [clearDebounceTimers]);
 
   return { values, setField, setValues };
 }

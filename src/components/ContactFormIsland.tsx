@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   parseEmailFromQuery,
   parseNameFromQuery,
@@ -119,6 +119,11 @@ export default function ContactFormIsland({
   const successRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
+  // Focus after React commits the success panel (post-await microtasks can race paint).
+  useEffect(() => {
+    if (submitted) successRef.current?.focus();
+  }, [submitted]);
+
   const apiBase = (postkitApiBaseUrl ?? "").replace(/\/$/, "");
   const deliveryConfigured =
     apiBase.length > 0 && apiBase.startsWith("https://");
@@ -217,7 +222,6 @@ export default function ContactFormIsland({
       }
 
       setSubmitted(true);
-      queueMicrotask(() => successRef.current?.focus());
     } catch (err) {
       const timedOut = err instanceof DOMException && err.name === "AbortError";
       setErrorText(

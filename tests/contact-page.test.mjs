@@ -104,13 +104,42 @@ test("contact form prefills role/name/email from safe query params", async () =>
     /SAFE_EMAIL_RE\s*=\s*\/\^[^\n]*\\u0000-\\u001f\\u007f[^\n]*\\u0000-\\u001f\\u007f[^\n]*\\u0000-\\u001f\\u007f/,
   );
 
-  const { SAFE_EMAIL_RE } = await import(
+  const {
+    SAFE_EMAIL_RE,
+    resolveRoleOption,
+    parseNameFromQuery,
+    parseEmailFromQuery,
+  } = await import(
     pathToFileURL(new URL("src/lib/form-query-sync.ts", root).pathname).href
   );
+
   assert.equal(SAFE_EMAIL_RE.test("user@example.com"), true);
   assert.equal(SAFE_EMAIL_RE.test("user\u0000@example.com"), false);
   assert.equal(SAFE_EMAIL_RE.test("user@exam\u0007ple.com"), false);
   assert.equal(SAFE_EMAIL_RE.test("user@example.com\u007f"), false);
+
+  assert.equal(resolveRoleOption("venue"), "Venue owner / operator");
+  assert.equal(resolveRoleOption("partnership"), "Venue owner / operator");
+  assert.equal(resolveRoleOption("advertiser"), "Advertiser / brand");
+  assert.equal(resolveRoleOption("sales"), "Advertiser / brand");
+  assert.equal(resolveRoleOption("other"), "Other");
+  assert.equal(resolveRoleOption("general"), "Other");
+  assert.equal(resolveRoleOption("Advertiser / brand"), "Advertiser / brand");
+  assert.equal(resolveRoleOption("unknown-role"), null);
+  assert.equal(resolveRoleOption(""), null);
+  assert.equal(resolveRoleOption(null), null);
+
+  assert.equal(parseNameFromQuery("Ada Lovelace"), "Ada Lovelace");
+  assert.equal(parseNameFromQuery("  Ada  "), "Ada");
+  assert.equal(parseNameFromQuery("bad\u0000name"), "");
+  assert.equal(parseNameFromQuery(""), "");
+  assert.equal(parseNameFromQuery(null), "");
+
+  assert.equal(parseEmailFromQuery("user@example.com"), "user@example.com");
+  assert.equal(parseEmailFromQuery("  user@example.com  "), "user@example.com");
+  assert.equal(parseEmailFromQuery("user\u0000@example.com"), "");
+  assert.equal(parseEmailFromQuery("not-an-email"), "");
+  assert.equal(parseEmailFromQuery(null), "");
 
   assert.match(docs, /role=venue/);
   assert.match(docs, /Do not put secrets in query strings/i);

@@ -15,7 +15,7 @@
     "format:check": "prettier --check .",
     "lint": "eslint . && astro check",
     "playwright:install": "playwright install chromium",
-    "test": "node --test tests/*.test.mjs",
+    "test": "node --experimental-strip-types --test tests/*.test.mjs",
     "test:seo": "node tests/seo.mjs",
     "test:a11y": "node tests/a11y.mjs",
     "test:contact-prefill": "node tests/contact-prefill.mjs",
