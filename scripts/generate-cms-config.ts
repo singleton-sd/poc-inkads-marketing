@@ -10,7 +10,7 @@ const rootDir = fileURLToPath(new URL("..", import.meta.url));
 const outPath = path.join(rootDir, "public/admin/config.yml");
 
 function yamlQuote(value: string): string {
-  if (/[:#\n]|^[\s-]/.test(value) || value.includes("'")) {
+  if (/[:#,\n]|^[\s-]/.test(value) || value.includes("'")) {
     return JSON.stringify(value);
   }
   return value;
@@ -67,6 +67,9 @@ function serializeInlineField(field: CmsField, indent: number): string {
   ];
   if (field.required === false) {
     attrs.push("required: false");
+  }
+  if (field.hint) {
+    attrs.push(`hint: ${yamlQuote(field.hint)}`);
   }
   if (field.default !== undefined) {
     attrs.push(

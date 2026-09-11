@@ -152,6 +152,9 @@ test("marketing CMS exposes a template select", async () => {
   assert.match(cms, /widget: "select"/);
   assert.match(cms, /default: "prose"/);
   assert.match(cms, /audience-landing/);
+  assert.match(cms, /name: "navLabel"/);
+  assert.match(cms, /name: "showInHeader"/);
+  assert.match(cms, /name: "showInFooter"/);
 });
 
 test("layout fixtures cover every marketing template", async () => {

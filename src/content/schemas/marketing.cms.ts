@@ -1,9 +1,9 @@
-import { approvedInternalRoutes } from "../../lib/approved-internal-routes.ts";
 import type { CmsField } from "./cms.ts";
 import {
   ctaLinkCmsFields,
   draftCmsField,
   featureItemCmsFields,
+  internalRouteCmsField,
   processStepCmsFields,
   seoCmsFields,
 } from "./cms.ts";
@@ -41,14 +41,12 @@ const proseFields: CmsField[] = [
     required: false,
     hint: "prose / audience-landing: button label.",
   },
-  {
+  internalRouteCmsField({
     label: "CTA URL",
     name: "ctaHref",
-    widget: "select",
-    options: approvedInternalRoutes,
     required: false,
-    hint: "prose / audience-landing: must pair with CTA label.",
-  },
+    hint: "prose / audience-landing: must pair with CTA label. Root-relative allowlisted path (validated at build).",
+  }),
   {
     label: "Closing title",
     name: "closingTitle",
@@ -162,6 +160,32 @@ const audienceLandingFields: CmsField[] = [
   },
 ];
 
+const navFields: CmsField[] = [
+  {
+    label: "Nav label",
+    name: "navLabel",
+    widget: "string",
+    required: false,
+    hint: "Label in header/footer when navigation opt-in is enabled. Required if either show flag is on.",
+  },
+  {
+    label: "Show in header",
+    name: "showInHeader",
+    widget: "boolean",
+    required: false,
+    default: false,
+    hint: "When true, appends this page to the primary header nav at build time.",
+  },
+  {
+    label: "Show in footer",
+    name: "showInFooter",
+    widget: "boolean",
+    required: false,
+    default: false,
+    hint: "When true, appends this page to the footer Company column at build time.",
+  },
+];
+
 export const marketingCmsFields: CmsField[] = [
   templateSelectField,
   ...seoCmsFields,
@@ -170,5 +194,6 @@ export const marketingCmsFields: CmsField[] = [
   ...pairedCtaFields,
   ...landingBandFields,
   ...audienceLandingFields,
+  ...navFields,
   draftCmsField,
 ];

@@ -39,16 +39,39 @@ Shared on every marketing page:
 - `template`
 - `title`, `description`, `headline`, `summary`
 - optional `eyebrow`
+- optional `navLabel`, `showInHeader`, `showInFooter` (navigation opt-in;
+  defaults hidden — see below)
 - optional `draft` (defaults to `false`)
+
+### Marketing pages in site navigation
+
+Published marketing pages stay **out of** the header and footer until you opt
+in. Set:
+
+| Field          | Effect                                                                |
+| -------------- | --------------------------------------------------------------------- |
+| `showInHeader` | When `true`, appends the page to the primary header nav at build time |
+| `showInFooter` | When `true`, appends the page to the footer **Company** column        |
+| `navLabel`     | Link text used in nav (required when either show flag is `true`)      |
+
+Hardcoded core links (How it works, Venues, About, FAQ, etc.) are never
+replaced — CMS entries are additive only. Draft pages are excluded from nav and
+from the public site.
+
+Published marketing slugs are also added to the CTA allowlist
+(`approvedInternalRoutes`) at build time, so peer marketing pages can be linked
+from CTAs even when they remain hidden from navigation. Decap CTA URL fields are
+free-text root-relative paths (not a static select list) so newly published
+marketing routes are usable without regenerating `public/admin/config.yml`; the
+Astro schemas still reject paths outside the allowlist at build.
 
 Layout fixtures for visual review live at `/layout-prose/`, `/layout-cta-heavy/`,
 `/layout-landing-band/`, and `/layout-audience/` (`draft: false`, titles prefixed
-with “Layout fixture:”).
+with “Layout fixture:”). Fixtures stay out of nav by default.
 
 The filename slug becomes the public URL (`partners.md` → `/partners/`). Slugs
 must be lowercase kebab-case and cannot match fixed routes such as `about`,
-`contact`, or `pricing`. New marketing URLs are not added to site navigation
-automatically (see GitHub issue #67).
+`contact`, or `pricing`.
 
 FAQ item frontmatter requires:
 
