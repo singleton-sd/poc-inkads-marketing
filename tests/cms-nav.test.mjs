@@ -118,6 +118,19 @@ test("draft frontmatter with inline comment is excluded from discovery", async (
     isDraftFrontmatter("---\ntitle: X\ndraft: true\n---\nbody\n"),
     true,
   );
+  // Hash inside a quoted scalar is part of the string, not a comment.
+  assert.equal(
+    isDraftFrontmatter('---\ntitle: X\ndraft: "true # note"\n---\nbody\n'),
+    false,
+  );
+  assert.equal(
+    isDraftFrontmatter("---\ntitle: X\ndraft: 'true # note'\n---\nbody\n"),
+    false,
+  );
+  assert.equal(
+    isDraftFrontmatter('---\ntitle: X\ndraft: "true" # note\n---\nbody\n'),
+    true,
+  );
 });
 
 test("reserved marketing slugs are not discovered as routes", async () => {
