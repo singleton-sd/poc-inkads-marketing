@@ -1,18 +1,42 @@
+@import "@fontsource-variable/inter";
+@import "@fontsource-variable/manrope";
+@import "@fontsource/ibm-plex-mono/500.css";
+
 :root {
-  color-scheme: light;
-  --ink: #1a1a1a;
-  --muted: #5c5c5c;
-  --line: #d8d8d8;
-  --surface: #f6f4f1;
-  --accent: #0f6e56;
-  --danger: #9b1c1c;
-  --ok: #0f6e56;
-  font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+  color-scheme: dark;
+  --ink-canvas: #000000;
+  --ink-surface: #111111;
+  --ink-surface-raised: #191919;
+  --ink-text: #ffffff;
+  --ink-text-muted: #9da1a6;
+  --ink-text-soft: #c9ccd1;
+  --ink-brand: #ffb300;
+  --ink-brand-hovered: #ffd54f;
+  --ink-on-brand: #000000;
+  --ink-border: #292c30;
+  --ink-focus: #ffd54f;
+  --ink-danger: #ff6b6b;
+  --ink-ok: #7dcea0;
+  --ink-font-heading: "Manrope Variable", "Manrope", sans-serif;
+  --ink-font-body: "Inter Variable", "Inter", sans-serif;
+  --ink-font-label: "IBM Plex Mono", monospace;
+  --ink-radius-control: 8px;
+  --ink-shell-max: 1280px;
+  font-family: var(--ink-font-body);
   line-height: 1.45;
-  color: var(--ink);
+  color: var(--ink-text);
   background:
-    radial-gradient(1200px 600px at 10% -10%, #e8f2ee 0%, transparent 55%),
-    linear-gradient(180deg, #fbfaf8 0%, var(--surface) 100%);
+    radial-gradient(
+      900px 480px at 12% -8%,
+      rgb(255 179 0 / 12%) 0%,
+      transparent 55%
+    ),
+    radial-gradient(
+      700px 420px at 90% 0%,
+      rgb(132 50 255 / 10%) 0%,
+      transparent 50%
+    ),
+    var(--ink-canvas);
   min-height: 100%;
 }
 
@@ -23,27 +47,65 @@
 body {
   margin: 0;
   min-height: 100vh;
+  background: transparent;
 }
 
 code {
-  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-family: var(--ink-font-label);
   font-size: 0.92em;
+  color: var(--ink-brand-hovered);
 }
 
 .shell {
-  max-width: 42rem;
+  width: min(100% - 2.5rem, 42rem);
   margin: 0 auto;
-  padding: 2rem 1.25rem 3rem;
+  padding: 2.5rem 0 3.5rem;
 }
 
 .shell-wide {
-  max-width: 72rem;
+  width: min(100% - 2.5rem, var(--ink-shell-max));
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin-bottom: 1.25rem;
+}
+
+.brand img {
+  width: 2.5rem;
+  height: 2.5rem;
+  display: block;
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.brand-name {
+  font-family: var(--ink-font-heading);
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.045em;
+  line-height: 1.1;
+}
+
+.brand-kicker {
+  font-family: var(--ink-font-label);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-text-muted);
 }
 
 .top h1 {
-  margin: 0 0 0.35rem;
-  font-size: 1.65rem;
-  letter-spacing: -0.02em;
+  margin: 0 0 0.4rem;
+  font-family: var(--ink-font-heading);
+  font-size: clamp(1.6rem, 3vw, 2rem);
+  letter-spacing: -0.045em;
 }
 
 .top-row {
@@ -51,58 +113,107 @@ code {
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--ink-border);
 }
 
 .lede {
-  margin: 0.5rem 0 1.25rem;
-  color: var(--muted);
+  margin: 0.65rem 0 1.5rem;
+  color: var(--ink-text-soft);
+  max-width: 36rem;
 }
 
 .muted {
-  color: var(--muted);
+  color: var(--ink-text-muted);
 }
 
 .error {
-  color: var(--danger);
+  color: var(--ink-danger);
 }
 
 .ok {
-  color: var(--ok);
+  color: var(--ink-ok);
+}
+
+.panel {
+  border: 1px solid var(--ink-border);
+  border-radius: var(--ink-radius-control);
+  background: var(--ink-surface);
+  padding: 1.25rem 1.35rem;
+  margin: 1rem 0;
 }
 
 .primary,
 .ghost {
   appearance: none;
-  border-radius: 0.35rem;
-  padding: 0.55rem 1rem;
+  border-radius: var(--ink-radius-control);
+  padding: 0.7rem 1.15rem;
   font: inherit;
   cursor: pointer;
 }
 
 .primary {
-  border: 1px solid var(--accent);
-  background: var(--accent);
-  color: #fff;
+  border: 1px solid var(--ink-brand);
+  background: var(--ink-brand);
+  color: var(--ink-on-brand);
+  font-weight: 600;
+}
+
+.primary:hover {
+  background: var(--ink-brand-hovered);
+  border-color: var(--ink-brand-hovered);
 }
 
 .ghost {
-  border: 1px solid var(--line);
+  border: 1px solid var(--ink-border);
   background: transparent;
-  color: var(--ink);
+  color: var(--ink-text);
+}
+
+.ghost:hover {
+  background: var(--ink-surface-raised);
 }
 
 .picker {
-  display: block;
-  margin: 0.75rem 0 1.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  margin: 0.85rem 0 1.35rem;
+  font-family: var(--ink-font-label);
+  font-size: 0.85rem;
+  color: var(--ink-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .picker select {
-  margin-left: 0.35rem;
-  font: inherit;
-  padding: 0.35rem 0.5rem;
+  font-family: var(--ink-font-body);
+  font-size: 1rem;
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--ink-text);
+  background: var(--ink-surface);
+  border: 1px solid var(--ink-border);
+  border-radius: var(--ink-radius-control);
+  padding: 0.45rem 0.65rem;
 }
 
 a {
-  color: var(--accent);
+  color: var(--ink-brand);
+}
+
+a:hover {
+  color: var(--ink-brand-hovered);
+}
+
+:focus-visible {
+  outline: 3px solid var(--ink-focus);
+  outline-offset: 3px;
+}
+
+/* Keep PostKit editor readable on dark host chrome */
+.shell-wide :where(.pk-editor-root, [class*="pk-editor"]) {
+  border-radius: var(--ink-radius-control);
 }

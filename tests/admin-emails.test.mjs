@@ -43,6 +43,8 @@ test("email admin SPA sources exist and use cms-oauth-kit", async () => {
   assert.match(auth, /event\.source !== popup/);
   assert.match(auth, /new URL\(OAUTH_AUTH_URL\)\.origin/);
   assert.match(auth, /content\/email-templates/);
+  assert.match(app, /assets\.inkads\.poc\.singletonsd\.com/);
+  assert.match(app, /redirect_uri/);
   assert.match(app, /EmailTemplateEditor/);
   assert.match(app, /onSave/);
   assert.doesNotMatch(app, /onSendTest/);
@@ -100,6 +102,7 @@ test("editorial docs describe /admin/emails Decap-parity path", async () => {
   assert.match(documentation, /post-kit-editor/);
   assert.match(documentation, /cms-oauth-kit/);
   assert.match(documentation, /Never put\s+`POSTKIT_API_KEY`/i);
+  assert.match(documentation, /redirect_uri is not associated/);
   assert.match(documentation, /#102/);
 });
 

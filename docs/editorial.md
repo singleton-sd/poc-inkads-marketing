@@ -136,6 +136,12 @@ work). The SPA is built to `admin-emails/dist` and copied into the site
 repository. Never put `POSTKIT_API_KEY` (or any `PUBLIC_*` PostKit key) in the
 email admin bundle.
 
+If GitHub shows **redirect_uri is not associated with this application**, the
+shared org OAuth App used by cms-oauth-kit must list Authorization callback URL
+`https://auth.singletonsd.com/callback` (client id is non-secret and visible in
+the authorize redirect). Decap `/admin` uses the same app — fix it once for both
+surfaces. Do not put client secrets in this repository.
+
 After [#100](https://github.com/singleton-sd/poc-inkads-marketing/issues/100)
 lands, consumer CI will run `post-kit-publish` to Azure Blob for tenant
 `inkads` (see PostKit

@@ -17,6 +17,21 @@ import {
 
 type Phase = "boot" | "login" | "loading" | "ready";
 
+const BRAND_ICON =
+  "https://assets.inkads.poc.singletonsd.com/svg/icon/icon-dark.svg";
+
+function BrandMark() {
+  return (
+    <div className="brand">
+      <img src={BRAND_ICON} alt="" width={40} height={40} />
+      <div className="brand-text">
+        <span className="brand-name">InkAds</span>
+        <span className="brand-kicker">Email templates</span>
+      </div>
+    </div>
+  );
+}
+
 export function App() {
   const [phase, setPhase] = useState<Phase>("boot");
   const [token, setToken] = useState<string | null>(null);
@@ -158,8 +173,9 @@ export function App() {
   if (phase === "boot" || phase === "loading") {
     return (
       <div className="shell">
+        <BrandMark />
         <header className="top">
-          <h1>InkAds email templates</h1>
+          <h1>Email templates</h1>
         </header>
         <p className="muted">Loading…</p>
       </div>
@@ -169,11 +185,13 @@ export function App() {
   if (phase === "login") {
     return (
       <div className="shell">
+        <BrandMark />
         <header className="top">
-          <h1>InkAds email templates</h1>
+          <h1>Sign in to edit email templates</h1>
           <p className="lede">
-            Sign in with GitHub (same cms-oauth-kit boundary as Decap) to edit
-            PostKit sources under <code>content/email-templates/</code>.
+            Same GitHub OAuth boundary as Decap (<code>cms-oauth-kit</code>).
+            Sources live under <code>content/email-templates/</code> — not a
+            Decap collection.
           </p>
         </header>
         {error ? (
@@ -181,17 +199,21 @@ export function App() {
             {error}
           </p>
         ) : null}
-        <button
-          type="button"
-          className="primary"
-          onClick={() => void onLogin()}
-        >
-          Sign in with GitHub
-        </button>
-        <p className="muted">
-          Markdown / Decap admin stays at <a href="../">/admin</a>. Send-test is
-          not available yet.
-        </p>
+        <div className="panel">
+          <button
+            type="button"
+            className="primary"
+            onClick={() => void onLogin()}
+          >
+            Sign in with GitHub
+          </button>
+          <p className="muted" style={{ marginTop: "1rem" }}>
+            If GitHub reports an unknown <code>redirect_uri</code>, the shared
+            OAuth App callback must be{" "}
+            <code>https://auth.singletonsd.com/callback</code> (same as Decap at{" "}
+            <a href="../">/admin</a>). Send-test is not available yet.
+          </p>
+        </div>
       </div>
     );
   }
@@ -201,9 +223,10 @@ export function App() {
 
   return (
     <div className="shell shell-wide">
+      <BrandMark />
       <header className="top top-row">
         <div>
-          <h1>InkAds email templates</h1>
+          <h1>Email templates</h1>
           <p className="muted">
             Signed in as <strong>{login}</strong> · save opens a PR to{" "}
             <code>main</code>
