@@ -165,6 +165,10 @@ testMetadata("sitemap lists primary public routes", () => {
   );
   assert.doesNotMatch(sitemapXml, /\/admin\//i);
   assert.doesNotMatch(sitemapXml, /404\.html/i);
+  assert.doesNotMatch(
+    sitemapXml,
+    /<loc>https:\/\/inkads\.poc\.singletonsd\.com\/go\/?<\/loc>/i,
+  );
 });
 
 testMetadata("sitemap and robots reference production domain", () => {
@@ -179,6 +183,7 @@ testMetadata("sitemap and robots reference production domain", () => {
 
   assert.match(robotsTxt, /User-agent:\s*\*/i);
   assert.match(robotsTxt, /Disallow:\s*\/admin\//i);
+  assert.match(robotsTxt, /Disallow:\s*\/go\//i);
   assert.match(
     robotsTxt,
     new RegExp(

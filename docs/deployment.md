@@ -144,5 +144,17 @@ curl --fail --head https://inkads.poc.singletonsd.com
 Expected DNS response: `singleton-sd.github.io.`. The HTTPS response should be
 successful and use a certificate valid for `inkads.poc.singletonsd.com`.
 
+## House-ad QR redirect
+
+House-ad QR codes must encode the stable public URL (HTTPS only):
+
+`https://inkads.poc.singletonsd.com/go`
+
+GitHub Pages serves a static redirect page at `/go` (meta-refresh + JS). Editors
+change the destination in `src/content/redirects/go.md` (or Decap **Redirects**)
+without regenerating QR artwork. Targets must be root-relative allowlisted paths
+only — no open redirects to arbitrary hosts. Default target:
+`/contact?role=venue`.
+
 If deployment must be rolled back, revert the responsible commit on `main`.
 The resulting Pages workflow republishes the previous static build.

@@ -4,6 +4,7 @@ export const RESERVED_PAGE_SLUGS = [
   "advertisers",
   "contact",
   "faq",
+  "go",
   "how-it-works",
   "places",
   "pricing",

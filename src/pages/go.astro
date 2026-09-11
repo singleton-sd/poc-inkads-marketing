@@ -1,0 +1,45 @@
+---
+/**
+ * Stable public redirect for house-ad QR codes.
+ * Target is content-driven (`src/content/redirects/go.md`) so destinations can
+ * change without regenerating QR artwork. GitHub Pages has no server redirects,
+ * so this page uses meta-refresh + location.replace.
+ */
+import { getEntry } from "astro:content";
+
+import { withBase } from "../lib/nav";
+import {
+  assertSafeQrRedirectTarget,
+  DEFAULT_QR_REDIRECT_TARGET,
+} from "../lib/qr-redirect";
+
+const entry = await getEntry("redirects", "go");
+if (!entry) {
+  throw new Error(
+    `Missing redirects/go content (expected target ${DEFAULT_QR_REDIRECT_TARGET}).`,
+  );
+}
+
+const target = assertSafeQrRedirectTarget(entry.data.target);
+const base = import.meta.env.BASE_URL;
+const href = withBase(target, base);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex,nofollow" />
+    <meta http-equiv="refresh" content={`0;url=${href}`} />
+    <title>Redirecting… | InkAds</title>
+    <script is:inline define:vars={{ href }}>
+      location.replace(href);
+    </script>
+  </head>
+  <body>
+    <p>
+      Redirecting to <a href={href}>{href}</a>…
+    </p>
+  </body>
+</html>
