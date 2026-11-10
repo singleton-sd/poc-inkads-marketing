@@ -47,6 +47,17 @@ test("contact form posts to PostKit with loading and error states", async () => 
   assert.match(form, /ContactFormIsland/);
   assert.doesNotMatch(island, /Preview form|Nothing was sent/);
   assert.doesNotMatch(form, /Preview form|Nothing was sent/);
+  assert.match(island, /buildContactMessagePayload/);
+  assert.match(island, /message: messagePayload/);
+  assert.doesNotMatch(island, /phone:\s*values\.phone/);
+  assert.match(island, /contact-phone/);
+  assert.match(island, /hint="required"/);
+  assert.match(island, /hint="optional"/);
+  assert.match(island, /Fields labelled \(required\)/);
+  assert.doesNotMatch(island, /\bTwenty\b/);
+  assert.doesNotMatch(island, /waitlist/i);
+  assert.doesNotMatch(island, /how did you hear/i);
+  assert.doesNotMatch(island, /hint="required">[\s\S]*?\*/);
 });
 
 test("contact form prefills role/name/email from safe query params", async () => {
@@ -123,6 +134,13 @@ test("contact form prefills role/name/email from safe query params", async () =>
 
   const {
     SAFE_EMAIL_RE,
+    SAFE_NAME_MAX,
+    SAFE_COMPANY_MAX,
+    SAFE_PHONE_MAX,
+    SAFE_MESSAGE_MAX,
+    POSTKIT_MESSAGE_MIN,
+    POSTKIT_MESSAGE_MAX,
+    CONTACT_FORM_SOURCE,
     resolveRoleOption,
     parseNameFromQuery,
     parseEmailFromQuery,
@@ -131,6 +149,8 @@ test("contact form prefills role/name/email from safe query params", async () =>
     serializeEmailQuery,
     contactFormQuerySchema,
     contactFormSchema,
+    buildContactMessagePayload,
+    subjectFromRole,
   } = await import(
     pathToFileURL(new URL("src/lib/contact-form-schema.ts", root).pathname).href
   );
@@ -160,6 +180,11 @@ test("contact form prefills role/name/email from safe query params", async () =>
   assert.equal(parseNameFromQuery("bad\u0000name"), "");
   assert.equal(parseNameFromQuery(""), "");
   assert.equal(parseNameFromQuery(null), "");
+  assert.equal(
+    parseNameFromQuery("A".repeat(SAFE_NAME_MAX)),
+    "A".repeat(SAFE_NAME_MAX),
+  );
+  assert.equal(parseNameFromQuery("A".repeat(SAFE_NAME_MAX + 1)), "");
 
   assert.equal(parseEmailFromQuery("user@example.com"), "user@example.com");
   assert.equal(parseEmailFromQuery("  user@example.com  "), "user@example.com");
@@ -187,6 +212,7 @@ test("contact form prefills role/name/email from safe query params", async () =>
   assert.equal(parsed.name, "Ada");
   assert.equal(parsed.email, "ada@example.com");
   assert.equal("company" in parsed, false);
+  assert.equal("phone" in parsed, false);
 
   const serialized = serializeQueryWithSchema(contactFormQuerySchema, parsed, {
     serialize: {
@@ -213,24 +239,103 @@ test("contact form prefills role/name/email from safe query params", async () =>
   const formOk = contactFormSchema.safeParse({
     name: "Ada",
     company: "InkAds",
+    phone: "+61 400 000 000",
     email: "ada@example.com",
     role: "Advertiser / brand",
     message: "Hello",
   });
   assert.equal(formOk.success, true);
 
+  const formOptional = contactFormSchema.safeParse({
+    name: "Ada",
+    company: "",
+    phone: "",
+    email: "ada@example.com",
+    role: "",
+    message: "Please follow up about a venue pilot.",
+  });
+  assert.equal(formOptional.success, true);
+
   const formBad = contactFormSchema.safeParse({
     name: "",
     company: "",
+    phone: "",
     email: "nope",
     role: "",
     message: "",
   });
   assert.equal(formBad.success, false);
 
+  assert.equal(SAFE_NAME_MAX, 120);
+  const tooLongName = contactFormSchema.safeParse({
+    name: "A".repeat(SAFE_NAME_MAX + 1),
+    company: "",
+    phone: "",
+    email: "ada@example.com",
+    role: "",
+    message: "Hello from a venue",
+  });
+  assert.equal(tooLongName.success, false);
+
+  const maxName = contactFormSchema.safeParse({
+    name: "A".repeat(SAFE_NAME_MAX),
+    company: "",
+    phone: "",
+    email: "ada@example.com",
+    role: "",
+    message: "Hello from a venue",
+  });
+  assert.equal(maxName.success, true);
+
+  assert.equal(subjectFromRole(""), "general");
+  assert.equal(subjectFromRole("Venue owner / operator"), "partnership");
+  assert.equal(subjectFromRole("Advertiser / brand"), "sales");
+  assert.equal(subjectFromRole("Other"), "general");
+
+  assert.equal(
+    buildContactMessagePayload({
+      company: "Example Pub",
+      phone: "+61 400 000 000",
+      message: "We have wall space.",
+    }),
+    [
+      "Venue / company: Example Pub",
+      "Phone: +61 400 000 000",
+      `Source: ${CONTACT_FORM_SOURCE}`,
+      "",
+      "We have wall space.",
+    ].join("\n"),
+  );
+  assert.equal(
+    buildContactMessagePayload({
+      company: "",
+      phone: "",
+      message: "Just a note.",
+    }),
+    [`Source: ${CONTACT_FORM_SOURCE}`, "", "Just a note."].join("\n"),
+  );
+  assert.match(CONTACT_FORM_SOURCE, /InkAds contact form/);
+  assert.doesNotMatch(CONTACT_FORM_SOURCE, /venue|advertiser/i);
+
+  const shortPayload = buildContactMessagePayload({
+    company: "",
+    phone: "",
+    message: "Hi",
+  });
+  assert.ok(shortPayload.length >= POSTKIT_MESSAGE_MIN);
+
+  const maxPayload = buildContactMessagePayload({
+    company: "C".repeat(SAFE_COMPANY_MAX),
+    phone: "1".repeat(SAFE_PHONE_MAX),
+    message: "M".repeat(SAFE_MESSAGE_MAX),
+  });
+  assert.ok(maxPayload.length <= POSTKIT_MESSAGE_MAX);
+
   assert.match(docs, /role=venue/);
   assert.match(docs, /Do not put secrets in query strings/i);
   assert.match(docs, /useZodFormQuerySync|Zod schema/i);
+  assert.match(docs, /Phone is folded into the/);
+  assert.match(docs, /no\s+asterisks/i);
 });
 
 test("contact content describes live enquiry delivery", async () => {
@@ -251,4 +356,6 @@ test("contact content describes live enquiry delivery", async () => {
     publicCopy,
     /\b(guaranteed|proven roi|industry-leading|best-in-class|revenue lift)\b/i,
   );
+  assert.doesNotMatch(publicCopy, /waitlist/i);
+  assert.doesNotMatch(publicCopy, /how did you hear/i);
 });

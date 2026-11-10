@@ -132,6 +132,23 @@ try {
 
   await page.goto(`${origin}/contact/`, { waitUntil: "networkidle" });
   await page.waitForSelector("#contact-role");
+  await page.waitForSelector("#contact-phone");
+  assert.equal(await page.locator("#contact-phone").inputValue(), "");
+  const nameLabel = await page.locator("label[for='contact-name']").innerText();
+  const companyLabel = await page
+    .locator("label[for='contact-company']")
+    .innerText();
+  const phoneLabel = await page
+    .locator("label[for='contact-phone']")
+    .innerText();
+  const messageLabel = await page
+    .locator("label[for='contact-message']")
+    .innerText();
+  assert.match(nameLabel, /required/i);
+  assert.doesNotMatch(nameLabel, /\*/);
+  assert.match(companyLabel, /optional/i);
+  assert.match(phoneLabel, /optional/i);
+  assert.match(messageLabel, /required/i);
   await page.locator("#contact-role").selectOption("Advertiser / brand");
   await page.waitForFunction(
     () =>
@@ -143,6 +160,74 @@ try {
   await page.waitForFunction(
     () => new URL(window.location.href).searchParams.get("role") === "venue",
   );
+
+  assert.equal(
+    await page
+      .locator("[data-contact-form]")
+      .locator("text=how did you hear")
+      .count(),
+    0,
+  );
+  assert.equal(
+    await page.locator("[data-contact-form]").locator("text=waitlist").count(),
+    0,
+  );
+
+  const submit = page.locator("[data-contact-form-submit]");
+  if (await submit.isEnabled()) {
+    await page.locator("#contact-name").fill("");
+    await page.locator("#contact-email").fill("");
+    await page.locator("#contact-phone").fill("");
+    await page.locator("#contact-company").fill("");
+    await page.locator("#contact-message").fill("");
+    await page.locator("#contact-role").selectOption("");
+    await submit.click();
+    await page.waitForSelector("text=Name is required.");
+    await page.waitForSelector("text=Email is required.");
+    await page.waitForSelector("text=Message is required.");
+    assert.equal(
+      await page.locator("text=Venue / company is required.").count(),
+      0,
+    );
+    assert.equal(await page.locator("text=Select an option.").count(), 0);
+
+    const posts = [];
+    await page.route("**/contact", async (route) => {
+      const request = route.request();
+      if (request.method() !== "POST") {
+        await route.continue();
+        return;
+      }
+      posts.push({
+        url: request.url(),
+        body: request.postDataJSON(),
+      });
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ status: "sent" }),
+      });
+    });
+
+    await page.locator("#contact-role").selectOption("");
+    await page.locator("#contact-name").fill("Ada Lovelace");
+    await page.locator("#contact-email").fill("ada@example.com");
+    await page.locator("#contact-phone").fill("+61 400 000 000");
+    await page
+      .locator("#contact-message")
+      .fill("Please follow up about a pilot.");
+    await submit.click();
+    await page.waitForSelector("[data-contact-form-success]:not([hidden])");
+    assert.equal(posts.length, 1);
+    assert.match(posts[0].url, /\/contact$/);
+    assert.equal(posts[0].body.name, "Ada Lovelace");
+    assert.equal(posts[0].body.email, "ada@example.com");
+    assert.equal(posts[0].body.subject, "general");
+    assert.equal("phone" in posts[0].body, false);
+    assert.match(posts[0].body.message, /Phone: \+61 400 000 000/);
+    assert.match(posts[0].body.message, /Source: InkAds contact form/);
+    assert.doesNotMatch(posts[0].body.message, /Venue \/ company:/);
+  }
 
   console.log("contact-prefill: ok");
 } finally {
