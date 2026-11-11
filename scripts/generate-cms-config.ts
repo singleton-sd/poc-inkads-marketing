@@ -131,9 +131,9 @@ const config = `backend:
   name: github
   repo: singleton-sd/poc-inkads-marketing
   branch: main
-  # Shared Decap OAuth proxy (cms-oauth-kit, https://auth.singletonsd.com)
-  base_url: https://auth.singletonsd.com
-  auth_endpoint: auth
+  # Shared Decap OAuth on the Singleton SD API gateway; callback https://api.singletonsd.com/v1/cms-auth/callback
+  base_url: https://api.singletonsd.com
+  auth_endpoint: v1/cms-auth/auth
 
 publish_mode: editorial_workflow
 
