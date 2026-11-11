@@ -1,7 +1,7 @@
 ---
 title: Privacy Policy | InkAds
 description: How the InkAds proof-of-concept marketing site handles contact enquiries and hosting.
-effectiveDate: 2026-08-31
+effectiveDate: 2026-11-10
 draft: false
 ---
 
@@ -10,9 +10,10 @@ marketing site at `inkads.poc.singletonsd.com`.
 
 ## What we collect
 
-When you use the contact form, we collect the fields you submit: name, venue or
-company name, email address, how you identify (venue, advertiser, or other), and
-your message.
+When you use the contact form, we collect the fields you submit: name, email
+address, and your message. Venue or company name, phone number, and how you
+identify (venue, advertiser, or other) are optional. Submissions are tagged as
+coming from the InkAds contact form; we do not ask how you heard about us.
 
 If you email us directly, we receive your email address and message content.
 

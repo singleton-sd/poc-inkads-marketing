@@ -166,7 +166,10 @@ development email provider instead of the production InkAds inbox.
 ### Deep-link query prefills
 
 Marketing CTAs and QR codes may open `/contact?role=venue|advertiser|other`
-(and optional safe `name` / `email`). See
+(and optional safe `name` / `email`). Role maps to PostKit `subject`
+(opportunity type). Lead source is tagged in the message body as the InkAds
+contact form; phone is also appended there until PostKit accepts a phone field.
+See
 [design-reference/contact.md](design-reference/contact.md#query-prefills-deep-links--qr).
 **Never put secrets in URL query strings.**
 

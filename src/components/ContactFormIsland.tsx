@@ -3,6 +3,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import {
   CONTACT_ROLE_OPTIONS,
+  SAFE_COMPANY_MAX,
+  SAFE_EMAIL_MAX,
+  SAFE_MESSAGE_MAX,
+  SAFE_NAME_MAX,
+  SAFE_PHONE_MAX,
+  buildContactMessagePayload,
   contactFormQuerySchema,
   contactFormQuerySerializers,
   contactFormSchema,
@@ -58,16 +64,19 @@ function submitReducer(_state: SubmitState, action: SubmitAction): SubmitState {
 function Field({
   id,
   label,
+  hint,
   children,
 }: {
   id: string;
   label: string;
+  hint: "required" | "optional";
   children: ReactNode;
 }) {
   return (
     <div className="field">
       <label className="field__label" htmlFor={id}>
         {label}
+        <span className="field__hint"> ({hint})</span>
       </label>
       {children}
     </div>
@@ -102,6 +111,7 @@ export default function ContactFormIsland({
     () => ({
       name: initialName,
       company: "",
+      phone: "",
       email: initialEmail,
       role: (initialRole as ContactRole | "") || "",
       message: "",
@@ -117,7 +127,7 @@ export default function ContactFormIsland({
     formState: { errors },
   } = useForm<ContactFormValues>({
     resolver: zodResolver(contactFormSchema),
-    defaultValues: defaultValues as ContactFormValues,
+    defaultValues,
     mode: "onSubmit",
   });
 
@@ -183,7 +193,7 @@ export default function ContactFormIsland({
     }
 
     const subject = subjectFromRole(values.role);
-    const messagePayload = `Venue / company: ${values.company}\n\n${values.message}`;
+    const messagePayload = buildContactMessagePayload(values);
     const isPreview = location.pathname.includes("/pr-preview/");
 
     dispatch({ type: "submit" });
@@ -264,51 +274,75 @@ export default function ContactFormIsland({
           noValidate
           onSubmit={handleSubmit(onValidSubmit)}
         >
+          <p className="contact-form__legend">
+            Fields labelled (required) must be filled in. The others are
+            optional.
+          </p>
           <div className="contact-form__row">
-            <Field id="contact-name" label="Name">
+            <Field id="contact-name" label="Name" hint="required">
               <input
                 className="field-control"
                 id="contact-name"
                 type="text"
                 autoComplete="name"
+                maxLength={SAFE_NAME_MAX}
+                required
+                aria-required="true"
                 aria-invalid={errors.name ? "true" : undefined}
                 {...register("name")}
               />
               <FieldError message={errors.name?.message} />
             </Field>
-            <Field id="contact-company" label="Venue / company">
+            <Field id="contact-company" label="Venue / company" hint="optional">
               <input
                 className="field-control"
                 id="contact-company"
                 type="text"
                 autoComplete="organization"
+                maxLength={SAFE_COMPANY_MAX}
                 aria-invalid={errors.company ? "true" : undefined}
                 {...register("company")}
               />
               <FieldError message={errors.company?.message} />
             </Field>
           </div>
-          <Field id="contact-email" label="Email">
-            <input
-              className="field-control"
-              id="contact-email"
-              type="email"
-              autoComplete="email"
-              aria-invalid={errors.email ? "true" : undefined}
-              {...register("email")}
-            />
-            <FieldError message={errors.email?.message} />
-          </Field>
-          <Field id="contact-role" label="I am a…">
+          <div className="contact-form__row">
+            <Field id="contact-email" label="Email" hint="required">
+              <input
+                className="field-control"
+                id="contact-email"
+                type="email"
+                autoComplete="email"
+                maxLength={SAFE_EMAIL_MAX}
+                required
+                aria-required="true"
+                aria-invalid={errors.email ? "true" : undefined}
+                {...register("email")}
+              />
+              <FieldError message={errors.email?.message} />
+            </Field>
+            <Field id="contact-phone" label="Phone" hint="optional">
+              <input
+                className="field-control"
+                id="contact-phone"
+                type="tel"
+                autoComplete="tel"
+                inputMode="tel"
+                maxLength={SAFE_PHONE_MAX}
+                aria-invalid={errors.phone ? "true" : undefined}
+                {...register("phone")}
+              />
+              <FieldError message={errors.phone?.message} />
+            </Field>
+          </div>
+          <Field id="contact-role" label="I am a…" hint="optional">
             <select
               className="field-control"
               id="contact-role"
               aria-invalid={errors.role ? "true" : undefined}
               {...register("role")}
             >
-              <option value="" disabled>
-                Select an option
-              </option>
+              <option value="">Select an option</option>
               {CONTACT_ROLE_OPTIONS.map((option) => (
                 <option key={option} value={option}>
                   {option}
@@ -320,11 +354,15 @@ export default function ContactFormIsland({
           <Field
             id="contact-message"
             label="Tell us about your space or campaign"
+            hint="required"
           >
             <textarea
               className="field-control"
               id="contact-message"
               rows={5}
+              maxLength={SAFE_MESSAGE_MAX}
+              required
+              aria-required="true"
               aria-invalid={errors.message ? "true" : undefined}
               {...register("message")}
             />

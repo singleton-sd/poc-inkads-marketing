@@ -34,7 +34,10 @@ test("privacy policy describes PostKit contact delivery", async () => {
 
   assert.match(privacy, /PostKit/);
   assert.match(privacy, /rate limiting/i);
+  assert.match(privacy, /phone number/i);
+  assert.match(privacy, /tagged as\s+coming from the InkAds contact form/i);
   assert.doesNotMatch(privacy, /preview only/i);
+  assert.doesNotMatch(privacy, /\bTwenty\b/);
 });
 
 test("legal content files are published", async () => {

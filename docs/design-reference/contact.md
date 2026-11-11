@@ -7,17 +7,20 @@ header_active: ""
 purpose: demo request
 email: hello@inkads.poc.singletonsd.com
 form_fields:
-  - { name: name, type: text, required: true, placeholder: Name }
-  - { name: company, type: text, required: true, placeholder: Venue / company }
+  - { name: name, type: text, required: true, placeholder: Name, max: 120 }
+  - { name: company, type: text, required: false, placeholder: Venue / company }
   - { name: email, type: email, required: true, placeholder: Email }
+  - { name: phone, type: tel, required: false, placeholder: Phone }
   - {
       name: role,
       type: select,
+      required: false,
       options: ["Venue owner / operator", "Advertiser / brand", "Other"],
     }
   - {
       name: message,
       type: textarea,
+      required: true,
       placeholder: Tell us about your space or campaign,
     }
 submit_label: Send request
@@ -44,7 +47,12 @@ Two-column layout 0.9fr / 1.1fr.
 
 Default: form visible. On submit: success panel (gold border) replaces the fields.
 
-Fields: Name | Venue / company (row) · Email · Role select (“I am a…”) · Message textarea · Send request (gold button).
+Fields: Name (required) | Venue / company (optional) · Email (required) | Phone
+(optional) · Role select (“I am a…”, optional) · Message textarea (required) ·
+Send request (gold button). Labels use “(required)” / “(optional)” text — no
+asterisks. Lead source is system-assigned as the InkAds contact form (not the
+role, and not a “how did you hear about us” field). Phone is folded into the
+PostKit message body until `/contact` has a phone field.
 
 Implemented as a React island (`ContactFormIsland`, `client:load`) with:
 
@@ -61,12 +69,13 @@ Implemented as a React island (`ContactFormIsland`, `client:load`) with:
 safe fields via the React island. Invalid values are ignored (form stays on
 defaults). Changing synced fields updates the address bar via `history.replaceState`
 (`role` uses short aliases `venue` / `advertiser` / `other`; `name` / `email` write
-back too; empty values clear the param). Company and message are never put in the URL.
+back too; empty values clear the param). Company, phone, and message are never
+put in the URL. Unset role still submits with PostKit subject `general`.
 
 | Param   | Values                                                                                         | Effect                                                                                                   |
 | ------- | ---------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
 | `role`  | `venue` / `partnership`, `advertiser` / `sales`, `other` / `general`, or an exact option label | Selects “I am a…”; submit still maps via `ROLE_TO_SUBJECT` → PostKit `partnership` / `sales` / `general` |
-| `name`  | Non-empty trimmed text ≤ 200 chars, no control characters                                      | Prefills Name                                                                                            |
+| `name`  | Non-empty trimmed text ≤ 120 chars, no control characters                                      | Prefills Name                                                                                            |
 | `email` | Simple email shape ≤ 254 chars, no control characters in each segment                          | Prefills Email                                                                                           |
 
 Examples:
