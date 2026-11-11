@@ -147,7 +147,8 @@ Seeded keys today:
 `EmailTemplateAdmin` page (PostKit
 [#138](https://github.com/singleton-sd/post-kit/issues/138) /
 [#140](https://github.com/singleton-sd/post-kit/issues/140)). That host will use
-cms-oauth-kit for GitHub OAuth and open PRs for
+the shared Decap OAuth on the Singleton SD API gateway for GitHub OAuth and
+open PRs for
 `content/email-templates/<key>/{template,metadata,preview}.json`. Do not put a
 temporary SPA in this repository while waiting. Send-test needs a trusted BFF
 (#102) after templates are published (#100).
@@ -170,10 +171,10 @@ page, marketing, FAQ, legal, and redirect fields enforced by the Astro schemas.
 
 GitHub Pages can serve the static admin files, but it cannot execute the OAuth
 callback or safely hold the OAuth client secret. CMS login therefore uses the
-shared org service **cms-oauth-kit** at `https://auth.singletonsd.com`
-(`singleton-sd/cms-oauth-kit`). `public/admin/config.yml` sets
-`base_url: https://auth.singletonsd.com` and `auth_endpoint: auth`. This
-repository stays fully static and does not host Azure Functions.
+shared Decap OAuth on the Singleton SD API gateway.
+`public/admin/config.yml` sets `base_url: https://api.singletonsd.com` and
+`auth_endpoint: v1/cms-auth/auth`. This repository stays fully static and does
+not host Azure Functions.
 
 Open `/admin` on `https://inkads.poc.singletonsd.com` or `localhost:4321`.
 GitHub Pages / preview hosts that are not under `*.singletonsd.com` or
@@ -181,10 +182,10 @@ GitHub Pages / preview hosts that are not under `*.singletonsd.com` or
 local OAuth proxy in this repository.
 
 If GitHub shows **redirect_uri is not associated with this application**, the
-shared org OAuth App used by cms-oauth-kit must list Authorization callback URL
-`https://auth.singletonsd.com/callback` (client id is non-secret and visible in
-the authorize redirect). Fix it once for Decap and any future email admin host.
-Do not put client secrets in this repository.
+shared org OAuth App used by the gateway must list Authorization callback URL
+`https://api.singletonsd.com/v1/cms-auth/callback` (client id is non-secret and
+visible in the authorize redirect). Fix it once for Decap and any future email
+admin host. Do not put client secrets in this repository.
 
 Editors need **write** access to this repository so that the GitHub OAuth grant
 covers Decap's required `repo` scope. Do not commit OAuth client secrets or

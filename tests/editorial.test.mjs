@@ -12,8 +12,9 @@ test("Decap admin targets this repository and models landing and legal content",
 
   assert.match(config, /name: github/);
   assert.match(config, /repo: singleton-sd\/poc-inkads-marketing/);
-  assert.match(config, /base_url: https:\/\/auth\.singletonsd\.com/);
-  assert.match(config, /auth_endpoint: auth/);
+  assert.match(config, /base_url: https:\/\/api\.singletonsd\.com/);
+  assert.match(config, /auth_endpoint: v1\/cms-auth\/auth/);
+  assert.doesNotMatch(config, /auth\.singletonsd\.com/);
   assert.doesNotMatch(
     config,
     /ssd-pocpk-decap-oauth-dev-ae|azurewebsites\.net|poc-plattform-kit/,
@@ -40,14 +41,15 @@ test("admin page loads Decap without adding it to the public application", async
   assert.doesNotMatch(landing, /decap|\/admin/i);
 });
 
-test("editorial documentation states the cms-oauth-kit login path", async () => {
+test("editorial documentation states the API gateway CMS login path", async () => {
   const documentation = await readFile(
     new URL("docs/editorial.md", root),
     "utf8",
   );
 
-  assert.match(documentation, /cms-oauth-kit/);
-  assert.match(documentation, /https:\/\/auth\.singletonsd\.com/);
+  assert.match(documentation, /Singleton SD API gateway/);
+  assert.match(documentation, /https:\/\/api\.singletonsd\.com/);
+  assert.match(documentation, /auth_endpoint: v1\/cms-auth\/auth/);
   assert.match(
     documentation,
     /GitHub Pages.*cannot execute the\s+OAuth\s+callback/is,
@@ -55,7 +57,11 @@ test("editorial documentation states the cms-oauth-kit login path", async () => 
   assert.match(documentation, /Do not commit OAuth client\s+secrets/i);
   assert.match(documentation, /EmailTemplateAdmin/);
   assert.match(documentation, /redirect_uri is not associated/);
-  assert.match(documentation, /auth\.singletonsd\.com\/callback/);
+  assert.match(
+    documentation,
+    /https:\/\/api\.singletonsd\.com\/v1\/cms-auth\/callback/,
+  );
+  assert.doesNotMatch(documentation, /auth\.singletonsd\.com/);
   assert.doesNotMatch(
     documentation,
     /ssd-pocpk-decap-oauth-dev-ae|poc-plattform-kit/,
