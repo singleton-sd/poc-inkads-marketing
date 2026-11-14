@@ -14,6 +14,7 @@ import { pricingPageSchema } from "./content/schemas/pricing";
 import { redirectEntrySchema } from "./content/schemas/redirect";
 import { supportPageSchema } from "./content/schemas/support";
 import { venuesPageSchema } from "./content/schemas/venues";
+import { waitlistPageSchema } from "./content/schemas/waitlist";
 
 const pages = defineCollection({
   loader: glob({ base: "./src/content/pages", pattern: "**/*.{md,mdx}" }),
@@ -28,6 +29,7 @@ const pages = defineCollection({
     pricingPageSchema,
     supportPageSchema,
     venuesPageSchema,
+    waitlistPageSchema,
   ]),
 });
 

@@ -133,10 +133,10 @@ content/email-templates/<key>/
 
 Seeded keys today:
 
-| Key                          | Purpose                                                |
-| ---------------------------- | ------------------------------------------------------ |
-| `demo.welcome`               | Compile-clean fixture for publish CI                   |
-| `marketing.waitlist-confirm` | Waitlist confirmation (used when a waitlist BFF ships) |
+| Key                          | Purpose                                                 |
+| ---------------------------- | ------------------------------------------------------- |
+| `demo.welcome`               | Compile-clean fixture for publish CI                    |
+| `marketing.waitlist-confirm` | Waitlist confirmation (unused; leads go to `/v1/leads`) |
 
 **Not a Decap collection.** Do not model EmailBuilder JSON as widgets in
 `public/admin/config.yml`. An authenticated email admin UI (sibling to Decap
@@ -160,8 +160,8 @@ storage account / RBAC. Authoring rules:
 [`docs/guides/template-authoring.md`](https://github.com/singleton-sd/post-kit/blob/main/docs/guides/template-authoring.md).
 
 Never commit PostKit API keys or other secrets under `content/email-templates/`.
-The contact form continues to use browser `POST /contact` and does not require
-these templates.
+Contact and waitlist forms post JSON from the browser to
+`https://api.singletonsd.com/v1/leads` and do not require these templates.
 
 ## Decap admin and authentication boundary
 

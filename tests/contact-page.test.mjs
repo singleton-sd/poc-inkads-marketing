@@ -22,7 +22,7 @@ test("contact page uses shared chrome and a split MetaPair + form layout", async
   assert.match(content, /Let's talk about your space or campaign\./);
 });
 
-test("contact form posts to PostKit with loading and error states", async () => {
+test("contact form posts JSON to the shared lead-intake API", async () => {
   const island = await readFile(
     new URL("src/components/ContactFormIsland.tsx", root),
     "utf8",
@@ -31,22 +31,27 @@ test("contact form posts to PostKit with loading and error states", async () => 
     new URL("src/components/ContactForm.astro", root),
     "utf8",
   );
+  const page = await readFile(new URL("src/pages/contact.astro", root), "utf8");
 
-  assert.match(island, /PUBLIC_POSTKIT_API_BASE_URL|postkitApiBaseUrl/);
-  assert.match(island, /fetch\(`\$\{apiBase\}\/contact`/);
-  assert.match(island, /startsWith\("https:\/\/"\)/);
-  assert.match(island, /AbortController/);
+  assert.match(island, /buildLeadRequest/);
+  assert.match(island, /submitLeadRequest/);
+  assert.match(island, /formType: "contact"/);
+  assert.match(island, /TurnstileWidget/);
   assert.match(island, /zodResolver|contactFormSchema/);
   assert.match(island, /handleSubmit/);
-  assert.match(island, /partnership|subjectFromRole/);
-  assert.match(island, /X-PostKit-Contact-Preview/);
   assert.match(island, /data-contact-form-error/);
   assert.match(island, /data-contact-form-success/);
+  assert.match(island, /contact-consent/);
+  assert.match(island, /marketingOptIn/);
+  assert.doesNotMatch(island, /PostKit|postkitApiBaseUrl/);
+  assert.doesNotMatch(island, /X-PostKit-Contact-Preview/);
   assert.match(form, /withBase\("\/privacy"/);
+  assert.match(form, /PUBLIC_TURNSTILE_SITE_KEY/);
   assert.match(form, /client:load/);
   assert.match(form, /ContactFormIsland/);
   assert.doesNotMatch(island, /Preview form|Nothing was sent/);
   assert.doesNotMatch(form, /Preview form|Nothing was sent/);
+  assert.doesNotMatch(page, /Preview form|Nothing was sent/);
 });
 
 test("contact form prefills role/name/email from safe query params", async () => {
@@ -131,6 +136,7 @@ test("contact form prefills role/name/email from safe query params", async () =>
     serializeEmailQuery,
     contactFormQuerySchema,
     contactFormSchema,
+    SAFE_NAME_MAX,
   } = await import(
     pathToFileURL(new URL("src/lib/contact-form-schema.ts", root).pathname).href
   );
@@ -213,24 +219,34 @@ test("contact form prefills role/name/email from safe query params", async () =>
   const formOk = contactFormSchema.safeParse({
     name: "Ada",
     company: "InkAds",
+    phone: "",
     email: "ada@example.com",
     role: "Advertiser / brand",
     message: "Hello",
+    consent: true,
+    marketingOptIn: false,
+    website: "",
   });
   assert.equal(formOk.success, true);
 
   const formBad = contactFormSchema.safeParse({
     name: "",
     company: "",
+    phone: "",
     email: "nope",
     role: "",
     message: "",
+    consent: false,
+    marketingOptIn: false,
+    website: "",
   });
   assert.equal(formBad.success, false);
+  assert.equal(SAFE_NAME_MAX, 120);
 
   assert.match(docs, /role=venue/);
   assert.match(docs, /Do not put secrets in query strings/i);
   assert.match(docs, /useZodFormQuerySync|Zod schema/i);
+  assert.match(docs, /\/v1\/leads/);
 });
 
 test("contact content describes live enquiry delivery", async () => {

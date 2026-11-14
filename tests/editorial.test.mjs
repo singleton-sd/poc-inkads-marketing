@@ -96,6 +96,7 @@ test("Astro schemas validate landing and future legal frontmatter", async () => 
     "pricingPageSchema",
     "supportPageSchema",
     "venuesPageSchema",
+    "waitlistPageSchema",
   ]) {
     assert.match(pagesUnionBody, new RegExp(`\\b${name}\\b`));
   }
