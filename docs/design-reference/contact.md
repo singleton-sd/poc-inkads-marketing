@@ -49,7 +49,11 @@ Fields: Name | Venue / company (row) · Email · Role select (“I am a…”) �
 Implemented as a React island (`ContactFormIsland`, `client:load`) with:
 
 - **Zod schema** (`src/lib/contact-form-schema.ts`) as source of truth for field
-  types, role aliases, PostKit subject mapping, and query parse/serialize
+  types, role aliases, and query parse/serialize
+- **`src/lib/lead-intake.ts`** builds the job-kit `POST /v1/leads` JSON body
+  (`formType: contact`, `product: inkads`, `sourceSite` =
+  `https://inkads.poc.singletonsd.com`)
+- **Cloudflare Turnstile** (public site key from `PUBLIC_TURNSTILE_SITE_KEY`)
 - **react-hook-form + `@hookform/resolvers/zod`** for typed form state and submit
   validation
 - **`useZodFormQuerySync`** — reusable Zod ↔ URL query sync (pass any Zod object
@@ -63,11 +67,11 @@ defaults). Changing synced fields updates the address bar via `history.replaceSt
 (`role` uses short aliases `venue` / `advertiser` / `other`; `name` / `email` write
 back too; empty values clear the param). Company and message are never put in the URL.
 
-| Param   | Values                                                                                         | Effect                                                                                                   |
-| ------- | ---------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `role`  | `venue` / `partnership`, `advertiser` / `sales`, `other` / `general`, or an exact option label | Selects “I am a…”; submit still maps via `ROLE_TO_SUBJECT` → PostKit `partnership` / `sales` / `general` |
-| `name`  | Non-empty trimmed text ≤ 200 chars, no control characters                                      | Prefills Name                                                                                            |
-| `email` | Simple email shape ≤ 254 chars, no control characters in each segment                          | Prefills Email                                                                                           |
+| Param   | Values                                                                                         | Effect                                                                 |
+| ------- | ---------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `role`  | `venue` / `partnership`, `advertiser` / `sales`, `other` / `general`, or an exact option label | Selects “I am a…”; folded into the lead `message` (not a schema field) |
+| `name`  | Non-empty trimmed text ≤ 120 chars, no control characters                                      | Prefills Name                                                          |
+| `email` | Simple email shape ≤ 254 chars, no control characters in each segment                          | Prefills Email                                                         |
 
 Examples:
 

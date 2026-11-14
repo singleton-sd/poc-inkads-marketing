@@ -37,6 +37,9 @@ test("Pages workflow deploys main without deleting active previews", async () =>
   assert.match(workflow, /branch:\s*gh-pages/);
   assert.match(workflow, /clean-exclude:\s*pr-preview/);
   assert.doesNotMatch(workflow, /secrets\./);
+  assert.match(workflow, /PUBLIC_TURNSTILE_SITE_KEY/);
+  assert.doesNotMatch(workflow, /PUBLIC_POSTKIT_API_BASE_URL/);
+  assert.doesNotMatch(workflow, /azure\/login/);
 });
 
 test("PR workflow publishes subpath previews and updates the PR body", async () => {

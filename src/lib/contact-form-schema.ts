@@ -1,4 +1,12 @@
 import { z } from "zod";
+import {
+  LEAD_COMPANY_MAX,
+  LEAD_EMAIL_MAX,
+  LEAD_MESSAGE_MAX,
+  LEAD_NAME_MAX,
+  LEAD_PHONE_MAX,
+  LEAD_WEBSITE_MAX,
+} from "./lead-intake.ts";
 
 /** Select option labels (also used as form values). */
 export const CONTACT_ROLE_OPTIONS = [
@@ -26,17 +34,14 @@ export const ROLE_OPTION_TO_QUERY: Record<ContactRole, string> = {
   Other: "other",
 };
 
-/** Role option → PostKit contact `subject`. */
-export const ROLE_TO_SUBJECT: Record<ContactRole, string> = {
-  "Venue owner / operator": "partnership",
-  "Advertiser / brand": "sales",
-  Other: "general",
-};
-
 export const ROLE_OPTION_VALUES = new Set<string>(CONTACT_ROLE_OPTIONS);
 
-export const SAFE_NAME_MAX = 200;
-export const SAFE_EMAIL_MAX = 254;
+export const SAFE_NAME_MAX = LEAD_NAME_MAX;
+export const SAFE_EMAIL_MAX = LEAD_EMAIL_MAX;
+export const SAFE_COMPANY_MAX = LEAD_COMPANY_MAX;
+export const SAFE_PHONE_MAX = LEAD_PHONE_MAX;
+export const SAFE_MESSAGE_MAX = LEAD_MESSAGE_MAX;
+export const SAFE_WEBSITE_MAX = LEAD_WEBSITE_MAX;
 
 // Reject whitespace, @, and C0/DEL controls in each segment (blocks %00 etc.).
 export const SAFE_EMAIL_RE =
@@ -87,7 +92,7 @@ export const contactQueryRoleSchema = z.preprocess(
   z.union([z.enum(CONTACT_ROLE_OPTIONS), z.literal("")]),
 );
 
-/** URL-synced subset (company/message never appear here). */
+/** URL-synced subset (company/phone/message/consent never appear here). */
 export const contactFormQuerySchema = z.object({
   name: contactQueryNameSchema,
   email: contactQueryEmailSchema,
@@ -96,6 +101,16 @@ export const contactFormQuerySchema = z.object({
 
 export type ContactFormQueryValues = z.infer<typeof contactFormQuerySchema>;
 
+const optionalPlainText = (max: number, label: string) =>
+  z
+    .string()
+    .trim()
+    .max(max, `${label} must be at most ${max} characters.`)
+    .refine(
+      (value) => !CONTROL_CHARS_RE.test(value),
+      `${label} contains invalid characters.`,
+    );
+
 export const contactFormSchema = z.object({
   name: z
     .string()
@@ -103,10 +118,22 @@ export const contactFormSchema = z.object({
     .min(1, "Name is required.")
     .max(SAFE_NAME_MAX, `Name must be at most ${SAFE_NAME_MAX} characters.`)
     .refine(
-      (v) => !CONTROL_CHARS_RE.test(v),
+      (value) => !CONTROL_CHARS_RE.test(value),
       "Name contains invalid characters.",
     ),
-  company: z.string().trim().min(1, "Venue / company is required."),
+  company: z
+    .string()
+    .trim()
+    .min(1, "Venue / company is required.")
+    .max(
+      SAFE_COMPANY_MAX,
+      `Venue / company must be at most ${SAFE_COMPANY_MAX} characters.`,
+    )
+    .refine(
+      (value) => !CONTROL_CHARS_RE.test(value),
+      "Venue / company contains invalid characters.",
+    ),
+  phone: optionalPlainText(SAFE_PHONE_MAX, "Phone"),
   email: z
     .string()
     .trim()
@@ -116,18 +143,30 @@ export const contactFormSchema = z.object({
   role: z.enum(CONTACT_ROLE_OPTIONS, {
     error: "Select an option.",
   }),
-  message: z.string().trim().min(1, "Message is required."),
+  message: z
+    .string()
+    .trim()
+    .min(1, "Message is required.")
+    .max(
+      SAFE_MESSAGE_MAX,
+      `Message must be at most ${SAFE_MESSAGE_MAX} characters.`,
+    ),
+  consent: z.literal(true, {
+    error: "Please confirm you have read the privacy policy.",
+  }),
+  marketingOptIn: z.boolean(),
+  website: optionalPlainText(SAFE_WEBSITE_MAX, "Website"),
 });
 
 export type ContactFormValues = z.infer<typeof contactFormSchema>;
 
 /** Form default values (role may be "" until the user selects). */
-export type ContactFormDefaultValues = {
-  name: string;
-  company: string;
-  email: string;
+export type ContactFormDefaultValues = Omit<
+  ContactFormValues,
+  "role" | "consent"
+> & {
   role: ContactRole | "";
-  message: string;
+  consent: boolean;
 };
 
 export function parseNameFromQuery(raw: string | null): string {
@@ -167,7 +206,3 @@ export const contactFormQuerySerializers: {
   email: serializeEmailQuery,
   role: serializeRoleQuery,
 };
-
-export function subjectFromRole(role: ContactRole): string {
-  return ROLE_TO_SUBJECT[role];
-}

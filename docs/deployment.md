@@ -84,33 +84,48 @@ In the public `poc.singletonsd.com` hosted zone, create this record:
 Do not point the subdomain at the apex domain and do not create an alias to a
 private distribution. The record contains no secret.
 
-## Contact form (PostKit)
+## Contact and waitlist forms (lead-intake)
 
-The contact form posts to the shared PostKit Function App. **Source of truth**
-for the public base URL is PostKit Azure App Configuration store
-`ssd-postkit-appcs-prod-ae`, key `app:api:publicBaseUrl` (see PostKit
-[`docs/integrations/inkads-marketing.md`](https://github.com/singleton-sd/post-kit/blob/main/docs/integrations/inkads-marketing.md)).
+The static site posts JSON from the browser to the shared job-kit public
+function:
 
-At build time, `pages.yml` / `preview.yml`:
+`POST https://api.singletonsd.com/v1/leads`
 
-1. Log in with GitHub OIDC (`azure/login`) when no override is set
-2. Run `scripts/resolve-postkit-api-base-url.sh` → bake
-   `PUBLIC_POSTKIT_API_BASE_URL` into the Astro build
+Body is `application/json` and must stay under 16 KB. The gateway owns CORS.
+InkAds is allowlisted only as origin **`https://inkads.poc.singletonsd.com`**,
+and `sourceSite` in the payload must match that origin. There is no server
+code in this repository for lead intake.
 
-The browser never talks to App Configuration.
+Cloudflare Turnstile is rendered on each form. Bake the **public** site key at
+build time with Actions variable `PUBLIC_TURNSTILE_SITE_KEY` (see
+`.env.example`). Never commit the Turnstile secret; job-kit verifies tokens.
 
-### Required GitHub Actions variables (OIDC)
+The API currently returns `404 function_disabled` until operators enable
+lead-intake. The forms treat that as temporarily unavailable.
 
-| Variable                | Purpose                                                         |
-| ----------------------- | --------------------------------------------------------------- |
-| `AZURE_CLIENT_ID`       | App registration client id for this repo’s federated credential |
-| `AZURE_TENANT_ID`       | Entra tenant                                                    |
-| `AZURE_SUBSCRIPTION_ID` | Subscription that holds the App Config store                    |
+### Hosting (production origin)
 
-Grant that identity **App Configuration Data Reader** on
-`ssd-postkit-appcs-prod-ae`. Add federated credentials for this repository
-(`ref:refs/heads/main` and `pull_request`). After PostKit seeds the key (or ops
-sets it in the portal), CI reads it on every build.
+| Check                                                  | Value                                                       |
+| ------------------------------------------------------ | ----------------------------------------------------------- |
+| Custom domain                                          | `inkads.poc.singletonsd.com` (`public/CNAME`, Astro `site`) |
+| DNS                                                    | Route 53 CNAME → `singleton-sd.github.io`                   |
+| Host                                                   | GitHub Pages (`gh-pages` branch, repository root)           |
+| `https://singleton-sd.github.io/poc-inkads-marketing/` | 301 to the custom domain                                    |
+
+That hostname matches the job-kit / gateway allowlist. Do not serve production
+from another origin without updating the allowlist. PR previews stay on the
+same host under `/pr-preview/pr-<n>/`, so `Origin` remains
+`https://inkads.poc.singletonsd.com`.
+
+### Required GitHub Actions variables
+
+| Variable                    | Purpose                                            |
+| --------------------------- | -------------------------------------------------- |
+| `PUBLIC_TURNSTILE_SITE_KEY` | Cloudflare Turnstile site key baked into static JS |
+
+Email-template publish still uses Azure OIDC (`AZURE_CLIENT_ID`,
+`AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`) as documented below. The marketing
+site build no longer reads PostKit App Configuration.
 
 ### Email template publish (Blob)
 
@@ -132,7 +147,7 @@ tenants/inkads/{environment}/templates/{key}/manifest.json
 | Container       | `templates`                                | `POSTKIT_TEMPLATE_STORAGE_CONTAINER` |
 
 Uses the same `AZURE_CLIENT_ID` / `AZURE_TENANT_ID` / `AZURE_SUBSCRIPTION_ID`
-OIDC variables as App Config. That identity also needs **Storage Blob Data
+OIDC variables for email-template publish. That identity also needs **Storage Blob Data
 Contributor** (or narrower container scope) on the template storage account —
 App Configuration Data Reader alone is not enough to publish. Never put
 storage account keys, connection strings, or `POSTKIT_API_KEY` in GitHub
@@ -144,24 +159,15 @@ Local compile check (no Azure):
 pnpm templates:compile
 ```
 
-### Emergency / local override
-
-Optional Actions variable `PUBLIC_POSTKIT_API_BASE_URL` (must be `https://`)
-skips App Config and bakes that value instead. Use only for break-glass or
-pointing a one-off build somewhere else. Locally:
+### Local Turnstile key
 
 ```sh
-export PUBLIC_POSTKIT_API_BASE_URL=https://ssd-postkit-api-prod-ae.azurewebsites.net
-# or, with az login + Data Reader:
-export PUBLIC_POSTKIT_API_BASE_URL="$(./scripts/resolve-postkit-api-base-url.sh)"
+export PUBLIC_TURNSTILE_SITE_KEY=your-turnstile-site-key
 pnpm build
 ```
 
-The browser form refuses to enable submit unless the configured base starts with
-`https://`.
-
-PR preview pages send `X-PostKit-Contact-Preview: true` so PostKit uses the
-development email provider instead of the production InkAds inbox.
+Submit stays disabled until Turnstile issues a token. Use a placeholder in
+`.env.example`; never hardcode a production key.
 
 ### Deep-link query prefills
 

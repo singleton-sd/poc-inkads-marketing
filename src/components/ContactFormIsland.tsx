@@ -1,20 +1,31 @@
-import { useEffect, useMemo, useReducer, useRef, type ReactNode } from "react";
+import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import {
   CONTACT_ROLE_OPTIONS,
+  SAFE_COMPANY_MAX,
+  SAFE_EMAIL_MAX,
+  SAFE_MESSAGE_MAX,
+  SAFE_NAME_MAX,
+  SAFE_PHONE_MAX,
   contactFormQuerySchema,
   contactFormQuerySerializers,
   contactFormSchema,
-  subjectFromRole,
   type ContactFormDefaultValues,
   type ContactFormQueryValues,
   type ContactFormValues,
   type ContactRole,
 } from "../lib/contact-form-schema";
+import {
+  buildLeadRequest,
+  newSubmissionId,
+  sourcePageFromLocation,
+  submitLeadRequest,
+} from "../lib/lead-intake";
 import { useZodFormQuerySync } from "../hooks/useZodFormQuerySync";
+import { Field, FieldError, HoneypotField } from "./LeadFormFields";
+import TurnstileWidget, { type TurnstileWidgetHandle } from "./TurnstileWidget";
 
-const FETCH_TIMEOUT_MS = 15_000;
 const TEXT_DEBOUNCE_MS = 300;
 
 export type ContactFormIslandProps = {
@@ -22,7 +33,8 @@ export type ContactFormIslandProps = {
   successBody?: string;
   submitLabel?: string;
   privacyHref: string;
-  postkitApiBaseUrl?: string;
+  waitlistHref: string;
+  turnstileSiteKey?: string;
   initialRole?: string;
   initialName?: string;
   initialEmail?: string;
@@ -50,37 +62,11 @@ function submitReducer(_state: SubmitState, action: SubmitAction): SubmitState {
       return { status: "error", message: action.message };
     case "resetError":
       return { status: "idle" };
-    default:
-      return { status: "idle" };
+    default: {
+      const exhaustive: never = action;
+      return exhaustive;
+    }
   }
-}
-
-function Field({
-  id,
-  label,
-  children,
-}: {
-  id: string;
-  label: string;
-  children: ReactNode;
-}) {
-  return (
-    <div className="field">
-      <label className="field__label" htmlFor={id}>
-        {label}
-      </label>
-      {children}
-    </div>
-  );
-}
-
-function FieldError({ message }: { message?: string }) {
-  if (!message) return null;
-  return (
-    <p className="contact-form__error" role="alert">
-      {message}
-    </p>
-  );
 }
 
 export default function ContactFormIsland({
@@ -88,12 +74,16 @@ export default function ContactFormIsland({
   successBody = "Thank you. We will follow up by email if your enquiry needs a response.",
   submitLabel = "Send message",
   privacyHref,
-  postkitApiBaseUrl,
+  waitlistHref,
+  turnstileSiteKey = "",
   initialRole = "",
   initialName = "",
   initialEmail = "",
 }: ContactFormIslandProps) {
   const successRef = useRef<HTMLDivElement>(null);
+  const turnstileRef = useRef<TurnstileWidgetHandle>(null);
+  const submissionIdRef = useRef(newSubmissionId());
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [submitState, dispatch] = useReducer(submitReducer, {
     status: "idle",
   });
@@ -102,9 +92,13 @@ export default function ContactFormIsland({
     () => ({
       name: initialName,
       company: "",
+      phone: "",
       email: initialEmail,
       role: (initialRole as ContactRole | "") || "",
       message: "",
+      consent: false,
+      marketingOptIn: false,
+      website: "",
     }),
     [initialRole, initialName, initialEmail],
   );
@@ -160,14 +154,11 @@ export default function ContactFormIsland({
     if (submitted) successRef.current?.focus();
   }, [submitted]);
 
-  const apiBase = (postkitApiBaseUrl ?? "").replace(/\/$/, "");
-  const deliveryConfigured =
-    apiBase.length > 0 && apiBase.startsWith("https://");
-
+  const siteKey = turnstileSiteKey.trim();
+  const deliveryConfigured = siteKey.length > 0;
   const configError = !deliveryConfigured
     ? "Contact delivery is not configured. Email hello@inkads.poc.singletonsd.com instead."
     : "";
-
   const submitError = submitState.status === "error" ? submitState.message : "";
 
   async function onValidSubmit(values: ContactFormValues) {
@@ -182,78 +173,50 @@ export default function ContactFormIsland({
       return;
     }
 
-    const subject = subjectFromRole(values.role);
-    const messagePayload = `Venue / company: ${values.company}\n\n${values.message}`;
-    const isPreview = location.pathname.includes("/pr-preview/");
-
-    dispatch({ type: "submit" });
-    const controller = new AbortController();
-    const timeoutId = window.setTimeout(
-      () => controller.abort(),
-      FETCH_TIMEOUT_MS,
-    );
-
-    try {
-      const response = await fetch(`${apiBase}/contact`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          ...(isPreview ? { "X-PostKit-Contact-Preview": "true" } : {}),
-        },
-        credentials: "omit",
-        signal: controller.signal,
-        body: JSON.stringify({
-          name: values.name,
-          email: values.email,
-          subject,
-          message: messagePayload,
-        }),
-      });
-
-      if (!response.ok) {
-        if (response.status === 400) {
-          dispatch({
-            type: "error",
-            message: "Please check the highlighted fields and try again.",
-          });
-        } else if (response.status === 429) {
-          dispatch({
-            type: "error",
-            message:
-              "Too many messages were sent. Please wait a minute and try again.",
-          });
-        } else if (response.status >= 500) {
-          dispatch({
-            type: "error",
-            message:
-              "Delivery is temporarily unavailable. Please try again later.",
-          });
-        } else {
-          dispatch({
-            type: "error",
-            message:
-              "We could not send your message. Please try again shortly.",
-          });
-        }
-        return;
-      }
-
-      dispatch({ type: "success" });
-    } catch (err) {
-      const timedOut = err instanceof DOMException && err.name === "AbortError";
+    if (!turnstileToken) {
       dispatch({
         type: "error",
-        message: timedOut
-          ? "Delivery is temporarily unavailable. Please try again later."
-          : "We could not reach the server. Check your connection and try again.",
+        message: "Please complete the verification check.",
       });
-    } finally {
-      window.clearTimeout(timeoutId);
+      return;
     }
+
+    dispatch({ type: "submit" });
+    const payload = buildLeadRequest({
+      formType: "contact",
+      submissionId: submissionIdRef.current,
+      name: values.name,
+      email: values.email,
+      company: values.company,
+      phone: values.phone,
+      message: values.message,
+      role: values.role,
+      consent: true,
+      marketingOptIn: values.marketingOptIn,
+      turnstileToken,
+      website: values.website,
+      sourcePage: sourcePageFromLocation(
+        window.location.pathname,
+        import.meta.env.BASE_URL,
+      ),
+    });
+    const result = await submitLeadRequest(payload);
+
+    if (result.ok) {
+      dispatch({ type: "success" });
+      return;
+    }
+
+    turnstileRef.current?.reset();
+    if (result.kind !== "validation") {
+      submissionIdRef.current = newSubmissionId();
+    }
+    dispatch({ type: "error", message: result.message });
   }
 
   const submitting = submitState.status === "submitting";
+  const canSubmit =
+    deliveryConfigured && Boolean(turnstileToken) && !submitting;
 
   return (
     <div className="contact-form-shell" data-contact-form="">
@@ -271,6 +234,7 @@ export default function ContactFormIsland({
                 id="contact-name"
                 type="text"
                 autoComplete="name"
+                maxLength={SAFE_NAME_MAX}
                 aria-invalid={errors.name ? "true" : undefined}
                 {...register("name")}
               />
@@ -282,23 +246,40 @@ export default function ContactFormIsland({
                 id="contact-company"
                 type="text"
                 autoComplete="organization"
+                maxLength={SAFE_COMPANY_MAX}
                 aria-invalid={errors.company ? "true" : undefined}
                 {...register("company")}
               />
               <FieldError message={errors.company?.message} />
             </Field>
           </div>
-          <Field id="contact-email" label="Email">
-            <input
-              className="field-control"
-              id="contact-email"
-              type="email"
-              autoComplete="email"
-              aria-invalid={errors.email ? "true" : undefined}
-              {...register("email")}
-            />
-            <FieldError message={errors.email?.message} />
-          </Field>
+          <div className="contact-form__row">
+            <Field id="contact-email" label="Email">
+              <input
+                className="field-control"
+                id="contact-email"
+                type="email"
+                autoComplete="email"
+                maxLength={SAFE_EMAIL_MAX}
+                aria-invalid={errors.email ? "true" : undefined}
+                {...register("email")}
+              />
+              <FieldError message={errors.email?.message} />
+            </Field>
+            <Field id="contact-phone" label="Phone">
+              <input
+                className="field-control"
+                id="contact-phone"
+                type="tel"
+                autoComplete="tel"
+                inputMode="tel"
+                maxLength={SAFE_PHONE_MAX}
+                aria-invalid={errors.phone ? "true" : undefined}
+                {...register("phone")}
+              />
+              <FieldError message={errors.phone?.message} />
+            </Field>
+          </div>
           <Field id="contact-role" label="I am a…">
             <select
               className="field-control"
@@ -325,18 +306,58 @@ export default function ContactFormIsland({
               className="field-control"
               id="contact-message"
               rows={5}
+              maxLength={SAFE_MESSAGE_MAX}
               aria-invalid={errors.message ? "true" : undefined}
               {...register("message")}
             />
             <FieldError message={errors.message?.message} />
           </Field>
+          <HoneypotField
+            id="contact-website"
+            register={register("website")}
+            error={errors.website?.message}
+          />
+          <label className="lead-form__check">
+            <input
+              id="contact-consent"
+              type="checkbox"
+              aria-invalid={errors.consent ? "true" : undefined}
+              {...register("consent")}
+            />
+            <span>
+              I have read the{" "}
+              <a className="text-link" href={privacyHref}>
+                <span>Privacy Policy</span>
+                <span aria-hidden="true">→</span>
+              </a>{" "}
+              and agree to be contacted about this enquiry.
+            </span>
+          </label>
+          <FieldError message={errors.consent?.message} />
+          <label className="lead-form__check">
+            <input
+              id="contact-marketing"
+              type="checkbox"
+              {...register("marketingOptIn")}
+            />
+            <span>
+              Optional: send me occasional updates about the InkAds proof of
+              concept. Unchecked by default.
+            </span>
+          </label>
+          {deliveryConfigured ? (
+            <TurnstileWidget
+              ref={turnstileRef}
+              siteKey={siteKey}
+              onToken={setTurnstileToken}
+            />
+          ) : null}
           <p className="contact-form__privacy">
-            See our{" "}
-            <a className="text-link" href={privacyHref}>
-              <span>Privacy Policy</span>
+            Prefer a shorter signup?{" "}
+            <a className="text-link" href={waitlistHref}>
+              <span>Join the waitlist</span>
               <span aria-hidden="true">→</span>
-            </a>{" "}
-            for how we handle contact submissions.
+            </a>
           </p>
           <p
             className="contact-form__error"
@@ -350,9 +371,9 @@ export default function ContactFormIsland({
             className="button-link button-link--primary button-link--block"
             type="submit"
             data-contact-form-submit=""
-            disabled={submitting || !deliveryConfigured}
+            disabled={!canSubmit}
           >
-            {submitLabel}
+            {submitting ? "Sending…" : submitLabel}
           </button>
         </form>
       ) : null}

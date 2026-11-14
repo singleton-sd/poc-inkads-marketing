@@ -1,0 +1,32 @@
+---
+import WaitlistFormIsland from "./WaitlistFormIsland";
+import { withBase } from "../lib/nav";
+
+interface Props {
+  successTitle?: string;
+  successBody?: string;
+  submitLabel?: string;
+}
+
+const {
+  successTitle = "You're on the list.",
+  successBody = "Thank you. We will email you if a place opens in the InkAds proof of concept.",
+  submitLabel = "Join waitlist",
+} = Astro.props;
+
+const base = import.meta.env.BASE_URL;
+const privacyHref = withBase("/privacy", base);
+const contactHref = withBase("/contact", base);
+const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY as
+  string | undefined;
+---
+
+<WaitlistFormIsland
+  client:load
+  successTitle={successTitle}
+  successBody={successBody}
+  submitLabel={submitLabel}
+  privacyHref={privacyHref}
+  contactHref={contactHref}
+  turnstileSiteKey={turnstileSiteKey}
+/>

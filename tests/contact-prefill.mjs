@@ -96,7 +96,21 @@ assert.ok(
 const origin = `http://127.0.0.1:${actualPort}`;
 
 const browser = await chromium.launch();
-const page = await browser.newPage();
+const context = await browser.newContext();
+await context.addInitScript(() => {
+  window.turnstile = {
+    render(container, options) {
+      if (container instanceof HTMLElement) {
+        container.dataset.turnstileReady = "true";
+      }
+      queueMicrotask(() => options?.callback?.("test-turnstile-token"));
+      return "widget-test";
+    },
+    reset() {},
+    remove() {},
+  };
+});
+const page = await context.newPage();
 
 async function waitForInputValue(selector, expected) {
   await page.waitForFunction(
