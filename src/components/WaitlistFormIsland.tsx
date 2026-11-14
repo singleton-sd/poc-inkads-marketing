@@ -70,6 +70,7 @@ export default function WaitlistFormIsland({
   const turnstileRef = useRef<TurnstileWidgetHandle>(null);
   const submissionIdRef = useRef(newSubmissionId());
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [turnstileError, setTurnstileError] = useState("");
   const [submitState, dispatch] = useReducer(submitReducer, {
     status: "idle",
   });
@@ -108,6 +109,7 @@ export default function WaitlistFormIsland({
     ? "Waitlist signup is not configured. Email hello@inkads.poc.singletonsd.com instead."
     : "";
   const submitError = submitState.status === "error" ? submitState.message : "";
+  const formAlert = submitError || configError || turnstileError;
 
   async function onValidSubmit(values: WaitlistFormValues) {
     dispatch({ type: "resetError" });
@@ -246,6 +248,7 @@ export default function WaitlistFormIsland({
               ref={turnstileRef}
               siteKey={siteKey}
               onToken={setTurnstileToken}
+              onError={setTurnstileError}
             />
           ) : null}
           <p className="contact-form__privacy">
@@ -257,11 +260,11 @@ export default function WaitlistFormIsland({
           </p>
           <p
             className="contact-form__error"
-            hidden={!(submitError || configError)}
+            hidden={!formAlert}
             role="alert"
             data-waitlist-form-error=""
           >
-            {submitError || configError}
+            {formAlert}
           </p>
           <button
             className="button-link button-link--primary button-link--block"

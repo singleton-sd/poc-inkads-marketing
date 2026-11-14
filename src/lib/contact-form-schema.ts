@@ -6,6 +6,7 @@ import {
   LEAD_NAME_MAX,
   LEAD_PHONE_MAX,
   LEAD_WEBSITE_MAX,
+  contactRolePrefix,
 } from "./lead-intake.ts";
 
 /** Select option labels (also used as form values). */
@@ -40,7 +41,10 @@ export const SAFE_NAME_MAX = LEAD_NAME_MAX;
 export const SAFE_EMAIL_MAX = LEAD_EMAIL_MAX;
 export const SAFE_COMPANY_MAX = LEAD_COMPANY_MAX;
 export const SAFE_PHONE_MAX = LEAD_PHONE_MAX;
-export const SAFE_MESSAGE_MAX = LEAD_MESSAGE_MAX;
+export const CONTACT_MESSAGE_PREFIX_MAX = Math.max(
+  ...CONTACT_ROLE_OPTIONS.map((role) => contactRolePrefix(role).length),
+);
+export const SAFE_MESSAGE_MAX = LEAD_MESSAGE_MAX - CONTACT_MESSAGE_PREFIX_MAX;
 export const SAFE_WEBSITE_MAX = LEAD_WEBSITE_MAX;
 
 // Reject whitespace, @, and C0/DEL controls in each segment (blocks %00 etc.).

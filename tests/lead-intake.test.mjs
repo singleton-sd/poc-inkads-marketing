@@ -8,16 +8,22 @@ const {
   LEAD_BODY_MAX_BYTES,
   LEAD_CONSENT_TEXT_VERSION,
   LEAD_INTAKE_URL,
+  LEAD_MESSAGE_MAX,
   LEAD_PRODUCT,
   LEAD_SOURCE_SITE,
   LEAD_WAITLIST_FEATURE,
   buildLeadRequest,
+  contactRolePrefix,
   leadRequestBytes,
   mapLeadHttpError,
   sourcePageFromLocation,
   submitLeadRequest,
 } = await import(
   pathToFileURL(new URL("src/lib/lead-intake.ts", root).pathname).href
+);
+
+const { SAFE_MESSAGE_MAX } = await import(
+  pathToFileURL(new URL("src/lib/contact-form-schema.ts", root).pathname).href
 );
 
 const SUBMISSION_ID = "550e8400-e29b-41d4-a716-446655440000";
@@ -118,6 +124,23 @@ test("omits empty optional fields and keeps honeypot only when filled", () => {
     contactInput({ website: "https://spam.example" }),
   );
   assert.equal(spam.website, "https://spam.example");
+});
+
+test("prefixed contact message stays within LEAD_MESSAGE_MAX", () => {
+  const role = "Venue owner / operator";
+  const prefix = contactRolePrefix(role);
+  const body = buildLeadRequest(
+    contactInput({
+      role,
+      message: "x".repeat(LEAD_MESSAGE_MAX),
+    }),
+  );
+
+  assert.ok(body.message);
+  assert.equal(body.message.length, LEAD_MESSAGE_MAX);
+  assert.equal(body.message.startsWith(prefix), true);
+  assert.equal(SAFE_MESSAGE_MAX + prefix.length, LEAD_MESSAGE_MAX);
+  assert.ok(SAFE_MESSAGE_MAX < LEAD_MESSAGE_MAX);
 });
 
 test("sourcePage strips Astro preview base and trailing slashes", () => {

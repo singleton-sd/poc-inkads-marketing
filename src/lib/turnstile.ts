@@ -25,6 +25,12 @@ declare global {
 
 let scriptPromise: Promise<TurnstileApi> | null = null;
 
+function scriptSelector(): HTMLScriptElement | null {
+  return document.querySelector<HTMLScriptElement>(
+    "script[data-lead-turnstile-script]",
+  );
+}
+
 export function loadTurnstile(): Promise<TurnstileApi> {
   if (typeof window !== "undefined" && window.turnstile) {
     return Promise.resolve(window.turnstile);
@@ -33,42 +39,40 @@ export function loadTurnstile(): Promise<TurnstileApi> {
 
   scriptPromise = new Promise((resolve, reject) => {
     if (typeof document === "undefined") {
+      scriptPromise = null;
       reject(new Error("Turnstile requires a browser."));
       return;
     }
 
-    const existing = document.querySelector<HTMLScriptElement>(
-      "script[data-lead-turnstile-script]",
-    );
-    const onReady = () => {
-      if (window.turnstile) {
-        resolve(window.turnstile);
-        return;
-      }
-      reject(new Error("Turnstile failed to load."));
-    };
-
-    if (existing) {
-      existing.addEventListener("load", onReady, { once: true });
-      existing.addEventListener(
-        "error",
-        () => reject(new Error("Turnstile failed to load.")),
-        { once: true },
-      );
-      if (window.turnstile) onReady();
-      return;
-    }
+    scriptSelector()?.remove();
 
     const script = document.createElement("script");
     script.src = TURNSTILE_SCRIPT_SRC;
     script.async = true;
     script.dataset.leadTurnstileScript = "";
-    script.addEventListener("load", onReady, { once: true });
+
+    let settled = false;
+    const fail = () => {
+      if (settled) return;
+      settled = true;
+      script.remove();
+      scriptPromise = null;
+      reject(new Error("Turnstile failed to load."));
+    };
+
     script.addEventListener(
-      "error",
-      () => reject(new Error("Turnstile failed to load.")),
+      "load",
+      () => {
+        if (window.turnstile) {
+          settled = true;
+          resolve(window.turnstile);
+          return;
+        }
+        fail();
+      },
       { once: true },
     );
+    script.addEventListener("error", fail, { once: true });
     document.head.appendChild(script);
   });
 

@@ -95,11 +95,23 @@ function present(value: string | undefined): string | undefined {
   return trimmed ? trimmed : undefined;
 }
 
+export function contactRolePrefix(role: string): string {
+  return `I am a… ${role}\n\n`;
+}
+
+function clipMessage(value: string): string {
+  return value.length <= LEAD_MESSAGE_MAX
+    ? value
+    : value.slice(0, LEAD_MESSAGE_MAX);
+}
+
 function contactMessage(message: string, role: string | undefined): string {
   const body = message.trim();
   const roleLabel = present(role);
-  if (!roleLabel) return body;
-  return `I am a… ${roleLabel}\n\n${body}`;
+  if (!roleLabel) return clipMessage(body);
+  const prefix = contactRolePrefix(roleLabel);
+  const remaining = Math.max(0, LEAD_MESSAGE_MAX - prefix.length);
+  return clipMessage(`${prefix}${body.slice(0, remaining)}`);
 }
 
 function clipSourcePage(path: string): string | undefined {
