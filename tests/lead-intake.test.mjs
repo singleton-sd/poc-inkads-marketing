@@ -14,9 +14,11 @@ const {
   LEAD_WAITLIST_FEATURE,
   buildLeadRequest,
   contactRolePrefix,
+  leadAttemptFingerprint,
   leadRequestBytes,
   mapLeadHttpError,
   sourcePageFromLocation,
+  submissionIdForAttempt,
   submitLeadRequest,
 } = await import(
   pathToFileURL(new URL("src/lib/lead-intake.ts", root).pathname).href
@@ -162,6 +164,15 @@ test("maps 400 field paths, 404 function_disabled, and retry statuses", () => {
   assert.match(invalid.message, /Consent/);
   assert.deepEqual(invalid.fields, ["email", "consent"]);
 
+  const tooLarge = mapLeadHttpError(413, { error: "payload_too_large" });
+  assert.equal(tooLarge.kind, "validation");
+  assert.match(tooLarge.message, /shorten the message/i);
+  assert.deepEqual(tooLarge.fields, ["message"]);
+
+  const media = mapLeadHttpError(415, { error: "unsupported_media_type" });
+  assert.equal(media.kind, "retry");
+  assert.match(media.message, /try again/i);
+
   const disabled = mapLeadHttpError(404, { error: "function_disabled" });
   assert.equal(disabled.kind, "unavailable");
   assert.match(disabled.message, /temporarily unavailable/i);
@@ -171,6 +182,25 @@ test("maps 400 field paths, 404 function_disabled, and retry statuses", () => {
     assert.equal(retry.kind, "retry", `status ${status}`);
     assert.match(retry.message, /try again/i);
   }
+});
+
+test("retries reuse submissionId until the form payload changes", () => {
+  const first = leadAttemptFingerprint(contactInput());
+  const kept = submissionIdForAttempt(SUBMISSION_ID, null, first);
+  assert.equal(kept.submissionId, SUBMISSION_ID);
+  assert.equal(kept.rotated, false);
+
+  const retry = submissionIdForAttempt(SUBMISSION_ID, first, first);
+  assert.equal(retry.submissionId, SUBMISSION_ID);
+  assert.equal(retry.rotated, false);
+
+  const edited = leadAttemptFingerprint(
+    contactInput({ message: "A different enquiry." }),
+  );
+  const rotated = submissionIdForAttempt(SUBMISSION_ID, first, edited);
+  assert.notEqual(rotated.submissionId, SUBMISSION_ID);
+  assert.match(rotated.submissionId, /^[0-9a-f-]{36}$/i);
+  assert.equal(rotated.rotated, true);
 });
 
 test("submitLeadRequest posts JSON under 16 KB to the shared API", async () => {
@@ -198,6 +228,20 @@ test("submitLeadRequest posts JSON under 16 KB to the shared API", async () => {
   assert.ok(
     Buffer.byteLength(posts[0].init.body, "utf8") < LEAD_BODY_MAX_BYTES,
   );
+});
+
+test("submitLeadRequest treats 409 as already-received success", async () => {
+  const fetchImpl = async () =>
+    new Response(JSON.stringify({ id: SUBMISSION_ID }), {
+      status: 409,
+      headers: { "Content-Type": "application/json" },
+    });
+  const result = await submitLeadRequest(
+    buildLeadRequest(contactInput()),
+    fetchImpl,
+  );
+  assert.equal(result.ok, true);
+  if (result.ok) assert.equal(result.id, SUBMISSION_ID);
 });
 
 test("submitLeadRequest treats function_disabled as unavailable", async () => {

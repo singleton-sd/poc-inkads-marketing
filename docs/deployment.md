@@ -98,7 +98,8 @@ code in this repository for lead intake.
 
 Cloudflare Turnstile is rendered on each form. Bake the **public** site key at
 build time with Actions variable `PUBLIC_TURNSTILE_SITE_KEY` (see
-`.env.example`). Never commit the Turnstile secret; job-kit verifies tokens.
+`.env.example`). The production Pages workflow fails the build if that
+variable is empty. Never commit the Turnstile secret; job-kit verifies tokens.
 
 The API currently returns `404 function_disabled` until operators enable
 lead-intake. The forms treat that as temporarily unavailable.

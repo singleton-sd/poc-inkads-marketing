@@ -98,15 +98,19 @@ const origin = `http://127.0.0.1:${actualPort}`;
 const browser = await chromium.launch();
 const context = await browser.newContext();
 await context.addInitScript(() => {
+  let lastOptions;
   window.turnstile = {
     render(container, options) {
+      lastOptions = options;
       if (container instanceof HTMLElement) {
         container.dataset.turnstileReady = "true";
       }
       queueMicrotask(() => options?.callback?.("test-turnstile-token"));
       return "widget-test";
     },
-    reset() {},
+    reset() {
+      queueMicrotask(() => lastOptions?.callback?.("test-turnstile-token"));
+    },
     remove() {},
   };
 });
@@ -203,6 +207,80 @@ try {
   const errorText = await page.locator("[data-contact-form-error]").innerText();
   assert.match(errorText, /Email/i);
   assert.equal(errorPosts.length, 1);
+
+  await page.unroute("https://api.singletonsd.com/v1/leads");
+
+  await page.goto(`${origin}/contact/`, { waitUntil: "networkidle" });
+  await page.waitForFunction(
+    () => !document.querySelector("[data-contact-form-submit]")?.disabled,
+  );
+  await page.locator("[data-contact-form-submit]").click();
+  await page.waitForSelector("#contact-name-error");
+  assert.equal(
+    await page.locator("#contact-name").getAttribute("aria-describedby"),
+    "contact-name-error",
+  );
+  assert.equal(
+    await page.evaluate(() => document.activeElement?.id),
+    "contact-name",
+  );
+
+  let retryCalls = 0;
+  const retryPosts = await mockLeads(async () => {
+    retryCalls += 1;
+    if (retryCalls === 1) {
+      return { status: 500, json: { error: "upstream" } };
+    }
+    return {
+      status: 202,
+      json: { id: "550e8400-e29b-41d4-a716-446655440002" },
+    };
+  });
+  await page.goto(`${origin}/contact/`, { waitUntil: "networkidle" });
+  await page.locator("#contact-name").fill("Ada Lovelace");
+  await page.locator("#contact-company").fill("Example Pub");
+  await page.locator("#contact-email").fill("ada@example.com");
+  await page.locator("#contact-role").selectOption("Other");
+  await page
+    .locator("#contact-message")
+    .fill("Retry without changing the payload.");
+  await page.locator("#contact-consent").check();
+  await page.waitForFunction(
+    () => !document.querySelector("[data-contact-form-submit]")?.disabled,
+  );
+  await page.locator("[data-contact-form-submit]").click();
+  await page.waitForSelector("[data-contact-form-error]:not([hidden])");
+  await page.waitForFunction(
+    () => !document.querySelector("[data-contact-form-submit]")?.disabled,
+  );
+  await page.locator("[data-contact-form-submit]").click();
+  await page.waitForSelector("[data-contact-form-success]:not([hidden])");
+  assert.equal(retryPosts.length, 2);
+  assert.equal(
+    retryPosts[0].body.submissionId,
+    retryPosts[1].body.submissionId,
+  );
+  assert.match(retryPosts[0].body.submissionId, /^[0-9a-f-]{36}$/i);
+
+  await page.unroute("https://api.singletonsd.com/v1/leads");
+
+  const duplicatePosts = await mockLeads(async () => ({
+    status: 409,
+    json: { id: "550e8400-e29b-41d4-a716-446655440003" },
+  }));
+  await page.goto(`${origin}/contact/`, { waitUntil: "networkidle" });
+  await page.locator("#contact-name").fill("Ada Lovelace");
+  await page.locator("#contact-company").fill("Example Pub");
+  await page.locator("#contact-email").fill("ada@example.com");
+  await page.locator("#contact-role").selectOption("Other");
+  await page.locator("#contact-message").fill("Already received.");
+  await page.locator("#contact-consent").check();
+  await page.waitForFunction(
+    () => !document.querySelector("[data-contact-form-submit]")?.disabled,
+  );
+  await page.locator("[data-contact-form-submit]").click();
+  await page.waitForSelector("[data-contact-form-success]:not([hidden])");
+  assert.equal(duplicatePosts.length, 1);
 
   await page.unroute("https://api.singletonsd.com/v1/leads");
 

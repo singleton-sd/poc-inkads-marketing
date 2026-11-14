@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useForm, type FieldErrors } from "react-hook-form";
 import {
   CONTACT_ROLE_OPTIONS,
   SAFE_COMPANY_MAX,
@@ -18,15 +18,32 @@ import {
 } from "../lib/contact-form-schema";
 import {
   buildLeadRequest,
+  leadAttemptFingerprint,
   newSubmissionId,
   sourcePageFromLocation,
+  submissionIdForAttempt,
   submitLeadRequest,
 } from "../lib/lead-intake";
 import { useZodFormQuerySync } from "../hooks/useZodFormQuerySync";
-import { Field, FieldError, HoneypotField } from "./LeadFormFields";
+import {
+  Field,
+  FieldError,
+  HoneypotField,
+  fieldErrorId,
+} from "./LeadFormFields";
 import TurnstileWidget, { type TurnstileWidgetHandle } from "./TurnstileWidget";
 
 const TEXT_DEBOUNCE_MS = 300;
+
+const CONTACT_FOCUS_ORDER = [
+  "name",
+  "company",
+  "email",
+  "phone",
+  "role",
+  "message",
+  "consent",
+] as const;
 
 export type ContactFormIslandProps = {
   successTitle?: string;
@@ -83,6 +100,7 @@ export default function ContactFormIsland({
   const successRef = useRef<HTMLDivElement>(null);
   const turnstileRef = useRef<TurnstileWidgetHandle>(null);
   const submissionIdRef = useRef(newSubmissionId());
+  const fingerprintRef = useRef<string | null>(null);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [turnstileError, setTurnstileError] = useState("");
   const [submitState, dispatch] = useReducer(submitReducer, {
@@ -109,6 +127,7 @@ export default function ContactFormIsland({
     handleSubmit,
     watch,
     setValue,
+    setFocus,
     formState: { errors },
   } = useForm<ContactFormValues>({
     resolver: zodResolver(contactFormSchema),
@@ -163,6 +182,15 @@ export default function ContactFormIsland({
   const submitError = submitState.status === "error" ? submitState.message : "";
   const formAlert = submitError || configError || turnstileError;
 
+  function onInvalid(formErrors: FieldErrors<ContactFormValues>) {
+    for (const name of CONTACT_FOCUS_ORDER) {
+      if (formErrors[name]) {
+        setFocus(name);
+        return;
+      }
+    }
+  }
+
   async function onValidSubmit(values: ContactFormValues) {
     dispatch({ type: "resetError" });
 
@@ -184,9 +212,34 @@ export default function ContactFormIsland({
     }
 
     dispatch({ type: "submit" });
+    const sourcePage = sourcePageFromLocation(
+      window.location.pathname,
+      import.meta.env.BASE_URL,
+    );
+    const fingerprint = leadAttemptFingerprint({
+      formType: "contact",
+      name: values.name,
+      email: values.email,
+      company: values.company,
+      phone: values.phone,
+      message: values.message,
+      role: values.role,
+      consent: true,
+      marketingOptIn: values.marketingOptIn,
+      website: values.website,
+      sourcePage,
+    });
+    const next = submissionIdForAttempt(
+      submissionIdRef.current,
+      fingerprintRef.current,
+      fingerprint,
+    );
+    submissionIdRef.current = next.submissionId;
+    fingerprintRef.current = fingerprint;
+
     const payload = buildLeadRequest({
       formType: "contact",
-      submissionId: submissionIdRef.current,
+      submissionId: next.submissionId,
       name: values.name,
       email: values.email,
       company: values.company,
@@ -197,22 +250,18 @@ export default function ContactFormIsland({
       marketingOptIn: values.marketingOptIn,
       turnstileToken,
       website: values.website,
-      sourcePage: sourcePageFromLocation(
-        window.location.pathname,
-        import.meta.env.BASE_URL,
-      ),
+      sourcePage,
     });
     const result = await submitLeadRequest(payload);
 
     if (result.ok) {
+      submissionIdRef.current = newSubmissionId();
+      fingerprintRef.current = null;
       dispatch({ type: "success" });
       return;
     }
 
     turnstileRef.current?.reset();
-    if (result.kind !== "validation") {
-      submissionIdRef.current = newSubmissionId();
-    }
     dispatch({ type: "error", message: result.message });
   }
 
@@ -227,7 +276,7 @@ export default function ContactFormIsland({
           className="contact-form"
           data-contact-form-fields=""
           noValidate
-          onSubmit={handleSubmit(onValidSubmit)}
+          onSubmit={handleSubmit(onValidSubmit, onInvalid)}
         >
           <div className="contact-form__row">
             <Field id="contact-name" label="Name">
@@ -237,10 +286,16 @@ export default function ContactFormIsland({
                 type="text"
                 autoComplete="name"
                 maxLength={SAFE_NAME_MAX}
-                aria-invalid={errors.name ? "true" : undefined}
                 {...register("name")}
+                aria-invalid={errors.name ? "true" : undefined}
+                aria-describedby={
+                  errors.name ? fieldErrorId("contact-name") : undefined
+                }
               />
-              <FieldError message={errors.name?.message} />
+              <FieldError
+                id={fieldErrorId("contact-name")}
+                message={errors.name?.message}
+              />
             </Field>
             <Field id="contact-company" label="Venue / company">
               <input
@@ -249,10 +304,16 @@ export default function ContactFormIsland({
                 type="text"
                 autoComplete="organization"
                 maxLength={SAFE_COMPANY_MAX}
-                aria-invalid={errors.company ? "true" : undefined}
                 {...register("company")}
+                aria-invalid={errors.company ? "true" : undefined}
+                aria-describedby={
+                  errors.company ? fieldErrorId("contact-company") : undefined
+                }
               />
-              <FieldError message={errors.company?.message} />
+              <FieldError
+                id={fieldErrorId("contact-company")}
+                message={errors.company?.message}
+              />
             </Field>
           </div>
           <div className="contact-form__row">
@@ -263,10 +324,16 @@ export default function ContactFormIsland({
                 type="email"
                 autoComplete="email"
                 maxLength={SAFE_EMAIL_MAX}
-                aria-invalid={errors.email ? "true" : undefined}
                 {...register("email")}
+                aria-invalid={errors.email ? "true" : undefined}
+                aria-describedby={
+                  errors.email ? fieldErrorId("contact-email") : undefined
+                }
               />
-              <FieldError message={errors.email?.message} />
+              <FieldError
+                id={fieldErrorId("contact-email")}
+                message={errors.email?.message}
+              />
             </Field>
             <Field id="contact-phone" label="Phone">
               <input
@@ -276,18 +343,27 @@ export default function ContactFormIsland({
                 autoComplete="tel"
                 inputMode="tel"
                 maxLength={SAFE_PHONE_MAX}
-                aria-invalid={errors.phone ? "true" : undefined}
                 {...register("phone")}
+                aria-invalid={errors.phone ? "true" : undefined}
+                aria-describedby={
+                  errors.phone ? fieldErrorId("contact-phone") : undefined
+                }
               />
-              <FieldError message={errors.phone?.message} />
+              <FieldError
+                id={fieldErrorId("contact-phone")}
+                message={errors.phone?.message}
+              />
             </Field>
           </div>
           <Field id="contact-role" label="I am a…">
             <select
               className="field-control"
               id="contact-role"
-              aria-invalid={errors.role ? "true" : undefined}
               {...register("role")}
+              aria-invalid={errors.role ? "true" : undefined}
+              aria-describedby={
+                errors.role ? fieldErrorId("contact-role") : undefined
+              }
             >
               <option value="" disabled>
                 Select an option
@@ -298,7 +374,10 @@ export default function ContactFormIsland({
                 </option>
               ))}
             </select>
-            <FieldError message={errors.role?.message} />
+            <FieldError
+              id={fieldErrorId("contact-role")}
+              message={errors.role?.message}
+            />
           </Field>
           <Field
             id="contact-message"
@@ -309,10 +388,16 @@ export default function ContactFormIsland({
               id="contact-message"
               rows={5}
               maxLength={SAFE_MESSAGE_MAX}
-              aria-invalid={errors.message ? "true" : undefined}
               {...register("message")}
+              aria-invalid={errors.message ? "true" : undefined}
+              aria-describedby={
+                errors.message ? fieldErrorId("contact-message") : undefined
+              }
             />
-            <FieldError message={errors.message?.message} />
+            <FieldError
+              id={fieldErrorId("contact-message")}
+              message={errors.message?.message}
+            />
           </Field>
           <HoneypotField
             id="contact-website"
@@ -323,8 +408,11 @@ export default function ContactFormIsland({
             <input
               id="contact-consent"
               type="checkbox"
-              aria-invalid={errors.consent ? "true" : undefined}
               {...register("consent")}
+              aria-invalid={errors.consent ? "true" : undefined}
+              aria-describedby={
+                errors.consent ? fieldErrorId("contact-consent") : undefined
+              }
             />
             <span>
               I have read the{" "}
@@ -335,7 +423,10 @@ export default function ContactFormIsland({
               and agree to be contacted about this enquiry.
             </span>
           </label>
-          <FieldError message={errors.consent?.message} />
+          <FieldError
+            id={fieldErrorId("contact-consent")}
+            message={errors.consent?.message}
+          />
           <label className="lead-form__check">
             <input
               id="contact-marketing"

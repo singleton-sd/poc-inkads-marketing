@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useForm, type FieldErrors } from "react-hook-form";
 import {
   SAFE_COMPANY_MAX,
   SAFE_EMAIL_MAX,
@@ -8,8 +8,10 @@ import {
 } from "../lib/contact-form-schema";
 import {
   buildLeadRequest,
+  leadAttemptFingerprint,
   newSubmissionId,
   sourcePageFromLocation,
+  submissionIdForAttempt,
   submitLeadRequest,
 } from "../lib/lead-intake";
 import {
@@ -17,8 +19,15 @@ import {
   type WaitlistFormDefaultValues,
   type WaitlistFormValues,
 } from "../lib/waitlist-form-schema";
-import { Field, FieldError, HoneypotField } from "./LeadFormFields";
+import {
+  Field,
+  FieldError,
+  HoneypotField,
+  fieldErrorId,
+} from "./LeadFormFields";
 import TurnstileWidget, { type TurnstileWidgetHandle } from "./TurnstileWidget";
+
+const WAITLIST_FOCUS_ORDER = ["name", "email", "company", "consent"] as const;
 
 export type WaitlistFormIslandProps = {
   successTitle?: string;
@@ -69,6 +78,7 @@ export default function WaitlistFormIsland({
   const successRef = useRef<HTMLDivElement>(null);
   const turnstileRef = useRef<TurnstileWidgetHandle>(null);
   const submissionIdRef = useRef(newSubmissionId());
+  const fingerprintRef = useRef<string | null>(null);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [turnstileError, setTurnstileError] = useState("");
   const [submitState, dispatch] = useReducer(submitReducer, {
@@ -90,6 +100,7 @@ export default function WaitlistFormIsland({
   const {
     register,
     handleSubmit,
+    setFocus,
     formState: { errors },
   } = useForm<WaitlistFormValues>({
     resolver: zodResolver(waitlistFormSchema),
@@ -110,6 +121,15 @@ export default function WaitlistFormIsland({
     : "";
   const submitError = submitState.status === "error" ? submitState.message : "";
   const formAlert = submitError || configError || turnstileError;
+
+  function onInvalid(formErrors: FieldErrors<WaitlistFormValues>) {
+    for (const name of WAITLIST_FOCUS_ORDER) {
+      if (formErrors[name]) {
+        setFocus(name);
+        return;
+      }
+    }
+  }
 
   async function onValidSubmit(values: WaitlistFormValues) {
     dispatch({ type: "resetError" });
@@ -132,9 +152,31 @@ export default function WaitlistFormIsland({
     }
 
     dispatch({ type: "submit" });
+    const sourcePage = sourcePageFromLocation(
+      window.location.pathname,
+      import.meta.env.BASE_URL,
+    );
+    const fingerprint = leadAttemptFingerprint({
+      formType: "waitlist",
+      name: values.name,
+      email: values.email,
+      company: values.company,
+      consent: true,
+      marketingOptIn: values.marketingOptIn,
+      website: values.website,
+      sourcePage,
+    });
+    const next = submissionIdForAttempt(
+      submissionIdRef.current,
+      fingerprintRef.current,
+      fingerprint,
+    );
+    submissionIdRef.current = next.submissionId;
+    fingerprintRef.current = fingerprint;
+
     const payload = buildLeadRequest({
       formType: "waitlist",
-      submissionId: submissionIdRef.current,
+      submissionId: next.submissionId,
       name: values.name,
       email: values.email,
       company: values.company,
@@ -142,22 +184,18 @@ export default function WaitlistFormIsland({
       marketingOptIn: values.marketingOptIn,
       turnstileToken,
       website: values.website,
-      sourcePage: sourcePageFromLocation(
-        window.location.pathname,
-        import.meta.env.BASE_URL,
-      ),
+      sourcePage,
     });
     const result = await submitLeadRequest(payload);
 
     if (result.ok) {
+      submissionIdRef.current = newSubmissionId();
+      fingerprintRef.current = null;
       dispatch({ type: "success" });
       return;
     }
 
     turnstileRef.current?.reset();
-    if (result.kind !== "validation") {
-      submissionIdRef.current = newSubmissionId();
-    }
     dispatch({ type: "error", message: result.message });
   }
 
@@ -172,7 +210,7 @@ export default function WaitlistFormIsland({
           className="contact-form"
           data-waitlist-form-fields=""
           noValidate
-          onSubmit={handleSubmit(onValidSubmit)}
+          onSubmit={handleSubmit(onValidSubmit, onInvalid)}
         >
           <Field id="waitlist-name" label="Name">
             <input
@@ -181,10 +219,16 @@ export default function WaitlistFormIsland({
               type="text"
               autoComplete="name"
               maxLength={SAFE_NAME_MAX}
-              aria-invalid={errors.name ? "true" : undefined}
               {...register("name")}
+              aria-invalid={errors.name ? "true" : undefined}
+              aria-describedby={
+                errors.name ? fieldErrorId("waitlist-name") : undefined
+              }
             />
-            <FieldError message={errors.name?.message} />
+            <FieldError
+              id={fieldErrorId("waitlist-name")}
+              message={errors.name?.message}
+            />
           </Field>
           <Field id="waitlist-email" label="Email">
             <input
@@ -193,10 +237,16 @@ export default function WaitlistFormIsland({
               type="email"
               autoComplete="email"
               maxLength={SAFE_EMAIL_MAX}
-              aria-invalid={errors.email ? "true" : undefined}
               {...register("email")}
+              aria-invalid={errors.email ? "true" : undefined}
+              aria-describedby={
+                errors.email ? fieldErrorId("waitlist-email") : undefined
+              }
             />
-            <FieldError message={errors.email?.message} />
+            <FieldError
+              id={fieldErrorId("waitlist-email")}
+              message={errors.email?.message}
+            />
           </Field>
           <Field id="waitlist-company" label="Venue / company">
             <input
@@ -205,10 +255,16 @@ export default function WaitlistFormIsland({
               type="text"
               autoComplete="organization"
               maxLength={SAFE_COMPANY_MAX}
-              aria-invalid={errors.company ? "true" : undefined}
               {...register("company")}
+              aria-invalid={errors.company ? "true" : undefined}
+              aria-describedby={
+                errors.company ? fieldErrorId("waitlist-company") : undefined
+              }
             />
-            <FieldError message={errors.company?.message} />
+            <FieldError
+              id={fieldErrorId("waitlist-company")}
+              message={errors.company?.message}
+            />
           </Field>
           <HoneypotField
             id="waitlist-website"
@@ -219,8 +275,11 @@ export default function WaitlistFormIsland({
             <input
               id="waitlist-consent"
               type="checkbox"
-              aria-invalid={errors.consent ? "true" : undefined}
               {...register("consent")}
+              aria-invalid={errors.consent ? "true" : undefined}
+              aria-describedby={
+                errors.consent ? fieldErrorId("waitlist-consent") : undefined
+              }
             />
             <span>
               I have read the{" "}
@@ -231,7 +290,10 @@ export default function WaitlistFormIsland({
               and agree to join the InkAds waitlist.
             </span>
           </label>
-          <FieldError message={errors.consent?.message} />
+          <FieldError
+            id={fieldErrorId("waitlist-consent")}
+            message={errors.consent?.message}
+          />
           <label className="lead-form__check">
             <input
               id="waitlist-marketing"

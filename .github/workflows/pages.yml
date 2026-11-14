@@ -35,6 +35,14 @@ jobs:
         run: pnpm lint
       - name: Run tests
         run: pnpm test
+      - name: Require Turnstile site key
+        env:
+          PUBLIC_TURNSTILE_SITE_KEY: ${{ vars.PUBLIC_TURNSTILE_SITE_KEY }}
+        run: |
+          if [ -z "${PUBLIC_TURNSTILE_SITE_KEY:-}" ]; then
+            echo "::error::Set repository variable PUBLIC_TURNSTILE_SITE_KEY (public site key only)."
+            exit 1
+          fi
       - name: Build production site
         run: pnpm build
         env:

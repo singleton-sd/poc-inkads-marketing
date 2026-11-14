@@ -130,6 +130,41 @@ export function newSubmissionId(): string {
   return crypto.randomUUID();
 }
 
+/** Payload identity for retries. Omits Turnstile token and submissionId. */
+export function leadAttemptFingerprint(
+  input: Omit<LeadPayloadInput, "submissionId" | "turnstileToken">,
+): string {
+  return JSON.stringify({
+    formType: input.formType,
+    name: input.name.trim(),
+    email: input.email.trim().toLowerCase(),
+    company: present(input.company) ?? "",
+    phone: present(input.phone) ?? "",
+    message: input.message?.trim() ?? "",
+    role: present(input.role) ?? "",
+    consent: input.consent,
+    marketingOptIn: input.marketingOptIn,
+    website: present(input.website) ?? "",
+    sourcePage: input.sourcePage ?? "",
+  });
+}
+
+/**
+ * Keep the same submissionId across retries of the same payload so job-kit
+ * can treat it as the jobId / Turnstile idempotency key. Mint a new id only
+ * when the form fields changed.
+ */
+export function submissionIdForAttempt(
+  currentId: string,
+  lastFingerprint: string | null,
+  fingerprint: string,
+): { submissionId: string; rotated: boolean } {
+  if (lastFingerprint !== null && lastFingerprint !== fingerprint) {
+    return { submissionId: newSubmissionId(), rotated: true };
+  }
+  return { submissionId: currentId, rotated: false };
+}
+
 export function sourcePageFromLocation(
   pathname: string,
   baseUrl = "/",
@@ -242,6 +277,24 @@ export function mapLeadHttpError(
     };
   }
 
+  if (status === 413) {
+    return {
+      ok: false,
+      kind: "validation",
+      message: "Please shorten the message and try again.",
+      fields: ["message"],
+    };
+  }
+
+  if (status === 415) {
+    return {
+      ok: false,
+      kind: "retry",
+      message: "We could not send your request. Please try again shortly.",
+      fields: [],
+    };
+  }
+
   if (status === 404 && code === "function_disabled") {
     return {
       ok: false,
@@ -317,7 +370,7 @@ export async function submitLeadRequest(
       }
     }
 
-    if (response.status === 202) {
+    if (response.status === 202 || response.status === 409) {
       const id =
         data &&
         typeof data === "object" &&

@@ -1,5 +1,9 @@
 import type { ReactNode } from "react";
 
+export function fieldErrorId(fieldId: string): string {
+  return `${fieldId}-error`;
+}
+
 export function Field({
   id,
   label,
@@ -19,10 +23,10 @@ export function Field({
   );
 }
 
-export function FieldError({ message }: { message?: string }) {
+export function FieldError({ id, message }: { id: string; message?: string }) {
   if (!message) return null;
   return (
-    <p className="contact-form__error" role="alert">
+    <p id={id} className="contact-form__error" role="alert">
       {message}
     </p>
   );
@@ -37,6 +41,7 @@ export function HoneypotField({
   register: object;
   error?: string;
 }) {
+  const errorId = fieldErrorId(id);
   return (
     <div className="lead-form__honeypot" aria-hidden="true">
       <label htmlFor={id}>Website</label>
@@ -46,8 +51,9 @@ export function HoneypotField({
         tabIndex={-1}
         autoComplete="off"
         {...register}
+        aria-describedby={error ? errorId : undefined}
       />
-      <FieldError message={error} />
+      <FieldError id={errorId} message={error} />
     </div>
   );
 }
