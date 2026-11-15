@@ -41,7 +41,7 @@ test("Pages workflow deploys main without deleting active previews", async () =>
   assert.match(workflow, /Require Turnstile site key/);
   assert.match(
     workflow,
-    /Set repository variable PUBLIC_TURNSTILE_SITE_KEY[\s\S]*exit 1/,
+    /if \[ -z "\$\{PUBLIC_TURNSTILE_SITE_KEY:-\}" \]; then\s+echo "::error::Set repository variable PUBLIC_TURNSTILE_SITE_KEY[^\n]*\s+exit 1/,
   );
   assert.doesNotMatch(workflow, /PUBLIC_POSTKIT_API_BASE_URL/);
   assert.doesNotMatch(workflow, /azure\/login/);

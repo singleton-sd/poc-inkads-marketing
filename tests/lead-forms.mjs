@@ -12,6 +12,21 @@ import { chromium } from "playwright";
 
 const distDir = fileURLToPath(new URL("../dist", import.meta.url));
 const port = Number(process.env.LEAD_FORMS_PORT ?? 0);
+const TURNSTILE_LOAD_ERROR =
+  "Verification failed to load. Check your connection and try again, or email hello@inkads.poc.singletonsd.com.";
+const TURNSTILE_STUB_SCRIPT = `
+window.turnstile = {
+  render(container, options) {
+    if (container instanceof HTMLElement) {
+      container.dataset.turnstileReady = "true";
+    }
+    queueMicrotask(() => options?.callback?.("test-turnstile-token"));
+    return "widget-retry";
+  },
+  reset() {},
+  remove() {},
+};
+`;
 
 if (!existsSync(distDir)) {
   throw new Error(
@@ -327,6 +342,45 @@ try {
   await page.waitForSelector("[data-waitlist-form-success]:not([hidden])");
   assert.equal(waitlistSuccess.length, 1);
   assert.equal(waitlistSuccess[0].body.formType, "waitlist");
+
+  const failContext = await browser.newContext();
+  const failPage = await failContext.newPage();
+  try {
+    let allowTurnstileScript = false;
+    await failPage.route(
+      (url) =>
+        url.hostname === "challenges.cloudflare.com" &&
+        url.pathname.includes("/turnstile/"),
+      async (route) => {
+        if (!allowTurnstileScript) {
+          await route.abort("failed");
+          return;
+        }
+        await route.fulfill({
+          status: 200,
+          contentType: "application/javascript",
+          body: TURNSTILE_STUB_SCRIPT,
+        });
+      },
+    );
+    await failPage.goto(`${origin}/contact/`, { waitUntil: "networkidle" });
+    await failPage.waitForSelector("[data-lead-turnstile-retry]");
+    const loadError = await failPage
+      .locator("[data-contact-form-error]:not([hidden])")
+      .innerText();
+    assert.equal(loadError.trim(), TURNSTILE_LOAD_ERROR);
+    assert.equal(
+      await failPage.locator("[data-contact-form-submit]").isDisabled(),
+      true,
+    );
+    allowTurnstileScript = true;
+    await failPage.locator("[data-lead-turnstile-retry]").click();
+    await failPage.waitForFunction(
+      () => !document.querySelector("[data-contact-form-submit]")?.disabled,
+    );
+  } finally {
+    await failContext.close();
+  }
 
   console.log("lead-forms: ok");
 } finally {
