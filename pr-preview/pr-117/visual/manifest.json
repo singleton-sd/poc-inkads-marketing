@@ -1,7 +1,7 @@
 {
   "basePath": "/",
   "baseSha": "49f12a648bb0e7a8ddabe81d4c47e43c2ba88dbd",
-  "headSha": "de1c337de6e24df95d56b7d6d6cff646e70182cb",
+  "headSha": "93d6d01edea83d1b7d6b3dee59bfe5e3356df920",
   "baseLabel": "local:/home/runner/work/poc-inkads-marketing/poc-inkads-marketing/visual-base/dist",
   "baseSiteUrl": null,
   "baseDistDir": "/home/runner/work/poc-inkads-marketing/poc-inkads-marketing/visual-base/dist",
@@ -23,7 +23,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/404",
-      "baseUrl": "http://127.0.0.1:44303/404",
+      "baseUrl": "http://127.0.0.1:45323/404",
       "status": "unchanged"
     },
     {
@@ -34,7 +34,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/404",
-      "baseUrl": "http://127.0.0.1:44303/404",
+      "baseUrl": "http://127.0.0.1:45323/404",
       "status": "unchanged"
     },
     {
@@ -45,7 +45,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/about",
-      "baseUrl": "http://127.0.0.1:44303/about",
+      "baseUrl": "http://127.0.0.1:45323/about",
       "status": "unchanged"
     },
     {
@@ -56,7 +56,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/about",
-      "baseUrl": "http://127.0.0.1:44303/about",
+      "baseUrl": "http://127.0.0.1:45323/about",
       "status": "unchanged"
     },
     {
@@ -67,7 +67,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/advertisers",
-      "baseUrl": "http://127.0.0.1:44303/advertisers",
+      "baseUrl": "http://127.0.0.1:45323/advertisers",
       "status": "unchanged"
     },
     {
@@ -78,7 +78,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/advertisers",
-      "baseUrl": "http://127.0.0.1:44303/advertisers",
+      "baseUrl": "http://127.0.0.1:45323/advertisers",
       "status": "unchanged"
     },
     {
@@ -89,7 +89,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/contact",
-      "baseUrl": "http://127.0.0.1:44303/contact",
+      "baseUrl": "http://127.0.0.1:45323/contact",
       "status": "unchanged"
     },
     {
@@ -100,7 +100,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/contact",
-      "baseUrl": "http://127.0.0.1:44303/contact",
+      "baseUrl": "http://127.0.0.1:45323/contact",
       "status": "unchanged"
     },
     {
@@ -111,7 +111,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/faq",
-      "baseUrl": "http://127.0.0.1:44303/faq",
+      "baseUrl": "http://127.0.0.1:45323/faq",
       "status": "unchanged"
     },
     {
@@ -122,7 +122,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/faq",
-      "baseUrl": "http://127.0.0.1:44303/faq",
+      "baseUrl": "http://127.0.0.1:45323/faq",
       "status": "unchanged"
     },
     {
@@ -133,7 +133,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/go",
-      "baseUrl": "http://127.0.0.1:44303/go",
+      "baseUrl": "http://127.0.0.1:45323/go",
       "status": "unchanged"
     },
     {
@@ -144,7 +144,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/go",
-      "baseUrl": "http://127.0.0.1:44303/go",
+      "baseUrl": "http://127.0.0.1:45323/go",
       "status": "unchanged"
     },
     {
@@ -155,7 +155,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/how-it-works",
-      "baseUrl": "http://127.0.0.1:44303/how-it-works",
+      "baseUrl": "http://127.0.0.1:45323/how-it-works",
       "status": "unchanged"
     },
     {
@@ -166,7 +166,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/how-it-works",
-      "baseUrl": "http://127.0.0.1:44303/how-it-works",
+      "baseUrl": "http://127.0.0.1:45323/how-it-works",
       "status": "unchanged"
     },
     {
@@ -177,7 +177,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/",
-      "baseUrl": "http://127.0.0.1:44303/",
+      "baseUrl": "http://127.0.0.1:45323/",
       "status": "unchanged"
     },
     {
@@ -188,7 +188,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/",
-      "baseUrl": "http://127.0.0.1:44303/",
+      "baseUrl": "http://127.0.0.1:45323/",
       "status": "unchanged"
     },
     {
@@ -199,7 +199,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/layout-audience",
-      "baseUrl": "http://127.0.0.1:44303/layout-audience",
+      "baseUrl": "http://127.0.0.1:45323/layout-audience",
       "status": "unchanged"
     },
     {
@@ -210,7 +210,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/layout-audience",
-      "baseUrl": "http://127.0.0.1:44303/layout-audience",
+      "baseUrl": "http://127.0.0.1:45323/layout-audience",
       "status": "unchanged"
     },
     {
@@ -221,7 +221,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/layout-cta-heavy",
-      "baseUrl": "http://127.0.0.1:44303/layout-cta-heavy",
+      "baseUrl": "http://127.0.0.1:45323/layout-cta-heavy",
       "status": "unchanged"
     },
     {
@@ -232,7 +232,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/layout-cta-heavy",
-      "baseUrl": "http://127.0.0.1:44303/layout-cta-heavy",
+      "baseUrl": "http://127.0.0.1:45323/layout-cta-heavy",
       "status": "unchanged"
     },
     {
@@ -243,7 +243,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/layout-landing-band",
-      "baseUrl": "http://127.0.0.1:44303/layout-landing-band",
+      "baseUrl": "http://127.0.0.1:45323/layout-landing-band",
       "status": "unchanged"
     },
     {
@@ -254,7 +254,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/layout-landing-band",
-      "baseUrl": "http://127.0.0.1:44303/layout-landing-band",
+      "baseUrl": "http://127.0.0.1:45323/layout-landing-band",
       "status": "unchanged"
     },
     {
@@ -265,7 +265,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/layout-prose",
-      "baseUrl": "http://127.0.0.1:44303/layout-prose",
+      "baseUrl": "http://127.0.0.1:45323/layout-prose",
       "status": "unchanged"
     },
     {
@@ -276,7 +276,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/layout-prose",
-      "baseUrl": "http://127.0.0.1:44303/layout-prose",
+      "baseUrl": "http://127.0.0.1:45323/layout-prose",
       "status": "unchanged"
     },
     {
@@ -287,7 +287,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/places",
-      "baseUrl": "http://127.0.0.1:44303/places",
+      "baseUrl": "http://127.0.0.1:45323/places",
       "status": "unchanged"
     },
     {
@@ -298,7 +298,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/places",
-      "baseUrl": "http://127.0.0.1:44303/places",
+      "baseUrl": "http://127.0.0.1:45323/places",
       "status": "unchanged"
     },
     {
@@ -309,7 +309,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/pricing",
-      "baseUrl": "http://127.0.0.1:44303/pricing",
+      "baseUrl": "http://127.0.0.1:45323/pricing",
       "status": "unchanged"
     },
     {
@@ -320,7 +320,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/pricing",
-      "baseUrl": "http://127.0.0.1:44303/pricing",
+      "baseUrl": "http://127.0.0.1:45323/pricing",
       "status": "unchanged"
     },
     {
@@ -331,7 +331,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/privacy",
-      "baseUrl": "http://127.0.0.1:44303/privacy",
+      "baseUrl": "http://127.0.0.1:45323/privacy",
       "status": "unchanged"
     },
     {
@@ -342,7 +342,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/privacy",
-      "baseUrl": "http://127.0.0.1:44303/privacy",
+      "baseUrl": "http://127.0.0.1:45323/privacy",
       "status": "unchanged"
     },
     {
@@ -353,7 +353,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/support",
-      "baseUrl": "http://127.0.0.1:44303/support",
+      "baseUrl": "http://127.0.0.1:45323/support",
       "status": "unchanged"
     },
     {
@@ -364,7 +364,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/support",
-      "baseUrl": "http://127.0.0.1:44303/support",
+      "baseUrl": "http://127.0.0.1:45323/support",
       "status": "unchanged"
     },
     {
@@ -375,7 +375,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/terms",
-      "baseUrl": "http://127.0.0.1:44303/terms",
+      "baseUrl": "http://127.0.0.1:45323/terms",
       "status": "unchanged"
     },
     {
@@ -386,7 +386,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/terms",
-      "baseUrl": "http://127.0.0.1:44303/terms",
+      "baseUrl": "http://127.0.0.1:45323/terms",
       "status": "unchanged"
     },
     {
@@ -397,7 +397,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/venues",
-      "baseUrl": "http://127.0.0.1:44303/venues",
+      "baseUrl": "http://127.0.0.1:45323/venues",
       "status": "unchanged"
     },
     {
@@ -408,7 +408,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/venues",
-      "baseUrl": "http://127.0.0.1:44303/venues",
+      "baseUrl": "http://127.0.0.1:45323/venues",
       "status": "unchanged"
     },
     {
@@ -419,7 +419,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/waitlist",
-      "baseUrl": "http://127.0.0.1:44303/waitlist",
+      "baseUrl": "http://127.0.0.1:45323/waitlist",
       "status": "unchanged"
     },
     {
@@ -430,7 +430,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/waitlist",
-      "baseUrl": "http://127.0.0.1:44303/waitlist",
+      "baseUrl": "http://127.0.0.1:45323/waitlist",
       "status": "unchanged"
     },
     {
@@ -441,7 +441,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/contact?role=venue",
-      "baseUrl": "http://127.0.0.1:44303/contact?role=venue",
+      "baseUrl": "http://127.0.0.1:45323/contact?role=venue",
       "status": "unchanged"
     },
     {
@@ -452,7 +452,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/contact?role=venue",
-      "baseUrl": "http://127.0.0.1:44303/contact?role=venue",
+      "baseUrl": "http://127.0.0.1:45323/contact?role=venue",
       "status": "unchanged"
     },
     {
@@ -463,7 +463,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/contact?role=advertiser",
-      "baseUrl": "http://127.0.0.1:44303/contact?role=advertiser",
+      "baseUrl": "http://127.0.0.1:45323/contact?role=advertiser",
       "status": "unchanged"
     },
     {
@@ -474,7 +474,7 @@
       "diffFile": null,
       "mismatched": 0,
       "prUrl": "/contact?role=advertiser",
-      "baseUrl": "http://127.0.0.1:44303/contact?role=advertiser",
+      "baseUrl": "http://127.0.0.1:45323/contact?role=advertiser",
       "status": "unchanged"
     }
   ]
