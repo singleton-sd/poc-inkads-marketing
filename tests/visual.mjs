@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 /**
  * Full-page visual screenshots for PR review, with base comparison.
  *
@@ -229,6 +230,18 @@ async function screenshotPage(
   const context = await browser.newContext({
     viewport: { width: viewport.width, height: viewport.height },
     deviceScaleFactor: 1,
+  });
+  await context.addInitScript(() => {
+    window.turnstile = {
+      render(container) {
+        if (container instanceof HTMLElement) {
+          container.dataset.turnstileStub = "true";
+        }
+        return "visual-stub";
+      },
+      reset() {},
+      remove() {},
+    };
   });
   const page = await context.newPage();
   try {

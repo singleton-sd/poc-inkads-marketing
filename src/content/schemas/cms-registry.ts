@@ -8,6 +8,7 @@ import { placesPageCms } from "./places.cms.ts";
 import { pricingPageCms } from "./pricing.cms.ts";
 import { supportPageCms } from "./support.cms.ts";
 import { venuesPageCms } from "./venues.cms.ts";
+import { waitlistPageCms } from "./waitlist.cms.ts";
 
 /** Alphabetical by file path so concurrent additions land on different lines. */
 export const pageCmsEntries = [
@@ -21,4 +22,5 @@ export const pageCmsEntries = [
   pricingPageCms,
   supportPageCms,
   venuesPageCms,
+  waitlistPageCms,
 ];

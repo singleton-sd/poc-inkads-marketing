@@ -26,14 +26,16 @@ test("privacy and terms pages load legal collection entries", async () => {
   assert.match(terms, /page\.data\.draft/);
 });
 
-test("privacy policy describes PostKit contact delivery", async () => {
+test("privacy policy describes lead-intake delivery", async () => {
   const privacy = await readFile(
     new URL("src/content/legal/privacy.md", root),
     "utf8",
   );
 
-  assert.match(privacy, /PostKit/);
-  assert.match(privacy, /rate limiting/i);
+  assert.match(privacy, /lead-intake|\/v1\/leads/i);
+  assert.match(privacy, /Turnstile/i);
+  assert.match(privacy, /waitlist/i);
+  assert.doesNotMatch(privacy, /PostKit/);
   assert.doesNotMatch(privacy, /preview only/i);
 });
 

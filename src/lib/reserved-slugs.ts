@@ -12,6 +12,7 @@ export const RESERVED_PAGE_SLUGS = [
   "support",
   "terms",
   "venues",
+  "waitlist",
 ] as const;
 
 const RESERVED_SET = new Set<string>([

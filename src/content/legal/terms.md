@@ -17,12 +17,12 @@ venues or advertisers.
 ## Acceptable use
 
 Do not misuse the site, attempt to disrupt its operation, or submit unlawful,
-abusive, or misleading content through the contact form.
+abusive, or misleading content through the contact or waitlist forms.
 
-## Contact form
+## Contact and waitlist forms
 
-Submitting the contact form does not create a contract, partnership, or pilot
-agreement. We may follow up by email at our discretion.
+Submitting the contact or waitlist form does not create a contract, partnership,
+or pilot agreement. We may follow up by email at our discretion.
 
 ## Intellectual property
 

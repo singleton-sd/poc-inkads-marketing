@@ -36,6 +36,7 @@ test("Decap pages collection is generated per page file", async () => {
 
   assert.match(config, /name: pages/);
   assert.match(config, /file: src\/content\/pages\/home\.md/);
+  assert.match(config, /file: src\/content\/pages\/waitlist\.md/);
   assert.match(config, /name: template/);
   assert.match(config, /widget: hidden/);
   assert.doesNotMatch(config, /name: brand/);

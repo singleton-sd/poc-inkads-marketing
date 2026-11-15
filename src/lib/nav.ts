@@ -27,6 +27,7 @@ export const footerNav = {
     { label: "FAQ", href: "/faq" },
     { label: "Support", href: "/support" },
     { label: "Contact", href: "/contact" },
+    { label: "Waitlist", href: "/waitlist" },
   ],
 } as const satisfies Record<string, readonly NavItem[]>;
 

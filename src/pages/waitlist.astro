@@ -1,0 +1,44 @@
+---
+import { getEntry } from "astro:content";
+import WaitlistForm from "../components/WaitlistForm.astro";
+import MetaPair from "../components/MetaPair.astro";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { requirePageData } from "../lib/require-page-data";
+import "../styles/pages/contact.css";
+
+const {
+  title,
+  description,
+  eyebrow = "Waitlist",
+  headline,
+  summary,
+  email = "hello@inkads.poc.singletonsd.com",
+  status = "Proof of concept · a Singleton SD product",
+  submitLabel = "Join waitlist",
+  successTitle = "You're on the list.",
+  successBody = "Thank you. We will email you if a place opens in the InkAds proof of concept.",
+} = requirePageData(await getEntry("pages", "waitlist"), "waitlist");
+---
+
+<BaseLayout title={title} description={description}>
+  <main id="main-content">
+    <section class="shell contact-page" aria-labelledby="page-title">
+      <div class="contact-page__copy">
+        <p class="eyebrow">{eyebrow}</p>
+        <h1 id="page-title">{headline}</h1>
+        <p class="contact-page__lead">{summary}</p>
+        <div class="contact-page__meta">
+          <MetaPair label="Email" value={email} href={`mailto:${email}`} />
+          <MetaPair label="Status" value={status} />
+        </div>
+      </div>
+      <div class="contact-page__form">
+        <WaitlistForm
+          submitLabel={submitLabel}
+          successTitle={successTitle}
+          successBody={successBody}
+        />
+      </div>
+    </section>
+  </main>
+</BaseLayout>
