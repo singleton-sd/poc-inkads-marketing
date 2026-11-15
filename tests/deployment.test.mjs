@@ -152,6 +152,27 @@ test("PR workflow publishes subpath previews and updates the PR body", async () 
   assert.doesNotMatch(workflow, /pull_request_target/);
 });
 
+test("preview deploy and cleanup check out before pr-preview-action", async () => {
+  const workflow = await readFile(
+    new URL(".github/workflows/preview.yml", root),
+    "utf8",
+  );
+  const checkoutFirst =
+    /^ {4}steps:\n {6}- name: Check out repository\n {8}uses: actions\/checkout@[0-9a-f]{40} # v[\d.]+\n {8}with:\n {10}persist-credentials: false\n/m;
+
+  function jobBody(name) {
+    const header = `\n  ${name}:\n`;
+    const start = workflow.indexOf(header);
+    assert.notEqual(start, -1, `preview.yml must define a ${name} job`);
+    const body = workflow.slice(start + header.length);
+    const nextJob = body.search(/\n {2}[a-z][\w-]*:\n/);
+    return nextJob === -1 ? body : body.slice(0, nextJob);
+  }
+
+  assert.match(jobBody("deploy"), checkoutFirst);
+  assert.match(jobBody("cleanup"), checkoutFirst);
+});
+
 test("visual screenshot helper is wired for hosted report and gate", async () => {
   const pkg = await readFile(new URL("package.json", root), "utf8");
   const visual = await readFile(new URL("tests/visual.mjs", root), "utf8");
