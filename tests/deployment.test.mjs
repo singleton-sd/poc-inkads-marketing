@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
+import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
+import { fileURLToPath } from "node:url";
 
 const root = new URL("../", import.meta.url);
 
@@ -156,4 +158,31 @@ test("Route 53 documentation names the expected CNAME target", async () => {
   );
   assert.match(deployment, /inkads\.poc\.singletonsd\.com/);
   assert.match(deployment, /singleton-sd\.github\.io/);
+});
+
+test("PostKit App Config URL resolver is not used for the marketing build", async () => {
+  assert.equal(
+    existsSync(
+      fileURLToPath(new URL("scripts/resolve-postkit-api-base-url.sh", root)),
+    ),
+    false,
+  );
+
+  const pages = await readFile(
+    new URL(".github/workflows/pages.yml", root),
+    "utf8",
+  );
+  const preview = await readFile(
+    new URL(".github/workflows/preview.yml", root),
+    "utf8",
+  );
+  const pkg = await readFile(new URL("package.json", root), "utf8");
+  const deployment = await readFile(
+    new URL("docs/deployment.md", root),
+    "utf8",
+  );
+  assert.doesNotMatch(pages, /resolve-postkit-api-base-url/);
+  assert.doesNotMatch(preview, /resolve-postkit-api-base-url/);
+  assert.doesNotMatch(pkg, /resolve-postkit-api-base-url/);
+  assert.doesNotMatch(deployment, /resolve-postkit-api-base-url/);
 });

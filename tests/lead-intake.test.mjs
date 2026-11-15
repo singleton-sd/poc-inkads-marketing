@@ -177,7 +177,7 @@ test("maps 400 field paths, 404 function_disabled, and retry statuses", () => {
   assert.equal(disabled.kind, "unavailable");
   assert.match(disabled.message, /temporarily unavailable/i);
 
-  for (const status of [403, 429, 500, 503]) {
+  for (const status of [403, 409, 429, 500, 503]) {
     const retry = mapLeadHttpError(status, { error: "turnstile_failed" });
     assert.equal(retry.kind, "retry", `status ${status}`);
     assert.match(retry.message, /try again/i);
@@ -230,9 +230,9 @@ test("submitLeadRequest posts JSON under 16 KB to the shared API", async () => {
   );
 });
 
-test("submitLeadRequest treats 409 as already-received success", async () => {
+test("submitLeadRequest treats 409 as a retry error", async () => {
   const fetchImpl = async () =>
-    new Response(JSON.stringify({ id: SUBMISSION_ID }), {
+    new Response(JSON.stringify({ error: "idempotency_payload_conflict" }), {
       status: 409,
       headers: { "Content-Type": "application/json" },
     });
@@ -240,8 +240,11 @@ test("submitLeadRequest treats 409 as already-received success", async () => {
     buildLeadRequest(contactInput()),
     fetchImpl,
   );
-  assert.equal(result.ok, true);
-  if (result.ok) assert.equal(result.id, SUBMISSION_ID);
+  assert.equal(result.ok, false);
+  if (!result.ok) {
+    assert.equal(result.kind, "retry");
+    assert.match(result.message, /try again/i);
+  }
 });
 
 test("submitLeadRequest treats function_disabled as unavailable", async () => {
