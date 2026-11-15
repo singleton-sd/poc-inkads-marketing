@@ -18,7 +18,10 @@ test("publish email templates workflow uses OIDC and inkads blob layout", async 
   assert.match(workflow, /--tenant inkads/);
   assert.match(workflow, /ssdpostkitstprodae/);
   assert.match(workflow, /--container/);
-  assert.match(workflow, /azure\/login@v2/);
+  assert.match(
+    workflow,
+    /azure\/login@7184910d9eb2b1c5e48f7073824a90609bb9b6d6 # v2\.3\.1/,
+  );
   assert.match(workflow, /id-token: write/);
   assert.match(workflow, /vars\.AZURE_CLIENT_ID/);
   assert.doesNotMatch(

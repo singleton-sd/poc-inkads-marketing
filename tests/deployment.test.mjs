@@ -33,10 +33,29 @@ test("Pages workflow deploys main without deleting active previews", async () =>
     "utf8",
   );
   assert.match(workflow, /branches:\s*\[main\]/);
-  assert.match(workflow, /JamesIves\/github-pages-deploy-action@v4\.8\.0/);
+  assert.match(
+    workflow,
+    /JamesIves\/github-pages-deploy-action@d92aa235d04922e8f08b40ce78cc5442fcfbfa2f # v4\.8\.0/,
+  );
   assert.match(workflow, /branch:\s*gh-pages/);
   assert.match(workflow, /clean-exclude:\s*pr-preview/);
-  assert.doesNotMatch(workflow, /secrets\./);
+  assert.match(workflow, /^permissions:\n {2}contents: read/m);
+  assert.match(workflow, /persist-credentials:\s*false/);
+  assert.match(
+    workflow,
+    /actions\/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3\.3\.0/,
+  );
+  assert.match(workflow, /secrets\.RELEASE_APP_PRIVATE_KEY/);
+  assert.match(workflow, /vars\.RELEASE_APP_ID/);
+  assert.match(workflow, /repositories:\s*poc-inkads-marketing/);
+  assert.match(
+    workflow,
+    /token:\s*\$\{\{\s*steps\.app-token\.outputs\.token\s*\}\}/,
+  );
+  assert.doesNotMatch(workflow, /\$\{\{\s*github\.token\s*\}\}/);
+  assert.doesNotMatch(workflow, /secrets\.GITHUB_TOKEN/);
+  assert.doesNotMatch(workflow, /\|\|\s*github\.token/);
+  assert.match(workflow, /name: pages-dist/);
   assert.match(workflow, /PUBLIC_TURNSTILE_SITE_KEY/);
   assert.match(workflow, /Require Turnstile site key/);
   assert.match(
@@ -52,19 +71,42 @@ test("PR workflow publishes subpath previews and updates the PR body", async () 
     new URL(".github/workflows/preview.yml", root),
     "utf8",
   );
-  assert.match(workflow, /rossjrw\/pr-preview-action@v1\.8\.1/);
+  const pinnedPreview =
+    /rossjrw\/pr-preview-action@ffa7509e91a3ec8dfc2e5536c4d5c1acdf7a6de9 # v1\.8\.1/;
+  assert.match(workflow, pinnedPreview);
   assert.match(workflow, /PREVIEW_BASE_PATH:\s*\/pr-preview\/pr-/);
   assert.match(
     workflow,
     /pages-base-url:\s*https:\/\/inkads\.poc\.singletonsd\.com/,
   );
+  assert.match(workflow, /^permissions:\n {2}contents: read/m);
+  assert.match(workflow, /persist-credentials:\s*false/);
+  assert.match(
+    workflow,
+    /actions\/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3\.3\.0/,
+  );
+  assert.match(workflow, /secrets\.RELEASE_APP_PRIVATE_KEY/);
+  assert.match(workflow, /vars\.RELEASE_APP_ID/);
+  assert.match(workflow, /repositories:\s*poc-inkads-marketing/);
+  assert.match(
+    workflow,
+    /token:\s*\$\{\{\s*steps\.app-token\.outputs\.token\s*\}\}/,
+  );
+  assert.doesNotMatch(workflow, /\|\|\s*github\.token/);
+  assert.doesNotMatch(workflow, /token:\s*\$\{\{\s*github\.token\s*\}\}/);
   assert.match(workflow, /pull-requests:\s*write/);
   assert.match(workflow, /github\.rest\.pulls\.update/);
   assert.match(workflow, /inkads-preview:start/);
-  assert.match(workflow, /sticky-pull-request-comment@v2/);
+  assert.match(
+    workflow,
+    /sticky-pull-request-comment@773744901bac0e8cbb5a0dc842800d45e9b2b405 # v2\.9\.4/,
+  );
   assert.match(workflow, /header:\s*inkads-preview/);
   assert.match(workflow, /pnpm test:visual/);
-  assert.match(workflow, /visual-pr-\$\{\{\s*github\.event\.number\s*\}\}/);
+  assert.match(
+    workflow,
+    /visual-pr-\$\{\{\s*github\.event\.number\s*\}\}-\$\{\{\s*github\.event\.pull_request\.head\.sha\s*\}\}/,
+  );
   assert.match(workflow, /dist\/visual/);
   assert.match(workflow, /name:\s*visual-review/);
   assert.match(workflow, /visual-gate\.mjs/);
@@ -89,21 +131,25 @@ test("PR workflow publishes subpath previews and updates the PR body", async () 
   assert.match(workflow, /Retry remove preview/);
   assert.match(workflow, /steps\.remove_preview\.outcome == 'failure'/);
   assert.equal(
-    (workflow.match(/rossjrw\/pr-preview-action@v1\.8\.1/g) ?? []).length,
+    (
+      workflow.match(
+        /rossjrw\/pr-preview-action@ffa7509e91a3ec8dfc2e5536c4d5c1acdf7a6de9 # v1\.8\.1/g,
+      ) ?? []
+    ).length,
     4,
   );
   assert.match(workflow, /VISUAL_BASE_DIR/);
   assert.match(workflow, /VISUAL_BASE_SHA/);
+  assert.match(workflow, /VISUAL_HEAD_SHA/);
   assert.match(workflow, /pull_request\.base\.sha/);
   assert.match(workflow, /path:\s*visual-base/);
   assert.match(workflow, /Build PR site for visual compare/);
-  assert.match(workflow, /workflow_run\.head_sha/);
   assert.match(workflow, /--paginate --slurp/);
+  assert.match(workflow, /manifest\.headSha|ARTIFACT_HEAD_SHA/);
   assert.match(workflow, /manifest\.baseSha|ARTIFACT_BASE_SHA/);
   assert.doesNotMatch(workflow, /Wandalen\/wretry/);
   assert.doesNotMatch(workflow, /\|\|\s*'pages-publish'/);
   assert.doesNotMatch(workflow, /pull_request_target/);
-  assert.doesNotMatch(workflow, /secrets\./);
 });
 
 test("visual screenshot helper is wired for hosted report and gate", async () => {
@@ -126,6 +172,8 @@ test("visual screenshot helper is wired for hosted report and gate", async () =>
   assert.match(visual, /VISUAL_BASE_SHA/);
   assert.match(visual, /VISUAL_BASE_URL/);
   assert.match(visual, /baseSha/);
+  assert.match(visual, /headSha/);
+  assert.match(visual, /VISUAL_HEAD_SHA/);
   assert.match(visual, /allowNotFound/);
   assert.match(visual, /404\.html/);
   assert.match(visual, /index\.html/);

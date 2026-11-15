@@ -70,6 +70,7 @@ const jsonLd = {
     },
   ],
 };
+const jsonLdJson = JSON.stringify(jsonLd).replace(/</g, "\\u003c");
 ---
 
 <!doctype html>
@@ -121,11 +122,7 @@ const jsonLd = {
     />
 
     <!-- Structured data -->
-    <script
-      type="application/ld+json"
-      is:inline
-      set:html={JSON.stringify(jsonLd)}
-    />
+    <script type="application/ld+json" is:inline set:html={jsonLdJson} />
   </head>
   <body>
     <a class="skip-link" href="#main-content">Skip to content</a>
