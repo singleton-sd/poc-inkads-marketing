@@ -38,6 +38,11 @@ test("admin page loads Decap without adding it to the public application", async
   );
 
   assert.match(admin, /decap-cms@3\.15\.1/);
+  assert.match(
+    admin,
+    /integrity="sha384-in6eHztHveqQ7uMZ1fDaKlDmacQLFuLH2wWrFTiymyuS8zQ5bixwL8U3AeRi8h\/L"/,
+  );
+  assert.match(admin, /crossorigin="anonymous"/);
   assert.doesNotMatch(landing, /decap|\/admin/i);
 });
 

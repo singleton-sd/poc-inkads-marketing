@@ -36,10 +36,14 @@ production is not used — it can lag when Pages deploys fail.
    use **Expand all** or open only the routes listed in the sticky comment.
 3. When the changes are intentional, add the **`visual-accepted`** label
 4. A thin workflow run clears **`visual-review`** automatically (no rebuild)
+   only if a visual artifact for the **current PR head SHA** exists. A stale
+   label from an earlier head does not clear the gate.
 5. Merge when `visual-review` is green
 
-Removing **`visual-accepted`** re-runs the gate against the last capture and fails
-again if diffs remain.
+Removing **`visual-accepted`** re-runs the gate against the last capture for
+the current head and fails again if diffs remain. A later push rebuilds the
+screenshots and runs the gate again; re-add the label after reviewing that
+head.
 
 CI-only PRs with no page changes should pass `visual-review` with zero diffs.
 
@@ -66,9 +70,13 @@ the repository root. Set the custom domain to `inkads.poc.singletonsd.com`.
 The production build includes a matching `CNAME` file so branch deployments
 retain the custom domain.
 
-Under **Settings > Actions > General > Workflow permissions**, select **Read
-and write permissions**. The workflows also declare their narrower permissions
-explicitly.
+Under **Settings > Actions > General > Workflow permissions**, **Read** is
+enough for `GITHUB_TOKEN`. Production and preview deploys mint the
+singleton-release GitHub App (`vars.RELEASE_APP_ID` +
+`secrets.RELEASE_APP_PRIVATE_KEY`, limited to this repository) and push to
+`gh-pages` with that token. Do not fall back to `GITHUB_TOKEN` or a PAT. The
+workflows declare `contents: read` at the workflow level; wider job
+permissions are only `pull-requests: write` on the PR-comment job.
 
 GitHub provisions the TLS certificate after DNS resolves. Enable **Enforce
 HTTPS** only after the certificate is available.

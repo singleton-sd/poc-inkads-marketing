@@ -116,6 +116,11 @@ testMetadata("structured data present", () => {
   assert.ok(jsonStart >= 0 && scriptEnd > jsonStart, "Missing JSON-LD payload");
 
   const jsonText = indexHtml.slice(jsonStart, scriptEnd).trim();
+  assert.doesNotMatch(
+    jsonText,
+    /</,
+    "JSON-LD must escape < as \\u003c so it cannot close the script tag",
+  );
   const parsed = JSON.parse(jsonText);
 
   assert.equal(parsed["@context"], "https://schema.org");

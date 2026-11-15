@@ -43,8 +43,10 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
+        with:
+          persist-credentials: false
       - name: Set up pnpm
-        uses: pnpm/action-setup@v6
+        uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
         with:
           run_install: false
       - name: Set up Node.js
@@ -67,8 +69,10 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
+        with:
+          persist-credentials: false
       - name: Set up pnpm
-        uses: pnpm/action-setup@v6
+        uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
         with:
           run_install: false
       - name: Set up Node.js
@@ -85,10 +89,12 @@ jobs:
           exit 1
       - name: Select environment
         id: env
+        env:
+          INPUT_ENVIRONMENT: ${{ inputs.environment }}
         run: |
-          if [ -n "${{ inputs.environment }}" ]; then
-            selected="${{ inputs.environment }}"
-          elif [ "${{ github.ref }}" = "refs/heads/main" ]; then
+          if [ -n "${INPUT_ENVIRONMENT:-}" ]; then
+            selected="${INPUT_ENVIRONMENT}"
+          elif [ "${GITHUB_REF}" = "refs/heads/main" ]; then
             selected="production"
           else
             selected="development"
@@ -96,7 +102,7 @@ jobs:
           echo "name=$selected" >> "$GITHUB_OUTPUT"
           echo "Publishing to $selected"
       - name: Azure login (OIDC)
-        uses: azure/login@v2
+        uses: azure/login@7184910d9eb2b1c5e48f7073824a90609bb9b6d6 # v2.3.1
         with:
           client-id: ${{ vars.AZURE_CLIENT_ID }}
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
@@ -106,6 +112,7 @@ jobs:
           # Non-secret account name; override via repo variable if PostKit moves storage.
           POSTKIT_TEMPLATE_STORAGE_ACCOUNT: ${{ vars.POSTKIT_TEMPLATE_STORAGE_ACCOUNT }}
           POSTKIT_TEMPLATE_STORAGE_CONTAINER: ${{ vars.POSTKIT_TEMPLATE_STORAGE_CONTAINER }}
+          POSTKIT_ENVIRONMENT: ${{ steps.env.outputs.name }}
         run: |
           set -euo pipefail
           storage="${POSTKIT_TEMPLATE_STORAGE_ACCOUNT:-ssdpostkitstprodae}"
@@ -113,7 +120,7 @@ jobs:
           pnpm exec post-kit-publish \
             --templates ./content/email-templates \
             --tenant inkads \
-            --environment "${{ steps.env.outputs.name }}" \
+            --environment "$POSTKIT_ENVIRONMENT" \
             --storage-account "$storage" \
             --container "$container" \
-            --commit "${{ github.sha }}"
+            --commit "$GITHUB_SHA"
