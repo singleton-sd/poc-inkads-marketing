@@ -64,4 +64,8 @@
     <loc>https://inkads.poc.singletonsd.com/venues/</loc>
     <changefreq>monthly</changefreq>
   </url>
+  <url>
+    <loc>https://inkads.poc.singletonsd.com/waitlist/</loc>
+    <changefreq>monthly</changefreq>
+  </url>
 </urlset>

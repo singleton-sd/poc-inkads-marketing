@@ -589,6 +589,61 @@ collections:
           - label: Body
             name: body
             widget: markdown
+      - label: Waitlist
+        file: src/content/pages/waitlist.md
+        name: waitlist
+        fields:
+          - label: Template
+            name: template
+            widget: hidden
+            default: waitlist
+          - label: Title
+            name: title
+            widget: string
+            hint: Page title (browser tab / SEO).
+          - label: Description
+            name: description
+            widget: text
+            hint: Short meta description for SEO.
+          - label: Headline
+            name: headline
+            widget: string
+          - label: Summary
+            name: summary
+            widget: text
+            hint: Hero lead / supporting sentence.
+          - label: Eyebrow
+            name: eyebrow
+            widget: string
+            required: false
+          - label: Email
+            name: email
+            widget: string
+            required: false
+          - label: Status
+            name: status
+            widget: string
+            required: false
+          - label: Submit label
+            name: submitLabel
+            widget: string
+            required: false
+          - label: Success title
+            name: successTitle
+            widget: string
+            required: false
+          - label: Success body
+            name: successBody
+            widget: text
+            required: false
+          - label: Draft
+            name: draft
+            widget: boolean
+            required: false
+            default: false
+          - label: Body
+            name: body
+            widget: markdown
 
   - name: marketing
     label: Marketing pages
