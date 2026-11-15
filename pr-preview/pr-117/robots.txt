@@ -1,6 +1,0 @@
-User-agent: *
-Allow: /
-Disallow: /admin/
-Disallow: /go/
-
-Sitemap: https://inkads.poc.singletonsd.com/sitemap.xml
