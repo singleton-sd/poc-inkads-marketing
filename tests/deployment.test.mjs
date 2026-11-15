@@ -4,6 +4,15 @@ import test from "node:test";
 
 const root = new URL("../", import.meta.url);
 
+function jobBody(workflow, name) {
+  const header = `\n  ${name}:\n`;
+  const start = workflow.indexOf(header);
+  assert.notEqual(start, -1, `workflow must define a ${name} job`);
+  const body = workflow.slice(start + header.length);
+  const nextJob = body.search(/\n {2}[a-z][\w-]*:\n/);
+  return nextJob === -1 ? body : body.slice(0, nextJob);
+}
+
 test("Astro uses the production custom domain", async () => {
   const config = await readFile(new URL("astro.config.mjs", root), "utf8");
   assert.match(
@@ -40,6 +49,12 @@ test("Pages workflow deploys main without deleting active previews", async () =>
   assert.match(workflow, /branch:\s*gh-pages/);
   assert.match(workflow, /clean-exclude:\s*pr-preview/);
   assert.match(workflow, /^permissions:\n {2}contents: read/m);
+  assert.match(
+    jobBody(workflow, "build"),
+    /^ {4}permissions:\n {6}contents: read/m,
+  );
+  assert.doesNotMatch(jobBody(workflow, "build"), /^ {6}contents:\s*write/m);
+  assert.doesNotMatch(jobBody(workflow, "deploy"), /^ {6}contents:\s*write/m);
   assert.match(workflow, /persist-credentials:\s*false/);
   assert.match(
     workflow,
@@ -80,6 +95,22 @@ test("PR workflow publishes subpath previews and updates the PR body", async () 
     /pages-base-url:\s*https:\/\/inkads\.poc\.singletonsd\.com/,
   );
   assert.match(workflow, /^permissions:\n {2}contents: read/m);
+  assert.match(
+    jobBody(workflow, "build"),
+    /^ {4}permissions:\n {6}contents: read/m,
+  );
+  assert.doesNotMatch(jobBody(workflow, "build"), /^ {6}contents:\s*write/m);
+  assert.doesNotMatch(jobBody(workflow, "deploy"), /^ {6}contents:\s*write/m);
+  assert.doesNotMatch(jobBody(workflow, "cleanup"), /^ {6}contents:\s*write/m);
+  assert.match(
+    jobBody(workflow, "comment"),
+    /^ {4}permissions:\n {6}contents: read\n {6}pull-requests: write/m,
+  );
+  assert.doesNotMatch(jobBody(workflow, "comment"), /^ {6}contents:\s*write/m);
+  assert.match(
+    jobBody(workflow, "visual-review"),
+    /^ {4}permissions:\n {6}contents: read\n {6}actions: read/m,
+  );
   assert.match(workflow, /persist-credentials:\s*false/);
   assert.match(
     workflow,
@@ -160,17 +191,27 @@ test("preview deploy and cleanup check out before pr-preview-action", async () =
   const checkoutFirst =
     /^ {4}steps:\n {6}- name: Check out repository\n {8}uses: actions\/checkout@[0-9a-f]{40} # v[\d.]+\n {8}with:\n {10}persist-credentials: false\n/m;
 
-  function jobBody(name) {
-    const header = `\n  ${name}:\n`;
-    const start = workflow.indexOf(header);
-    assert.notEqual(start, -1, `preview.yml must define a ${name} job`);
-    const body = workflow.slice(start + header.length);
-    const nextJob = body.search(/\n {2}[a-z][\w-]*:\n/);
-    return nextJob === -1 ? body : body.slice(0, nextJob);
-  }
+  assert.match(jobBody(workflow, "deploy"), checkoutFirst);
+  assert.match(jobBody(workflow, "cleanup"), checkoutFirst);
+});
 
-  assert.match(jobBody("deploy"), checkoutFirst);
-  assert.match(jobBody("cleanup"), checkoutFirst);
+test("preview comment waits for successful deploy except on close", async () => {
+  const workflow = await readFile(
+    new URL(".github/workflows/preview.yml", root),
+    "utf8",
+  );
+  const comment = jobBody(workflow, "comment");
+  assert.match(comment, /needs:\s*\[build,\s*deploy\]/);
+  assert.match(comment, /always\(\)/);
+  assert.match(
+    comment,
+    /github\.event\.action != 'closed' &&\n {10}needs\.deploy\.result == 'success'/,
+  );
+  assert.match(comment, /\|\|\n {8}github\.event\.action == 'closed'/);
+  assert.doesNotMatch(
+    comment,
+    /github\.event\.action == 'closed' &&[\s\S]*needs\.deploy/,
+  );
 });
 
 test("visual screenshot helper is wired for hosted report and gate", async () => {

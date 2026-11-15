@@ -218,14 +218,14 @@ jobs:
           action: deploy
 
   comment:
-    needs: [build]
+    needs: [build, deploy]
     if: >
       always() &&
       !cancelled() &&
       github.event.pull_request.head.repo.full_name == github.repository &&
       (
-        (needs.build.result == 'success' &&
-          contains(fromJSON('["opened","reopened","synchronize"]'), github.event.action)) ||
+        (github.event.action != 'closed' &&
+          needs.deploy.result == 'success') ||
         github.event.action == 'closed'
       )
     runs-on: ubuntu-latest
