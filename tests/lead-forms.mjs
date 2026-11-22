@@ -279,23 +279,27 @@ try {
 
   await page.unroute("https://api.singletonsd.com/v1/leads");
 
-  const duplicatePosts = await mockLeads(async () => ({
+  const conflictPosts = await mockLeads(async () => ({
     status: 409,
-    json: { id: "550e8400-e29b-41d4-a716-446655440003" },
+    json: { error: "idempotency_payload_conflict" },
   }));
   await page.goto(`${origin}/contact/`, { waitUntil: "networkidle" });
   await page.locator("#contact-name").fill("Ada Lovelace");
   await page.locator("#contact-company").fill("Example Pub");
   await page.locator("#contact-email").fill("ada@example.com");
   await page.locator("#contact-role").selectOption("Other");
-  await page.locator("#contact-message").fill("Already received.");
+  await page.locator("#contact-message").fill("Idempotency payload conflict.");
   await page.locator("#contact-consent").check();
   await page.waitForFunction(
     () => !document.querySelector("[data-contact-form-submit]")?.disabled,
   );
   await page.locator("[data-contact-form-submit]").click();
-  await page.waitForSelector("[data-contact-form-success]:not([hidden])");
-  assert.equal(duplicatePosts.length, 1);
+  await page.waitForSelector("[data-contact-form-error]:not([hidden])");
+  const conflictText = await page
+    .locator("[data-contact-form-error]")
+    .innerText();
+  assert.match(conflictText, /try again/i);
+  assert.equal(conflictPosts.length, 1);
 
   await page.unroute("https://api.singletonsd.com/v1/leads");
 

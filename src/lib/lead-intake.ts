@@ -370,7 +370,7 @@ export async function submitLeadRequest(
       }
     }
 
-    if (response.status === 202 || response.status === 409) {
+    if (response.status === 202) {
       const id =
         data &&
         typeof data === "object" &&
